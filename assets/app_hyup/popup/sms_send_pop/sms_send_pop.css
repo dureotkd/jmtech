@@ -1,0 +1,417 @@
+@charset "UTF-8";
+
+.g-btn {
+  background-color: #8d8d8d;
+  border: 1px solid #8d8d8d;
+  color: #fff;
+}
+
+input[text='type'] {
+  border: 1px solid #e1e1e1;
+}
+
+.popup-top-tit {
+  font-size: 16px;
+  padding: 10px 8px 8px;
+  background: #323639;
+  color: #fff;
+}
+
+.popup-wrap {
+  margin: 20px 10px;
+  background: #fff;
+  position: relative;
+  display: block;
+  font-size: 13px;
+  z-index: 1000;
+  border-radius: 2px;
+  min-width: 1052px;
+  padding: 10px 35px;
+}
+
+.popup-tit-wrap {
+  height: 50px;
+}
+
+.basics-btn {
+  font-size: 13px;
+  font-family: '맑은 고딕', 'Malgun Gothic' !important;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(197, 197, 197);
+  border-image: initial;
+  padding: 4px 10px;
+  border-radius: 2px;
+}
+
+.basics-btn i {
+  color: #666;
+}
+
+.section01 {
+  background: url(/assets/app_hyup/images/sms-back.png) 0 0 no-repeat;
+  width: 312px;
+  height: 592px;
+  position: relative;
+}
+
+.textarea-p {
+  font-size: 14px;
+}
+
+.noresize {
+  position: absolute;
+  top: 90px;
+  left: 21px;
+  width: 270px;
+  /* height: 444px; */
+  height: 350px;
+  resize: none; /* 사용자 임의 변경 불가 */
+  resize: both; /* 사용자 변경이 모두 가능 */
+  resize: none; /* 좌우만 가능 */
+  resize: none; /* 상하만 가능 */
+  border: 1px solid #e1e1e1;
+}
+
+/* ######################### 첨부파일 ############################## */
+.attach-area {
+  position: absolute;
+  bottom: 59px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 270px;
+  height: 92px;
+}
+
+/* 첨부파일 업로드 영역 */
+.attach-img-list-area {
+  /* height: 61px; */
+  height: 46px;
+  border: 1px solid #e1e1e1;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+
+/* 첨부파일 업로드 비어있을 때 */
+.attach-img-list-area.empty {
+  height: 46px;
+  border: 1px solid #e1e1e1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #d1d1d1;
+  color: #ffffff;
+}
+
+/* 첨부파일 업로드 리스트 */
+ul.attach-img-list {
+  list-style: none;
+  position: relative;
+}
+ul.attach-img-list li.img-item {
+  display: inline-block;
+  position: relative;
+}
+
+/* 이미지 삭제 */
+.img-item-del {
+  position: absolute;
+  top: -3px;
+  color: #8d8d8d;
+  right: 0;
+}
+.img-item-del > i:hover {
+  cursor: pointer;
+  color: red;
+  font-weight: bold;
+}
+
+/* 이미지 업로드 퍼센트 */
+.img-item-percent-area {
+  position: relative;
+  width: 100%;
+  /* background-color: #99aadd; */
+  background-color: #68c577;
+}
+.img-item-percent-text {
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #ffffff;
+  font-size: 10px;
+  text-align: left;
+  width: 100%;
+  z-index: 1;
+}
+.img-item-percent-bar {
+  height: 15px;
+  /* background-color: #5e7ef0; */
+  background-color: #28a745;
+  color: #ffffff;
+  opacity: 0.5;
+  font-size: 10px;
+  text-align: center;
+  width: 50%;
+}
+
+/* 업로드 정책 */
+.attach-img-info {
+  position: absolute;
+  top: 2px;
+  right: 5px;
+}
+.attach-img-info > i:hover {
+  cursor: pointer;
+  font-weight: bold;
+  color: #a1a1a1;
+}
+
+/* 업로드 정책 팝오버 */
+.attach-img-info-popover {
+  display: none;
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  width: 300px;
+  background-color: #d1d1d1;
+}
+.attach-img-info-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+.attach-img-info-close {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  font-size: 15px;
+}
+.attach-img-info-close > i:hover {
+  cursor: pointer;
+  font-weight: bold;
+  color: #ffffff;
+}
+ul.attach-img-info-rule {
+  margin-left: 20px;
+  margin-bottom: 10px;
+}
+
+/* 업로드한 이미지 갯수 */
+.attach-img-cnt {
+  position: absolute;
+  top: 22px;
+  right: 2px;
+}
+
+/* 업로드 */
+.attach-file-upload {
+  margin-top: 1px;
+  /* height: 29px; */
+  height: 44px;
+  border: 1px dashed #e1e1e1;
+  text-align: center;
+}
+.attach-file-upload:hover {
+  border-color: #5e7ef0;
+  color: #5e7ef0;
+  cursor: pointer;
+}
+.attach-file-upload > .placeholder-text {
+  color: #666666;
+  font-size: 12px;
+}
+.attach-file-upload-btn {
+  border-radius: 5px;
+  padding: 0 5px;
+}
+
+/* ################## 첨부파일 ############################## */
+
+.byte-ck {
+  position: absolute;
+  bottom: 28px;
+  left: 230px;
+  display: inline-block;
+}
+
+.section02 {
+  padding: 0 25px;
+}
+
+.sec-tit {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.ca-title-con {
+  padding: 5px;
+  width: 280px;
+  height: 168px;
+  border: 1px solid #e1e1e1;
+  overflow-y: scroll;
+}
+
+.t-btn {
+  text-align: right;
+  font-size: 14px;
+  margin-top: 5px;
+  margin-right: 3px;
+}
+
+.template-name {
+  font-size: 14px;
+  display: inline-block;
+  padding: 2px 11px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(197, 197, 197);
+  color: #666;
+  border-radius: 22px;
+  margin-right: 3px;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.template-name:hover {
+  opacity: 0.8;
+}
+
+.template-name.on2 {
+  background: #5e7ef0;
+  color: #fff;
+  border: 1px solid #5e7ef0;
+}
+
+.category-con {
+  margin-top: 5px;
+  border: 1px solid #e1e1e1;
+  height: 387px;
+  overflow: scroll;
+  width: 280px;
+}
+
+.category-con ul li {
+  padding: 3px 5px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #5e7ef0;
+}
+
+.category-con ul li:hover {
+  opacity: 0.8;
+}
+
+.se-select1 {
+  width: 135px;
+  margin-right: 5px;
+  height: 30px;
+  font-size: 13px;
+  margin-bottom: 3px;
+  padding-left: 7px;
+  background: url('/assets/adm/okems/common/img/se-arrow.png') #fff no-repeat 95% 50% / auto;
+}
+
+.list-wrap {
+  margin-top: 55px;
+}
+
+.list-top {
+  display: flex;
+  align-items: center;
+}
+
+.left-sec {
+  flex: 1;
+}
+
+.right-sec {
+  text-align: right;
+}
+
+.num-table {
+  height: 480px;
+  overflow-y: scroll;
+  border: 1px solid #e1e1e1;
+  width: 340px;
+}
+
+.num-table tr th {
+  border: 1px solid #e1e1e1;
+}
+
+.num-table tr td {
+  border: 1px solid #e1e1e1;
+}
+
+.send-num {
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.num-add {
+  text-align: center;
+  padding: 8px;
+  display: block;
+  height: 100%;
+  border-right: 1px solid #e1e1e1;
+}
+
+.num-add:hover {
+  background: #f5f5f5;
+}
+
+.input-tb {
+  border: 1px solid #e1e1e1 !important;
+  height: 30px;
+  margin: 0 5px;
+  width: 120px;
+}
+
+.close-btn {
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  opacity: 0.8;
+}
+
+.s-table-tit {
+  background: #f3f5fa;
+  text-align: center;
+  height: 45px;
+}
+
+.s-table-con {
+  border-bottom: 1px solid #e1e1e1;
+  height: 45px;
+  text-align: center;
+  font-weight: normal;
+}
+
+.send-btn {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ck-btn {
+  margin-top: 15px;
+  width: 93px;
+  padding: 6px;
+  color: #fff;
+  border-radius: 2px;
+  background: #5e7ef0;
+}
+
+.basics-btn:hover {
+  background: #f5f5f5;
+}
+
+.blue-color {
+  color: #5e7ef0;
+}
+
+.wrong-phone-number {
+  background: #ffd9d9;
+}

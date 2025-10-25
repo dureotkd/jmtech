@@ -1,0 +1,91 @@
+@charset "UTF-8";
+
+input[text='type'] {
+  border: 1px solid #e1e1e1;
+}
+
+.popup-top-tit {
+  font-size: 16px;
+  padding: 10px 8px 8px;
+  background: #323639;
+  color: #fff;
+}
+
+.popup-wrap2 {
+  margin: 20px 10px;
+  background: #fff;
+  position: relative;
+  display: block;
+  font-size: 13px;
+  z-index: 1000;
+  border-radius: 2px;
+  min-width: 740px;
+  man-width: 740px;
+  max-height: 800px;
+  padding: 10px;
+}
+
+.popup-tit-wrap {
+  height: 50px;
+}
+
+.coupon-table {
+  height: 420px !important;
+  overflow-y: scroll;
+  border: 1px solid #e1e1e1;
+  border-left: none;
+}
+
+.table-tit4 {
+  border: 1px solid #e1e1e1;
+  border-top: none;
+  background: #f3f5fa;
+  text-align: center;
+  height: 45px;
+}
+
+.table-con3 {
+  border: 1px solid #e1e1e1;
+  height: 45px;
+  padding: 0 10px;
+  text-align: left;
+  font-weight: normal;
+}
+
+.coupon-btn {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.se-select1 {
+  width: 135px;
+  margin-right: 5px;
+  height: 30px;
+  font-size: 13px;
+  margin-bottom: 3px;
+  padding-left: 7px;
+}
+
+.search-btn,
+.back-btn {
+  width: 93px;
+  padding: 6px 0;
+  color: #fff;
+  border-radius: 2px;
+}
+
+.search-btn {
+  background: #5e7ef0;
+  margin-bottom: 6px;
+}
+
+.coupon_tr:hover {
+  background-color: #f3f5fa;
+  cursor: pointer;
+}
+
+.col {
+  margin: 0px !important;
+  padding: 0px !important;
+}

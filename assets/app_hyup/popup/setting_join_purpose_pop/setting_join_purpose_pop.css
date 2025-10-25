@@ -1,0 +1,164 @@
+@charset "UTF-8";
+
+.popup-top-tit {
+  font-size: 16px;
+  padding: 10px 8px 8px;
+  background: #323639;
+  color: #fff;
+}
+
+.popup-wrap {
+  margin: 20px 10px 5px 10px;
+  background: #fff;
+  position: relative;
+  display: block;
+  font-size: 13px;
+  z-index: 1000;
+  border-radius: 2px;
+  min-width: 650px;
+}
+
+.popup-tit-wrap {
+  height: 50px;
+}
+
+.ck-btn {
+  width: 93px;
+  padding: 6px 0;
+  color: #fff;
+  border-radius: 2px;
+  background: #5e7ef0;
+}
+
+ul.tabs {
+}
+
+ul.tabs li {
+  background: none;
+  color: #222;
+  padding: 10px 15px;
+  cursor: pointer;
+  width: 50%;
+  float: left;
+  height: 50px;
+  border-top: 1px solid #e1e1e1;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+ul.tabs li.current {
+  border-top: 1px solid #8d8d8d;
+  border-bottom: 1px solid #fff;
+}
+
+.tab-content {
+  display: none;
+  background: #fff;
+  border: 1px solid #e1e1e1;
+}
+
+.tab-content.current {
+  display: inherit;
+}
+
+.tab-link {
+  font-size: 16px;
+  text-align: center;
+}
+
+.tit-table {
+  font-weight: bold;
+  padding-left: 10px;
+  width: 120px;
+}
+
+.con-table {
+  min-width: 580px;
+}
+
+.popup-content-table {
+  width: 100%;
+  padding: 30px 20px;
+}
+
+.table-ck {
+  margin: 0 10px 0 0;
+  width: 100%;
+  max-width: 142px;
+  line-height: 25px;
+  display: inline-block;
+}
+
+.top-tit {
+  vertical-align: top;
+  padding: 10px 0 0 15px;
+}
+
+.reset-btn {
+  padding: 0 10px;
+  text-align: right;
+}
+
+.basics-btn {
+  font-size: 13px;
+  font-family: '맑은 고딕', 'Malgun Gothic' !important;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(197, 197, 197);
+  border-image: initial;
+  padding: 4px 10px;
+  border-radius: 2px;
+}
+
+.basics-btn i {
+  color: #666;
+}
+
+.btn-wrap {
+  height: 100%;
+  align-content: center;
+  justify-content: center;
+}
+
+/* 230808 가입목적 세분화 */
+
+.popup-content-table2 {
+  width: 100%;
+}
+
+.popup-content-table2 tr th {
+  background: #f3f5fa;
+  font-weight: bold;
+  width: 132px;
+  padding-left: 7px;
+  height: 45px;
+  border-left: 1px solid #e1e1e1;
+  vertical-align: middle;
+  text-align: left;
+  padding-left: 15px;
+}
+
+.popup-content-table2 tr th input,
+.popup-content-table2 tr td label input {
+  vertical-align: middle;
+}
+
+.popup-content-table2 tr td {
+  padding-left: 10px;
+  padding-top: 10px;
+  border: 1px solid #e1e1e1;
+}
+
+.popup-content-table2 tr td label {
+  display: block;
+}
+
+/* 230808 가입목적 세분화 끝*/
+
+label {
+  font-family: '맑은 고딕', 'Malgun Gothic' !important;
+  font-size: 13px;
+}
+label {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vertical Swiper Demo</title>
+
+    <!-- Swiper CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: #000;
+      }
+      .swiper {
+        height: 100vh;
+      }
+      .swiper-slide {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 2rem;
+        position: relative;
+      }
+
+      /* 페이징 점 스타일 */
+      .swiper-pagination-bullet {
+        background: #fff !important;
+        opacity: 0.5;
+      }
+      .swiper-pagination-bullet-active {
+        opacity: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Swiper -->
+    <div class="swiper mySwiper">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide bg-black">첫 번째 페이지</div>
+        <div class="swiper-slide bg-[#111]">두 번째 페이지</div>
+        <div class="swiper-slide bg-[#222]">세 번째 페이지</div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="swiper-pagination"></div>
+    </div>
+
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      const swiper = new Swiper(".mySwiper", {
+        direction: "vertical", // 세로 스크롤
+        slidesPerView: 1, // 한 번에 한 페이지
+        mousewheel: true, // 마우스 휠로 이동
+        pagination: {
+          el: ".swiper-pagination",
+          clickable: true,
+        },
+        speed: 800, // 전환 속도 (ms)
+      });
+    </script>
+  </body>
+</html>

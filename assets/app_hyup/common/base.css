@@ -1,0 +1,498 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap");
+
+:root {
+  /* 배경/텍스트 f7fefe */
+  --background: #fff;
+
+  --foreground: #222222;
+
+  /* 메인 컬러 - 핑크톤 */
+  --color-primary: #dc8147; /* 로고 색상 */
+  --color-button: #558ad9; /* 버튼 색상 */
+  --color-secondary: #f4a519; /* 연한 핑크색 (배경, 버튼 등) */
+
+  --color-primary-light: #ffeecf; /* 연한 핑크색 (배경, 버튼 등) */
+  --color-primary-dark: #d26f89; /* 버튼 클릭 or 진한 포인트 */
+  --color-secondary: #fff3f6; /* 연한 배경 (카드, 선택 영역 등) */
+
+  /* 강조 색상 */
+  --color-accent: #f4a4b7; /* hover 또는 강조 */
+
+  /* 텍스트 */
+  --color-text: #504f4f;
+  --color-text-muted-light: #f5c9d4; /* 연핑크 강조용 */
+
+  /* 테두리/배경 */
+  --color-border: #f3cbd7;
+  --color-white: #ffffff;
+}
+
+body {
+  font-family: "Noto Sans KR";
+  color: var(--color-text) !important;
+  background-color: var(--background) !important;
+  margin: 0;
+  padding: 0;
+  font-weight: 400;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table th {
+  color: #fff;
+  font-weight: 400;
+  padding: 8px;
+  text-align: left;
+  font-size: 12px;
+}
+
+table td {
+  padding: 8px;
+  font-size: 12px;
+  color: #514a4a;
+  font-weight: 300;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* p,
+span {
+  font-size: 12px;
+} */
+
+.my-element {
+  height: 170px;
+}
+
+.menu-active {
+  background-color: #2b609c;
+}
+
+@media (min-width: 1024px) {
+  .my-element {
+    height: calc(100vh - 482px);
+  }
+}
+
+.ld-ext-right > .ld,
+.ld-ext-left > .ld,
+.ld-ext-bottom > .ld,
+.ld-ext-top > .ld,
+.ld-over > .ld,
+.ld-over-inverse > .ld,
+.ld-over-full > .ld,
+.ld-over-full-inverse > .ld {
+  width: 2em !important;
+  height: 2em !important;
+}
+
+.active-link {
+  border-bottom: 1px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+.active {
+  color: var(--color-primary);
+  /* font-weight: 900; */
+  text-decoration: underline;
+  text-underline-offset: 4px; /* 👈 이 줄 추가 */
+}
+
+.border-color-sm {
+  border-color: var(--color-primary); /* 연한 핑크색 테두리 */
+}
+
+.color-sm {
+  color: var(--color-primary) !important; /* 연한 핑크색 텍스트 */
+}
+
+.bg-sm {
+  background-color: var(--color-primary);
+}
+
+.btn-sm {
+  background-color: var(--color-button) !important;
+  transition: background-color 0.3s ease;
+  color: #fff !important;
+}
+
+.btn-sm:hover {
+  background-color: #3d7ac0 !important;
+}
+
+.bg-sm-light {
+  background-color: var(--color-primary-light);
+}
+
+body.fade-in {
+  opacity: 1;
+}
+
+body.fade-out {
+  opacity: 0;
+}
+[data-barba="container"] {
+  opacity: 1;
+  transition: none;
+}
+
+input {
+  border: 1px solid #c0c0c0;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important  ;
+  border: 1px solid #2e2c2c !important; /* Tailwind red-500 */
+}
+
+.btn-sm {
+  background-color: #f6f7f9;
+  color: #000;
+}
+
+.btn-primary-sm {
+  background-color: #2e2c2c;
+  color: #fff;
+}
+
+.btn_side_open_wrap {
+  position: relative;
+  margin: 0;
+  width: 24px;
+  padding: 9px 0;
+  overflow: hidden;
+  transition: all 0.5s linear;
+}
+
+#page-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  width: 0%;
+  background-color: var(--color-primary); /* 연한 초록색 (mint green 계열) */
+  z-index: 9999;
+  transition: width 0.3s ease;
+}
+
+.btn_side_open_wrap .relative_holder {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.playfair_display {
+  font-family: "Playfair Display", serif;
+  letter-spacing: 0.05em; /* 자간 설정 */
+}
+
+.btn_side_open_wrap .one {
+  top: 5%;
+}
+
+.btn_side_open_wrap .two {
+  top: 50%;
+}
+
+.btn_side_open_wrap .three {
+  top: 96%;
+}
+
+.btn_side_open_wrap span {
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  transition: all 0.6s;
+  backface-visibility: hidden;
+  left: 0;
+  background-color: #000;
+}
+
+button {
+  cursor: pointer;
+}
+
+aside {
+  transition: all 0.4s linear;
+}
+.text-hover-color {
+  cursor: pointer;
+  list-style: none;
+  transition: all 0.2s ease-in-out;
+}
+.text-hover-color:hover {
+  color: #7aa963;
+}
+
+.title {
+  font-weight: 600;
+  color: #fbfaf8;
+  line-height: 1.05;
+}
+
+.description {
+  font-weight: 500;
+  color: #fbfaf8;
+  line-height: 1.4;
+}
+
+.menu li > a,
+.menu li > summary {
+  all: unset;
+  display: block;
+  cursor: pointer;
+}
+
+.collapse:hover {
+  all: unset;
+}
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 50px;
+  aspect-ratio: 1;
+  display: grid;
+  border-radius: 50%;
+  background: linear-gradient(
+        0deg,
+        rgb(0 0 0/50%) 30%,
+        #0000 0 70%,
+        rgb(0 0 0/100%) 0
+      )
+      50%/8% 100%,
+    linear-gradient(90deg, rgb(0 0 0/25%) 30%, #0000 0 70%, rgb(0 0 0/75%) 0)
+      50%/100% 8%;
+  background-repeat: no-repeat;
+  animation: l23 1s infinite steps(12);
+}
+.loader::before,
+.loader::after {
+  content: "";
+  grid-area: 1/1;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.915;
+  transform: rotate(30deg);
+}
+.loader::after {
+  opacity: 0.83;
+  transform: rotate(60deg);
+}
+@keyframes l23 {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+
+.swal2-popup {
+  top: -50px !important;
+}
+
+.swal2-html-container {
+  font-family: var(--font-default);
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.5;
+  text-align: center !important;
+  font-size: 16px !important;
+}
+
+.swal2-confirm-button {
+  background-color: #000;
+  color: white;
+  font-weight: 600;
+  border-radius: 0;
+  border: none;
+  width: 100px;
+  height: 34px;
+}
+
+.swal2-confirm-button:hover {
+  background-color: #222;
+}
+
+.swal2-cancel-button {
+  background-color: white;
+  color: #222;
+  font-weight: 500;
+  border: 1px solid #ccc;
+  width: 100px;
+  border-radius: 0;
+  height: 34px;
+}
+
+.swal2-cancel-button:hover {
+  background-color: #f9f9f9;
+}
+
+.swal2-actions {
+  gap: 12px !important;
+  justify-content: center !important;
+}
+
+.radio {
+  all: unset;
+}
+
+/* From Uiverse.io by Yaya12085 */
+.radio-inputs {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  box-shadow: 0 0 0px 1px rgba(0, 0, 0, 0.06);
+  padding: 0.25rem;
+  width: 100%;
+  font-size: 14px;
+}
+
+.radio-inputs .radio {
+  flex: 1 1 auto;
+  text-align: center;
+}
+
+.radio-inputs .radio input {
+  display: none;
+}
+
+.radio-inputs .radio .name {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  border: none;
+  padding: 0.5rem 0;
+  color: rgba(51, 65, 85, 1);
+  transition: all 0.15s ease-in-out;
+}
+
+.radio-inputs .radio input:checked + .name {
+  background-color: var(--color-primary);
+  font-weight: 600;
+  color: #fff;
+}
+
+.icon-sm {
+  color: #373737;
+  cursor: pointer;
+}
+
+.my-popup {
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+.my-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #e53e3e; /* red-600 */
+}
+
+.my-confirm-button {
+  background-color: #e53e3e; /* red-600 */
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.375rem;
+  justify-content: center;
+}
+
+.my-confirm-button:hover {
+  background-color: #c53030; /* red-700 */
+}
+
+.swal2-toast {
+  border-radius: 3px;
+  border: 1px solid #ebebeb !important;
+  box-shadow: none !important;
+}
+
+.radio::before {
+  content: none !important;
+  background: none !important;
+  display: none !important;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 9999px; /* pill shape */
+  gap: 8px;
+  color: #fff;
+}
+
+.badge span {
+  background: #fff;
+  color: inherit;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 9999px;
+}
+
+/* 상태별 컬러 */
+.badge-ready {
+  background-color: #2e2c2c;
+  color: #fff;
+}
+
+.badge-shipping {
+  background-color: #0099cc;
+  color: #fff;
+}
+
+.badge-done {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.badge-cancel {
+  background-color: #e53935;
+  color: #fff;
+}
+
+/* 🔹 기업용 톤: 무채색 + 약간의 브랜딩 컬러 */
+.swal2-popup {
+  font-family: "Noto Sans KR", sans-serif;
+  border-radius: 0px !important;
+  padding: 2.5rem 2rem !important;
+  border: 1px solid #e5e7eb !important;
+  animation: none !important;
+  max-width: 420px;
+  padding: 22px !important;
+  top: -150px !important;
+}
+
+.swal2-title {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.swal2-confirm {
+  background-color: var(--color-button) !important;
+  color: #fff !important;
+  border-radius: 0px !important;
+  padding: 0.6rem 1.5rem !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.swal2-icon {
+  display: none !important; /* 불필요한 아이콘 제거 */
+}

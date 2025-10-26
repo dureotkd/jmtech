@@ -29,7 +29,7 @@ window.addEventListener("beforeinstallprompt", (e) => {
 
 window.addEventListener("load", () => {
   setTimeout(() => {
-    installBtn.addEventListener("click", () => {
+    installBtn?.addEventListener("click", () => {
       if (!beforeInstallTriggered) {
         Swal.fire({
           html: `이미 홈 화면에 추가되어 있습니다<br>바탕화면에서 ERP 아이콘을 눌러 실행하세요.`,

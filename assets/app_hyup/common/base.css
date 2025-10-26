@@ -31,8 +31,8 @@
 }
 
 body {
-  font-family: "Noto Sans KR";
-  color: var(--color-text) !important;
+  /* font-family: "Noto Sans KR"; */
+  /* color: var(--color-text) !important; */
   background-color: var(--background) !important;
   margin: 0;
   padding: 0;
@@ -141,8 +141,13 @@ body.fade-out {
   transition: none;
 }
 
-input {
+input,
+select {
   border: 1px solid #c0c0c0;
+}
+
+select {
+  padding: 3px;
 }
 
 input:focus,

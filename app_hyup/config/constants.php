@@ -274,3 +274,10 @@ define('DEFAULT_PROFILE_IMAGE', 'https://mosihealth.com/assets/app_hyup/images/d
 
 define('NICE_PROGRAM_PATH', "/var/www/html/gamemarket-service-new1/assets/app_hyup/lib/CPClient_linux_x64");
 define('NAVER_CALLBACK_URL', ($_SERVER['REMOTE_ADDR'] === '127.0.0.1') ? 'http://mosihealth.test/api/auth/callback/naver' : 'https://www.mosihealth.com/api/auth/callback/naver');
+
+
+define('VAT_CONTROL', serialize([
+    'N' => '부가세 별도',
+    'Y' => '부가세 포함',
+    'X' => '부가세 없음',
+]));

@@ -50,6 +50,10 @@
     <!-- tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap"
+        rel="stylesheet" />
+
     <!-- pretendard CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.8/dist/web/variable/pretendardvariable-dynamic-subset.css" />
 
@@ -122,7 +126,7 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 </head>
 
-<body class="!font-sans">
+<body>
     <div id="page-progress-bar"></div>
 
     <!-- <div class="loader"></div> -->
@@ -153,10 +157,13 @@
         }
         ?>
 
-        <nav class="w-55 bg-[#2c2a34] min-h-screen text-white font-sans !text-[13px] !py-4">
+        <nav class="w-55 bg-[#2c2a34] min-h-screen min-w-[220px] text-white font-sans !text-[13px]">
             <!-- 로고 -->
             <div class="flex flex-col items-center py-4 border-b border-[#3f3f3f]">
-                <img src="/assets/app_hyup/images/favicon/android-icon-192x192.png" alt="OKPANN" class="w-24" />
+                <img src="/assets/app_hyup/images/favicon/android-icon-192x192.png" alt="jmtech" class="w-24" />
+                <div class="w-full font-semibold !pl-[16px] !py-1.5 text-black text-lg bg-[#edf3ff]">
+                    제이엠테크
+                </div>
             </div>
 
             <!-- 메인 메뉴 -->
@@ -250,7 +257,7 @@
 
         </nav>
 
-        <div class="flex flex-col flex-1">
+        <div class="flex flex-col flex-1 min-w-[1120px]">
 
             <header class="!flex items-center justify-between w-full bg-[#558ad9] text-white font-bold h-[62px]">
 
@@ -373,7 +380,6 @@
     <script src="/assets/app_hyup/common/mask.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/mask.js') ?>"></script>
     <script src="/assets/app_hyup/common/common.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/common.js') ?>"></script>
     <script src="/assets/app_hyup/common/pwa.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/pwa.js') ?>"></script>
-    <script src="/assets/app_hyup/common/channel.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/channel.js') ?>"></script>
     <script src="/assets/app_hyup/common/alert.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/alert.js') ?>"></script>
     <script src="/assets/app_hyup/common/customConfirm.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/customConfirm.js') ?>"></script>
     <script src="/assets/app_hyup/common/transition.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/transition.js') ?>"></script>

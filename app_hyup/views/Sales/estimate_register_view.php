@@ -177,12 +177,16 @@ $datetime = date('YmdHis');
 
             <!-- Plus Button -->
             <button
+                onclick="add_row()"
+                type="button"
                 class="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition">
                 <span class="text-blue-600 !text-xl !font-bold !mb-1 leading-none">+</span>
             </button>
 
             <!-- Minus Button -->
             <button
+                onclick="remove_row()"
+                type="button"
                 class="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition">
                 <span class="text-red-500 !text-xl !font-bold leading-none">−</span>
             </button>
@@ -194,134 +198,150 @@ $datetime = date('YmdHis');
 
 <div class="!border-2 !border-black !mx-[9px]">
     <div id="example" class="!max-w-full"></div>
-    <div class="">
-        <table class="w-full border-collapse border border-black text-center">
-            <tbody>
-                <tr>
-                    <!-- "합계" 글씨칸 (2칸 병합) -->
-                    <td colspan="6" class="bg-[#d9d9d9] w-[50px] font-semibold text-sm text-black font-serif p-2">
-                        합계
-                    </td>
-
-                    <!-- 합계 금액 3칸 -->
-                    <td class="p-2">₩0</td>
-                    <td class="p-2">₩0</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <table class="tg">
+        <thead>
+            <tr>
+                <th class="tg-0pky !w-[100px] !text-center !text-black th-bg">납기일자</th>
+                <th class="tg-0pky"></th>
+                <th class="tg-0pky th-bg !w-[100px] !text-center">납품장소</th>
+                <th class="tg-0pky"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="tg-0pky !border-1 text-center th-bg">유효일자</td>
+                <td class="tg-0pky !border-1"></td>
+                <td class="tg-0pky !border-1 th-bg !w-[100px] !text-center">결제조건</td>
+                <td class="tg-0pky !border-1"></td>
+            </tr>
+            <tr>
+                <td class="tg-0pky text-center th-bg ">비고</td>
+                <td class="tg-0pky" colspan="3"></td>
+            </tr>
+        </tbody>
+    </table>
 
 </div>
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js?v=<?= $datetime ?>"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const hfInstance = HyperFormula.buildEmpty({
-            licenseKey: 'internal-use-in-handsontable',
-        });
+    const container = document.getElementById('example');
 
-        const container = document.getElementById('example');
-
-        const hot = new Handsontable(container, {
-            data: [
-                ['철판', 'SS400', 10, 15000, '=D1*E1', '=F1*0.1', ''],
-                ['볼트', 'M10', 20, 500, '=D2*E2', '=F2*0.1', ''],
-                ['너트', 'M10', 20, 400, '=D3*E3', '=F3*0.1', ''],
-                ['용접봉', '6013', 5, 10000, '=D4*E4', '=F4*0.1', ''],
-                ['기타', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
-                ['합계', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
-            ],
-
-            // ✅ 여기서 헤더 지정
-            colHeaders: function(col) {
-                const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-                const titles = ['품목', '규격', '수량', '단가', '공급가액', '세액', '비고'];
-                return `${titles[col]} ${letters[col]}`;
-            },
-            colWidths: [344, 120, 80, 100, 120, 100, 150],
-
-            rowHeaders: true,
-            height: 'auto',
-            width: '100%',
-            autoWrapRow: true,
-            autoWrapCol: true,
-
-            formulas: {
-                engine: hfInstance,
-                sheetName: 'Sheet1',
-            },
-
-            mergeCells: [
-                // {row, col, rowspan, colspan}
-                {
-                    row: 5,
-                    col: 0,
-                    rowspan: 1,
-                    colspan: 3
-                }, // “합계”를 왼쪽 3칸 병합
-            ],
-
-            columns: [{
-                    data: 0
-                }, // 품목
-                {
-                    data: 1
-                }, // 규격
-                {
-                    data: 2,
-                    type: 'numeric',
-                    numericFormat: {
-                        pattern: '0,0'
-                    },
-                    allowInvalid: false
-                },
-                {
-                    data: 3,
-                    type: 'numeric',
-                    numericFormat: {
-                        pattern: '0,0'
-                    },
-                    allowInvalid: false
-                },
-                {
-                    data: 4,
-                    type: 'numeric',
-                    numericFormat: {
-                        pattern: '0,0'
-                    },
-                },
-                {
-                    data: 5,
-                    type: 'numeric',
-                    numericFormat: {
-                        pattern: '0,0'
-                    },
-                },
-                {
-                    data: 6
-                }, // 비고
-            ],
-
-            // ✅ 특정 셀 스타일 지정
-            cells(row, col) {
-                const cellProperties = {};
-
-                // 오른쪽 정렬 열들 → 규격(1), 수량(2), 단가(3), 공급가액(4), 세액(5)
-                const rightAlignedCols = [1, 2, 3, 4, 5];
-                if (rightAlignedCols.includes(col)) {
-                    cellProperties.className = 'htRight'; // Handsontable 기본 오른쪽 정렬 클래스
-                }
-
-                // “합계” 행 스타일
-                if (row === 5) {
-                    cellProperties.className = '!bg-[#d9d9d9] !font-bold text-black htRight font-serif';
-                }
-
-                return cellProperties;
-            },
-
-            licenseKey: 'non-commercial-and-evaluation',
-        });
+    const hfInstance = HyperFormula.buildEmpty({
+        licenseKey: 'internal-use-in-handsontable',
     });
+
+
+    const hot = new Handsontable(container, {
+        data: [
+            ['철판', 'SS400', 10, 15000, '=D1*E1', '=F1*0.1', ''],
+            ['볼트', 'M10', 20, 500, '=D2*E2', '=F2*0.1', ''],
+            ['너트', 'M10', 20, 400, '=D3*E3', '=F3*0.1', ''],
+            ['용접봉', '6013', 5, 10000, '=D4*E4', '=F4*0.1', ''],
+            ['기타', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
+            ['합계', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
+        ],
+
+        // ✅ 여기서 헤더 지정
+        colHeaders: function(col) {
+            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+            const titles = ['품목', '규격', '수량', '단가', '공급가액', '세액', '비고'];
+            return `${titles[col]} ${letters[col]}`;
+        },
+        colWidths: [344, 120, 80, 100, 120, 100, 150],
+
+        rowHeaders: true,
+        height: 'auto',
+        width: '100%',
+        autoWrapRow: true,
+        autoWrapCol: true,
+
+        formulas: {
+            engine: hfInstance,
+            sheetName: 'Sheet1',
+        },
+
+        mergeCells: [
+            // {row, col, rowspan, colspan}
+            {
+                row: 5,
+                col: 0,
+                rowspan: 1,
+                colspan: 3
+            }, // “합계”를 왼쪽 3칸 병합
+        ],
+
+        columns: [{
+                data: 0
+            }, // 품목
+            {
+                data: 1
+            }, // 규격
+            {
+                data: 2,
+                type: 'numeric',
+                numericFormat: {
+                    pattern: '0,0'
+                },
+                allowInvalid: false
+            },
+            {
+                data: 3,
+                type: 'numeric',
+                numericFormat: {
+                    pattern: '0,0'
+                },
+                allowInvalid: false
+            },
+            {
+                data: 4,
+                type: 'numeric',
+                numericFormat: {
+                    pattern: '0,0'
+                },
+            },
+            {
+                data: 5,
+                type: 'numeric',
+                numericFormat: {
+                    pattern: '0,0'
+                },
+            },
+            {
+                data: 6
+            }, // 비고
+        ],
+
+        // ✅ 특정 셀 스타일 지정
+        cells(row, col) {
+            const cellProperties = {};
+
+            // 오른쪽 정렬 열들 → 규격(1), 수량(2), 단가(3), 공급가액(4), 세액(5)
+            const rightAlignedCols = [1, 2, 3, 4, 5];
+            if (rightAlignedCols.includes(col)) {
+                cellProperties.className = 'htRight'; // Handsontable 기본 오른쪽 정렬 클래스
+            }
+
+            // “합계” 행 스타일
+            if (row === 5) {
+                cellProperties.className = '!font-bold text-black htRight font-serif';
+            }
+
+            return cellProperties;
+        },
+
+        licenseKey: 'non-commercial-and-evaluation',
+    });
+
+    function add_row() {
+        const totalRowIndex = hot.countRows() - 1;
+        hot.alter("insert_row_above", totalRowIndex); // ✅ 변경
+    }
+
+    function remove_row() {
+        const totalRowIndex = hot.countRows() - 1;
+        if (totalRowIndex > 1) hot.alter("remove_row", totalRowIndex - 1);
+
+    }
 </script>

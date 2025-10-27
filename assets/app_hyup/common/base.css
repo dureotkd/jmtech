@@ -141,6 +141,11 @@ body.fade-out {
   transition: none;
 }
 
+.th-bg {
+  background-color: #d9d9d9 !important;
+  color: #000 !important;
+}
+
 input,
 select {
   border: 1px solid #c0c0c0;

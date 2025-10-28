@@ -163,50 +163,159 @@ define('POINT_REQUEST_TYPE', serialize([
     'refund' => '환불요청',
 ]));
 
+define('DEFAULT_PASSWORD', 'tech123');
+
 define('MENU', serialize([
-    [
-        'title' => '회사소개',
-        'url' => '/brand',
-        'items' => [
-            ['label' => '브랜드 소개', 'url' => '/brand'],
-            ['label' => '전문성', 'url' => '/brand/expertise'],
-            ['label' => '공간', 'url' => '/brand/space'],
-            ['label' => '아카이브', 'url' => '/brand/archive'],
+    'sales'    => [
+        'name'      => '판매관리',
+        'sub'             => [
+            'sales'          => [
+                'name'            => '판매관리',
+                'path'            => '/point/withdraw_req',
+                'auth_level'    => [11],
+                'sub'             => [
+                    'report'          => [
+                        'name'            => '매출(거래명세표)',
+                        'path'            => '/sales/report',
+                        'auth_level'    => [11]
+                    ],
+                    'estimate'          => [
+                        'name'            => '견적서',
+                        'path'            => '/sales/estimate',
+                        'auth_level'    => [11]
+                    ],
+                    'order'          => [
+                        'name'            => '수주서',
+                        'path'            => '/sales/order',
+                        'auth_level'    => [11]
+                    ],
+                ]
+            ],
+            'sales_document'          => [
+                'name'            => '매출증빙',
+                'path'            => '/sales_document/tax_bill',
+                'auth_level'    => [11],
+                'sub'             => [
+                    'tax_bill'          => [
+                        'name'            => '매출세금계산서(현영/기타)',
+                        'path'            => '/sales_document/tax_bill',
+                        'auth_level'    => [11]
+                    ],
+                ]
+            ],
+            'sales_profit'          => [
+                'name'            => '매출/손익현황',
+                'path'            => '/sales_profit/report',
+                'auth_level'    => [11],
+                'sub'             => [
+                    'partner_report'          => [
+                        'name'            => '매출처현황',
+                        'path'            => '/sales_profit/partner_report',
+                        'auth_level'    => [11]
+                    ],
+                    'sales_report'          => [
+                        'name'            => '매출보고서',
+                        'path'            => '/sales_profit/sales_report',
+                        'auth_level'    => [11]
+                    ],
+                    'profit_report'          => [
+                        'name'            => '손익보고서',
+                        'path'            => '/sales_profit/profit_report',
+                        'auth_level'    => [11]
+                    ],
+                ]
+            ],
+        ],
+        // 'sub'     =>  [
+        //     'report'    => [
+        //         'name'            => '매출(거래명세표)',
+        //         'path'            => '/sales/report',
+
+        //     ],
+        //     'estimate'        => [
+        //         'name'            => '견적서',
+        //         'path'            => '/sales/estimate',
+        //     ],
+        //     'order'        => [
+        //         'name'            => '수주서',
+        //         'path'            => '/sales/order',
+        //     ],
+        // ],
+        'auth_level'    => [11, 10, 2, 3]
+    ],
+    'purchase'    => [
+        'name'    => '구매관리',
+        'sub'        => [
+            'report'              => [
+                'name'            => '매입(거래명세표)',
+                'path'            => '/purchase/report',
+            ],
+            'order' => [
+                'name'            => '발주서',
+                'path'            => '/purchase/order',
+                'sub'             => []
+            ],
+
+            'withdraw' => [
+                'name'            => '매입증빙',
+                'path'            => '/point/withdraw_list',
+                'sub'             => [
+                    'withdraw_req'          => [
+                        'name'            => '출금신청',
+                        'path'            => '/point/withdraw_req',
+                        'auth_level'    => [11]
+                    ],
+                    'withdraw_suc'          => [
+                        'name'            => '출금완료',
+                        'path'            => '/point/withdraw_suc',
+                        'auth_level'    => [11]
+                    ],
+                    'withdraw_hold'          => [
+                        'name'            => '출금보류',
+                        'path'            => '/point/withdraw_hold',
+                        'auth_level'    => [11]
+                    ],
+                ]
+            ],
+            'cash_receipt_list'       => [
+                'name'            => '현금영수증 신청내역',
+                'path'            => '/point/cash_receipt_list',
+                'auth_level'    => [11]
+            ],
+            'credit_list'           => [
+                'name'            => '전체 충전내역',
+                'path'            => '/point/credit_list',
+                'auth_level'    => [11]
+            ],
+        ],
+        'auth_level'    => [11, 10]
+    ],
+
+    'setting'    => [
+        'name'    => '공지사항',
+        'sub'     =>  [
+            'list'        => [
+                'name'            => '공지사항관리',
+                'path'            => '/notice/notice_list',
+            ],
+            'faq_list'        => [
+                'name'            => 'FAQ관리',
+                'path'            => '/notice/faq_list',
+            ],
         ],
     ],
-    [
-        'title' => '쇼핑하기',
-        'url' => '/product',
-        'items' => [
-            ['label' => '모든 상품', 'url' => '/product'],
-            ['label' => '커피', 'url' => '/product?category=coffee'],
-            ['label' => '굿즈', 'url' => '/product?category=goods'],
-            ['label' => '선물세트', 'url' => '/product?category=gift'],
-        ],
-    ],
-    [
-        'title' => '비즈니스',
-        'url' => '/business',
-        'items' => [
-            ['label' => '카페 사업자 안내', 'url' => '/business/guide'],
-            ['label' => '쇼핑하기', 'url' => '/business/shop'],
-            ['label' => '대량 주문 문의', 'url' => '/business/bulk-order'],
-            ['label' => '협업문의', 'url' => '/business/partnership'],
-        ],
-    ],
-    [
-        'title' => '커뮤니티',
-        'url' => '/community/notice',
-        'items' => [
-            ['label' => '공지사항', 'url' => '/community/notice'],
-            ['label' => '추출 가이드', 'url' => '/community/guide'],
-        ],
-    ],
-    [
-        'title' => '고객센터',
-        'url' => '/support/faq',
-        'items' => [
-            ['label' => 'FAQ', 'url' => '/support/faq'],
+
+    'contract'    => [
+        'name'    => '공지사항',
+        'sub'     =>  [
+            'list'        => [
+                'name'            => '공지사항관리',
+                'path'            => '/notice/notice_list',
+            ],
+            'faq_list'        => [
+                'name'            => 'FAQ관리',
+                'path'            => '/notice/faq_list',
+            ],
         ],
     ],
 ]));

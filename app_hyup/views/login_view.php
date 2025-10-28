@@ -107,7 +107,7 @@
 <dialog id="my_modal_1" class="modal">
     <div class="modal-box">
         <form method="dialog">
-            <button onclick="close_modal_1();" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            <button onclick="close_modal_1();" class="text-black !text-lg focus:outline-none font-bold absolute right-6 top-2">✕</button>
         </form>
 
         <form onsubmit="handle_findid_form(event);" class="find-id-step-1 !mt-12 w-full rounded-lg !p-6 relative">
@@ -115,13 +115,14 @@
             <div class="!space-y-3 !mb-4">
                 <label class="flex items-center space-x-2">
                     <input type="radio" name="find-method" checked />
-                    <span class="text-sm">가입한 이메일로 찾기</span>
+                    <span class="text-sm">전화번호 찾기</span>
                 </label>
 
                 <input
-                    type="email"
-                    name="email"
-                    placeholder="이메일"
+                    type="text"
+                    name="phone"
+                    placeholder="전화번호"
+                    oninput="handle_phone_format(event);"
                     class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none" />
 
                 <p id="find_id_error" class="w-full border !text-sm text-red-500">
@@ -130,7 +131,7 @@
 
             <button
                 type="submit"
-                class="w-full border-1 !px-3 !py-2 btn-sm hover:text-white !border-gray-200 transition">
+                class="w-full btn-sm font-medium py-2 rounded">
                 아이디 찾기
             </button>
         </form>
@@ -160,7 +161,7 @@
 <dialog id="my_modal_2" class="modal">
     <div class="modal-box">
         <form method="dialog">
-            <button onclick="close_modal_2();" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            <button onclick="close_modal_2();" class="text-black !text-lg focus:outline-none font-bold absolute right-6 top-2">✕</button>
         </form>
 
         <form onsubmit="handle_findpw_form(event);" class="find-pw-step-1 bg-white w-full !mt-12 rounded-lg !p-6 relative">
@@ -184,31 +185,15 @@
 
             <button
                 type="submit"
-                class="w-full btn-primary-sm font-medium py-2 rounded">
-                비밀번호 재설정
+                class="w-full btn-sm font-medium py-2 rounded">
+                비밀번호 초기화
             </button>
         </form>
 
         <div class="find-pw-step-2 hidden bg-white w-full !mt-12 !space-y-3 !mb-4 rounded-lg !p-6 relative">
-            <div class="text-center mb-4">
-                <p class="text-lg font-semibold text-gray-800">
-                    비밀번호 재설정 링크가 전송되었습니다.
-                </p>
-                <p class="text-sm text-gray-600 mt-2">
-                    가입하신 이메일 주소로 비밀번호를 재설정할 수 있는 링크를 보내드렸습니다. <br />
-                </p>
-                <p class="text-sm text-blue-600 mt-2">
-                    이메일을 확인해 주세요.
-                </p>
-            </div>
-
-            <div class="flex gap-2 justify-center items-center mb-4">
-                <button
-                    class="w-full btn-primary-sm font-medium !py-2 rounded"
-                    onclick="location.href='/login'">
-                    로그인 하러가기
-                </button>
-            </div>
+            <p class="text-lg text-center font-semibold text-gray-800">
+                비밀번호가 초기화 되었습니다.
+            </p>
         </div>
 
     </div>
@@ -347,9 +332,11 @@
             dataType: "json",
             success: function(response) {
                 if (response.ok) {
-                    $(".find-pw").text(response.data);
-                    $(".find-pw-step-1").hide();
-                    $(".find-pw-step-2").show();
+                    my_modal_2.close()
+                    Swal.fire({
+                        html: response.msg,
+                        confirmButtonText: "닫기",
+                    });
                 } else {
                     $("#find_pw_error").text(response.data);
                 }

@@ -133,30 +133,6 @@
     <div class="relative w-full min-h-screen flex">
 
 
-        <?php
-        $menuItems = unserialize(MENU);
-
-        $PATH_INFO = $_SERVER['PATH_INFO'] ?? '';
-        $DEFAULT_PATH = $_SERVER['PATH_INFO'] ?? '/brand';
-        $currentMenuIndex = null;
-        $currentMenu = null;
-
-        foreach ($menuItems as $index => $menuItem) {
-
-            $urls = explode('/', $menuItem['url']);
-            $front_url = $urls[count($urls) - 1];
-
-            if (strstr($DEFAULT_PATH, $front_url)) {
-                $currentMenuIndex = $index;
-                break;
-            }
-        }
-
-        if ($currentMenuIndex !== null) { // ✅ 수정 포인트
-            $currentMenu = $menuItems[$currentMenuIndex]['items'];
-        }
-        ?>
-
         <nav class="w-55 bg-[#2c2a34] min-h-screen min-w-[220px] text-white font-sans !text-[13px]">
             <!-- 로고 -->
             <div class="flex flex-col items-center py-4 border-b border-[#3f3f3f]">
@@ -319,10 +295,14 @@
                             </div>
 
                             <!-- 이름 -->
-                            <p class="text-gray-800 text-base font-medium">유성균</p>
+                            <p class="text-gray-800 text-base font-medium">
+                                <?= $login_user['name'] ?? '' ?>
+                            </p>
 
                             <!-- 이메일 -->
-                            <p class="text-gray-500 text-sm !mb-4">jmlaser@empas.com</p>
+                            <p class="text-gray-500 text-sm !mb-4">
+                                <?= $login_user['user_id'] ?? '' ?>
+                            </p>
 
                             <!-- 내정보수정 -->
                             <button class="flex items-center gap-1 text-gray-700 hover:text-blue-600 text-sm !mb-2">

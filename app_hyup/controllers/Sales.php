@@ -20,7 +20,7 @@ class sales extends MY_Controller
     {
 
         $view_data =  [
-            'layout_data'           => $this->layout_config('report'),
+            'layout_data'           => $this->layout_config('report', '매출(거래명세표)'),
         ];
 
         $this->layout->view('/Sales/report_view', $view_data);
@@ -31,7 +31,7 @@ class sales extends MY_Controller
     {
 
         $view_data =  [
-            'layout_data'           => $this->layout_config('estimate'),
+            'layout_data'           => $this->layout_config('estimate', '견적서'),
         ];
 
         $this->layout->view('/Sales/estimate_view', $view_data);
@@ -43,7 +43,7 @@ class sales extends MY_Controller
 
         $view_data =  [
             'faqs'          => '',
-            'layout_data'   => $this->layout_config('order'),
+            'layout_data'   => $this->layout_config('order', '수주서'),
         ];
 
         $this->layout->view('/Sales/order_view', $view_data);
@@ -54,19 +54,18 @@ class sales extends MY_Controller
     {
 
         $view_data =  [
-            'layout_data'           => $this->layout_blank_config(),
+            'layout_data'           => $this->layout_blank_config('', '견적서 등록'),
         ];
 
         $this->layout->view('/Sales/estimate_register_view', $view_data);
     }
 
 
-    private function layout_config($sub_menu_code = '')
+    private function layout_config($sub_menu_code = '', $title = '')
     {
 
         $this->layout->setLayout("layout/template");
-        $this->layout->setTitle('브랜드 소개 | 제이엠테크');
-        $this->layout->setDescription('제이엠테크 브랜드 소개 페이지입니다.');
+        $this->layout->setTitle($title);
         $this->layout->setCss([]);
         $this->layout->setScript([]);
 
@@ -76,13 +75,12 @@ class sales extends MY_Controller
         ];
     }
 
-    private function layout_blank_config($sub_menu_code = '')
+    private function layout_blank_config($sub_menu_code = '', $title = '')
     {
 
         $this->layout->setPopHeader('견적서 등록');
         $this->layout->setLayout("layout/blank");
-        $this->layout->setTitle('브랜드 소개 | 제이엠테크');
-        $this->layout->setDescription('제이엠테크 브랜드 소개 페이지입니다.');
+        $this->layout->setTitle($title);
         $this->layout->setCss([]);
         $this->layout->setScript([]);
 

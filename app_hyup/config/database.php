@@ -83,11 +83,11 @@ $query_builder = TRUE;
  */
 $db = array(
 	'main'	=> array(
-		'hostname' => "13.124.197.194",
-		'hostaddr' => '13.124.197.194',
-		'username' => 'admin',
-		'password' => 'KauKau@1234!',
-		'database' => 'mujungryeok',
+		'hostname' => "43.203.198.242",
+		'hostaddr' => '43.203.198.242',
+		'username' => 'gamemarketdb',
+		'password' => '@MMAwoaltdj!@@@!@',
+		'database' => 'gamemarket',
 		'dbdriver' => 'mysqli',
 		'dbprefix' => '',
 		'pconnect' => FALSE,

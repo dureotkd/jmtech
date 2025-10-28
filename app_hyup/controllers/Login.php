@@ -27,49 +27,6 @@ class login extends MY_Controller
         $this->layout->view('login_view', $view_data);
     }
 
-    public function social_login()
-    {
-        $social_type = $this->input->post('social_type');
-        $name = $this->input->post('name');
-        $nickname = $this->input->post('nickname');
-        $email = $this->input->post('email');
-        $profile_image_url = $this->input->post('profile_image_url');
-
-        $res_array = [
-            'ok'    => true,
-            'msg'   => '',
-        ];
-
-        foreach ([1] as $proc) {
-
-            try {
-
-                $login_res = $this->user_service->loginBySocial([
-                    'social_type'         => $social_type,
-                    'name'                => $name,
-                    'nickname'            => $nickname,
-                    'email'               => $email,
-                    'profile_image_url'   => $profile_image_url,
-                ]);
-
-                if (empty($login_res)) {
-                    throw new Exception(DB_ERR_MSG);
-                }
-
-                $res_array['ok'] = $login_res;
-            } catch (Exception $e) {
-
-                $res_array = [
-                    'ok'    => false,
-                    'msg'   => $e->getMessage(),
-                ];
-            }
-        }
-
-        echo json_encode($res_array);
-        exit;
-    }
-
     public function login_proc()
     {
 
@@ -131,7 +88,7 @@ class login extends MY_Controller
 
         $res_array = [
             'ok'    => true,
-            'msg'   => '',
+            'msg'   => '비밀번호가 초기화 되었습니다.',
             'data'  => '',
         ];
 
@@ -183,12 +140,10 @@ class login extends MY_Controller
 
     private function layout_config($params = [])
     {
-        $title = $params['title'] ?? '로그인 | 제이엠테크';
-        $description = $params['description'] ?? '제이엠테크 로그인 페이지입니다.';
+        $title = $params['title'] ?? '로그인 ';
 
         $this->layout->setLayout("layout/blank");
         $this->layout->setTitle($title);
-        $this->layout->setDescription($description);
         $this->layout->setCss([]);
         $this->layout->setScript([]);
 

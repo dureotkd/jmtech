@@ -18,8 +18,7 @@ function redirect_handler()
         if (
             strpos($currentPath, '/login') === false
         ) {
-            // header('Location: /login');
-            // exit;
+            header('Location: /login');
         }
     }
 }

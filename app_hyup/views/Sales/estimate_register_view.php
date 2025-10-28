@@ -232,7 +232,6 @@ $datetime = date('YmdHis');
         licenseKey: 'internal-use-in-handsontable',
     });
 
-
     const hot = new Handsontable(container, {
         data: [
             ['철판', 'SS400', 10, 15000, '=D1*E1', '=F1*0.1', ''],

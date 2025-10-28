@@ -10,18 +10,6 @@ function setup()
     //     'dsn' => 'https://108b14cfb4723f849a4956deea3ee966@o4504126769987584.ingest.us.sentry.io/4509635951329280',
     // ]);
 
-    $HEAD_USER = $CI->service_model->get_user('row', [
-        "agent = 'HEAD'",
-    ]);
-
-    if (!empty($HEAD_USER)) {
-
-        define('HEAD_USER_ID', $HEAD_USER['id']);
-    } else {
-
-        define('HEAD_USER_ID', 1);
-    }
-
     // mobile인지 PC인지 구분
     if (strpos($_SERVER['HTTP_USER_AGENT'], 'Mobile') !== false) {
         define('IS_MOBILE', true);

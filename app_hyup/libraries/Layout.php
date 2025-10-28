@@ -135,7 +135,7 @@ class layout
 	 */
 	public function setTitle($title)
 	{
-		$this->title	= $title;
+		$this->title	= "{$title} | 제이엠테크";
 	}
 
 	public function setDescription($description)

@@ -46,6 +46,7 @@ $datetime = date('YmdHis');
 <link rel="stylesheet" href="/assets/app_hyup/lib/pqgrid/pqgrid.min.css" />
 
 <div class="w-full !px-2 !text-xs font-sans font-300">
+    <input type="hidden" id="sheetData" value='<?= json_encode($sheets, JSON_UNESCAPED_UNICODE) ?>' />
 
     <div class="w-full relative flex justify-center items-center mb-4">
         <img
@@ -197,7 +198,16 @@ $datetime = date('YmdHis');
 </div>
 
 <div class="!border-2 !border-black !mx-[9px]">
-    <div id="example" class="!max-w-full"></div>
+    <div class="sheet-tabs">
+        <?
+        foreach ($sheets as $sheet) {
+        ?>
+            <button onclick="showSheet('<?= $sheet ?>')"><?= $sheet ?></button>
+        <?
+        }
+        ?>
+    </div>
+    <div id="sheetContainer" class="!max-w-full"></div>
     <table class="tg">
         <thead>
             <tr>
@@ -226,121 +236,194 @@ $datetime = date('YmdHis');
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js?v=<?= $datetime ?>"></script>
 
 <script>
-    const container = document.getElementById('example');
+    // ✅ PHP에서 넘어온 JSON 읽기
+    const sheets = JSON.parse(document.getElementById('sheetData').value);
+    const containers = {};
 
-    const hfInstance = HyperFormula.buildEmpty({
-        licenseKey: 'internal-use-in-handsontable',
+    document.addEventListener('DOMContentLoaded', async () => {
+        start_loading();
+        await wait(700);
+        initializeHandsontable();
+        stop_loading();
     });
 
-    const hot = new Handsontable(container, {
-        data: [
-            ['철판', 'SS400', 10, 15000, '=D1*E1', '=F1*0.1', ''],
-            ['볼트', 'M10', 20, 500, '=D2*E2', '=F2*0.1', ''],
-            ['너트', 'M10', 20, 400, '=D3*E3', '=F3*0.1', ''],
-            ['용접봉', '6013', 5, 10000, '=D4*E4', '=F4*0.1', ''],
-            ['기타', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
-            ['합계', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
-        ],
+    function initializeHandsontable() {
+        const hfInstance = HyperFormula.buildEmpty({});
+        const sheetContainer = document.getElementById('sheetContainer');
+        const hotInstances = {};
 
-        // ✅ 여기서 헤더 지정
-        colHeaders: function(col) {
-            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-            const titles = ['품목', '규격', '수량', '단가', '공급가액', '세액', '비고'];
-            return `${titles[col]} ${letters[col]}`;
-        },
-        colWidths: [344, 120, 80, 100, 120, 100, 150],
+        for (const sheet of sheets) {
+            const div = document.createElement('div');
+            div.style.display = 'none';
+            sheetContainer.appendChild(div);
+            containers[sheet.name] = div;
 
-        rowHeaders: true,
-        height: 'auto',
-        width: '100%',
-        autoWrapRow: true,
-        autoWrapCol: true,
+            hfInstance.addSheet(sheet.name);
 
-        formulas: {
-            engine: hfInstance,
-            sheetName: 'Sheet1',
-        },
+            // 🔧 시트별 초기 데이터 세팅 (원하면 서버에서 주입 가능)
+            const initData = sheet.data && sheet.data.length ? sheet.data : [
+                [null, null]
+            ];
 
-        mergeCells: [
-            // {row, col, rowspan, colspan}
-            {
-                row: 5,
-                col: 0,
-                rowspan: 1,
-                colspan: 3
-            }, // “합계”를 왼쪽 3칸 병합
-        ],
-
-        columns: [{
-                data: 0
-            }, // 품목
-            {
-                data: 1
-            }, // 규격
-            {
-                data: 2,
-                type: 'numeric',
-                numericFormat: {
-                    pattern: '0,0'
+            hotInstances[sheet.name] = new Handsontable(div, {
+                data: initData,
+                formulas: {
+                    engine: hfInstance,
+                    sheetName: sheet.name,
                 },
-                allowInvalid: false
-            },
-            {
-                data: 3,
-                type: 'numeric',
-                numericFormat: {
-                    pattern: '0,0'
-                },
-                allowInvalid: false
-            },
-            {
-                data: 4,
-                type: 'numeric',
-                numericFormat: {
-                    pattern: '0,0'
-                },
-            },
-            {
-                data: 5,
-                type: 'numeric',
-                numericFormat: {
-                    pattern: '0,0'
-                },
-            },
-            {
-                data: 6
-            }, // 비고
-        ],
+                colHeaders: true,
+                rowHeaders: true,
+                licenseKey: 'non-commercial-and-evaluation',
+            });
+        }
 
-        // ✅ 특정 셀 스타일 지정
-        cells(row, col) {
-            const cellProperties = {};
+        // 첫 시트 표시
+        containers[sheets[0].name].style.display = 'block';
 
-            // 오른쪽 정렬 열들 → 규격(1), 수량(2), 단가(3), 공급가액(4), 세액(5)
-            const rightAlignedCols = [1, 2, 3, 4, 5];
-            if (rightAlignedCols.includes(col)) {
-                cellProperties.className = 'htRight'; // Handsontable 기본 오른쪽 정렬 클래스
-            }
+        // 전역 참조
+        window._handsontable = {
+            hfInstance,
+            containers,
+            hotInstances,
+            sheets
+        };
+    }
 
-            // “합계” 행 스타일
-            if (row === 5) {
-                cellProperties.className = '!font-bold text-black htRight font-serif';
-            }
 
-            return cellProperties;
-        },
+    // ✅ 시트 전환
+    function showSheet(name) {
+        const {
+            containers
+        } = window._handsontable;
+        console.log(containers, name)
+        Object.values(containers).forEach((el) => (el.style.display = 'none'));
+        containers[name].style.display = 'block';
+    }
 
-        licenseKey: 'non-commercial-and-evaluation',
-    });
-
+    // ✅ 행 추가/삭제 (현재 표시 중인 시트 기준)
     function add_row() {
-        const totalRowIndex = hot.countRows() - 1;
-        hot.alter("insert_row_above", totalRowIndex); // ✅ 변경
+        const {
+            containers,
+            hotInstances
+        } = window._handsontable;
+        const activeName = Object.keys(containers).find(
+            (key) => containers[key].style.display === 'block'
+        );
+        const hot = hotInstances[activeName];
+        hot.alter('insert_row_above', hot.countRows());
     }
 
     function remove_row() {
-        const totalRowIndex = hot.countRows() - 1;
-        if (totalRowIndex > 1) hot.alter("remove_row", totalRowIndex - 1);
-
+        const {
+            containers,
+            hotInstances
+        } = window._handsontable;
+        const activeName = Object.keys(containers).find(
+            (key) => containers[key].style.display === 'block'
+        );
+        const hot = hotInstances[activeName];
+        if (hot.countRows() > 1) hot.alter('remove_row', hot.countRows() - 1);
     }
+
+
+    // const hot = new Handsontable(container, {
+    //     data: [
+    //         ['철판', 'SS400', 10, 15000, '=D1*E1', '=F1*0.1', ''],
+    //         ['볼트', 'M10', 20, 500, '=D2*E2', '=F2*0.1', ''],
+    //         ['너트', 'M10', 20, 400, '=D3*E3', '=F3*0.1', ''],
+    //         ['용접봉', '6013', 5, 10000, '=D4*E4', '=F4*0.1', ''],
+    //         ['기타', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
+    //         ['합계', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
+    //     ],
+
+    //     // ✅ 여기서 헤더 지정
+    //     colHeaders: function(col) {
+    //         const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    //         const titles = ['품목', '규격', '수량', '단가', '공급가액', '세액', '비고'];
+    //         return `${titles[col]} ${letters[col]}`;
+    //     },
+    //     colWidths: [344, 120, 80, 100, 120, 100, 150],
+
+    //     rowHeaders: true,
+    //     height: 'auto',
+    //     width: '100%',
+    //     autoWrapRow: true,
+    //     autoWrapCol: true,
+
+    //     formulas: {
+    //         engine: hfInstance,
+    //         sheetName: 'Sheet1',
+    //     },
+
+    //     mergeCells: [
+    //         // {row, col, rowspan, colspan}
+    //         {
+    //             row: 5,
+    //             col: 0,
+    //             rowspan: 1,
+    //             colspan: 3
+    //         }, // “합계”를 왼쪽 3칸 병합
+    //     ],
+
+    //     columns: [{
+    //             data: 0
+    //         }, // 품목
+    //         {
+    //             data: 1
+    //         }, // 규격
+    //         {
+    //             data: 2,
+    //             type: 'numeric',
+    //             numericFormat: {
+    //                 pattern: '0,0'
+    //             },
+    //             allowInvalid: false
+    //         },
+    //         {
+    //             data: 3,
+    //             type: 'numeric',
+    //             numericFormat: {
+    //                 pattern: '0,0'
+    //             },
+    //             allowInvalid: false
+    //         },
+    //         {
+    //             data: 4,
+    //             type: 'numeric',
+    //             numericFormat: {
+    //                 pattern: '0,0'
+    //             },
+    //         },
+    //         {
+    //             data: 5,
+    //             type: 'numeric',
+    //             numericFormat: {
+    //                 pattern: '0,0'
+    //             },
+    //         },
+    //         {
+    //             data: 6
+    //         }, // 비고
+    //     ],
+
+    //     // ✅ 특정 셀 스타일 지정
+    //     cells(row, col) {
+    //         const cellProperties = {};
+
+    //         // 오른쪽 정렬 열들 → 규격(1), 수량(2), 단가(3), 공급가액(4), 세액(5)
+    //         const rightAlignedCols = [1, 2, 3, 4, 5];
+    //         if (rightAlignedCols.includes(col)) {
+    //             cellProperties.className = 'htRight'; // Handsontable 기본 오른쪽 정렬 클래스
+    //         }
+
+    //         // “합계” 행 스타일
+    //         if (row === 5) {
+    //             cellProperties.className = '!font-bold text-black htRight font-serif';
+    //         }
+
+    //         return cellProperties;
+    //     },
+
+    //     licenseKey: 'non-commercial-and-evaluation',
+    // });
 </script>

@@ -8,10 +8,7 @@ window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
 
-  installBtn.style.display = "block";
-
-  installBtn.addEventListener("click", async () => {
-    installBtn.style.display = "none";
+  installBtn?.addEventListener("click", async () => {
     deferredPrompt.prompt();
     const choiceResult = await deferredPrompt.userChoice;
 

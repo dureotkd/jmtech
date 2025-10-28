@@ -1212,6 +1212,7 @@ function process(val) {
 }
 
 const 기다려 = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /* [팝업] 기본 팝업 열기 (항상 중앙 정렬) */
 function open_popup_default(

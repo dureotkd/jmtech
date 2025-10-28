@@ -52,8 +52,13 @@ class sales extends MY_Controller
     # 견적서 등록 (팝업)
     public function estimate_register()
     {
+        $sheets = [
+            '견적서',
+            '내역서'
+        ];
 
         $view_data =  [
+            'sheets'                => $sheets,
             'layout_data'           => $this->layout_blank_config('', '견적서 등록'),
         ];
 

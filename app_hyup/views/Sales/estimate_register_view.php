@@ -1,6 +1,9 @@
 <?
 $datetime = date('YmdHis');
 ?>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
 <style>
     input {
@@ -41,6 +44,78 @@ $datetime = date('YmdHis');
         border-right: 1px solid black;
         border-left: 1px solid black;
     }
+
+    .ui-menu {
+        min-width: 450px !important;
+    }
+
+    /* dropdown 스타일 */
+    .ui-autocomplete {
+        /* max-height: 220px; */
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        background: #fff;
+        font-size: 14px;
+        border-radius: 4px;
+        z-index: 9999;
+    }
+
+    .ui-menu-item-wrapper {
+        padding: 6px 10px;
+        background-color: #fff !important;
+    }
+
+    /* jQuery UI 기본 hover 효과 제거 */
+    .ui-state-active,
+    .ui-menu-item-wrapper:hover {
+        background: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 6px 10px !important;
+        /* 원래 높이 유지 */
+        font-weight: normal !important;
+        color: inherit !important;
+        background-color: #bdbdbd !important;
+    }
+
+    /* 🔧 Autocomplete hover시 padding 안변하게 고정 */
+    .ui-menu-item-wrapper,
+    .ui-menu-item-wrapper.ui-state-active {
+        padding: 6px 10px !important;
+        /* 고정 패딩 */
+        margin: 0 !important;
+        background: none !important;
+        border: none !important;
+        font-weight: normal !important;
+        color: inherit !important;
+        line-height: 1.4;
+    }
+
+
+    /* 항목 내부 커스텀 스타일 */
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+    }
+
+    .item-name {
+        font-weight: 500;
+        width: 250px;
+        color: #111;
+    }
+
+    .item-person {
+        width: 50px;
+        color: #555;
+    }
+
+    .item-account {
+        width: 120px;
+        font-family: monospace;
+        color: #666;
+    }
 </style>
 <link rel="stylesheet" href="/assets/app_hyup/lib/pqgrid/pqgrid.css" />
 <link rel="stylesheet" href="/assets/app_hyup/lib/pqgrid/pqgrid.min.css" />
@@ -66,7 +141,7 @@ $datetime = date('YmdHis');
                 <div class="flex items-center">
                     <label class="w-[75px]">거 래 처 명 :</label>
                     <div class="flex items-center">
-                        <input type="text" class="border w-[250px] h-[24px]" />
+                        <input type="text" id="searchBox" class="border w-[250px] h-[24px]" />
                         <button class="bg-gray-200 border border-gray-400 h-[24px] px-2 text-xs" style="border-left: none !important;">🔍</button>
                     </div>
                 </div>
@@ -527,6 +602,86 @@ $datetime = date('YmdHis');
 
     //     licenseKey: 'non-commercial-and-evaluation',
     // });
+
+    // ✅ 객체 배열 형태로 구성
+    const availableTags = [{
+            label: "삼성전자",
+            person: "김도현",
+            account: "302-1111-2222-33"
+        },
+        {
+            label: "삼성SDI",
+            person: "이준호",
+            account: "312-1234-5678-90"
+        },
+        {
+            label: "LG전자",
+            person: "박정우",
+            account: "333-2222-1111-00"
+        },
+        {
+            label: "LG화학",
+            person: "홍길동",
+            account: "1002-999-888888"
+        },
+        {
+            label: "현대자동차",
+            person: "최지훈",
+            account: "1111-2222-3333"
+        },
+        {
+            label: "포스코",
+            person: "윤수민",
+            account: "312-111111-1111"
+        }
+    ];
+    $("#searchBox").autocomplete({
+            minLength: 1,
+            delay: 100,
+            source: availableTags,
+            // ✅ hover 시 input 값 바꾸지 않음
+            focus: function() {
+                return false; // 🔥 여기서 UI만 유지하고 값은 변경 안 함
+            },
+            select: function(event, ui) {
+                console.log("선택:", ui.item);
+                $("#searchBox").val(ui.item.label);
+                return false;
+            },
+            source: function(request, response) {
+                const term = $.trim(request.term).toLowerCase();
+
+                const results = availableTags.filter(item => {
+                    // label, person, account 전부 검색 조건 포함
+                    return (
+                        item.label.toLowerCase().includes(term) ||
+                        item.person.toLowerCase().includes(term) ||
+                        item.account.toLowerCase().includes(term)
+                    );
+                });
+
+                response(results);
+            },
+        })
+        // ✅ 항목 렌더링 커스텀 + 하이라이트
+        .data("ui-autocomplete")._renderItem = function(ul, item) {
+            const term = this.term.toLowerCase(); // 사용자가 입력한 검색어
+            const highlight = (text) => {
+                if (!term) return text;
+                const regex = new RegExp("(" + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ")", "gi");
+                return text.replace(regex, '<span class="highlight">$1</span>');
+            };
+
+            return $("<li>")
+                .append(`
+      <div class="item-row">
+        <div class="item-name">${highlight(item.label)}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+        <div class="item-person">${highlight(item.person)}</div>
+        <div class="item-account">${highlight(item.account)}</div>
+      </div>
+    `)
+                .appendTo(ul);
+        };
 
     const $fileInput = $('#fileInput');
     const $fileList = $('#fileList');

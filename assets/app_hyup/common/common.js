@@ -1163,6 +1163,12 @@ function strtotime(text, now) {
   return date.getTime() / 1000;
 }
 
+const getColumnLetter = (n) => {
+  return n >= 0
+    ? getColumnLetter(((n / 26) | 0) - 1) + String.fromCharCode(65 + (n % 26))
+    : "";
+};
+
 function lastNext(type, range, modifier) {
   var diff,
     day = days[range];

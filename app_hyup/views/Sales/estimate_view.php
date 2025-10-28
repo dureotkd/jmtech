@@ -33,7 +33,7 @@
                 class="border px-2 py-1 rounded w-64" />
             <button class="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 rounded">상세</button> -->
             <button
-                onclick="open_popup_default('/sales/estimate_register','견적서 등록',1000,700);"
+                onclick="open_popup_default('/sales/estimate_register','견적서 등록',1000,820);"
                 type="button"
                 class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
                 견적서 등록 +

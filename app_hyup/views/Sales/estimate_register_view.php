@@ -46,7 +46,8 @@ $datetime = date('YmdHis');
 <link rel="stylesheet" href="/assets/app_hyup/lib/pqgrid/pqgrid.min.css" />
 
 <div class="w-full !px-2 !text-xs font-sans font-300">
-    <input type="hidden" id="sheetData" value='<?= json_encode($sheets, JSON_UNESCAPED_UNICODE) ?>' />
+    <input type="hidden" id="sheetData"
+        value='<?= json_encode($sheets, JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT) ?>'>
 
     <div class="w-full relative flex justify-center items-center mb-4">
         <img
@@ -72,7 +73,7 @@ $datetime = date('YmdHis');
 
                 <div class="flex items-center">
                     <label class="w-[75px]">견 적 일 자 :</label>
-                    <input type="date" class="border w-[180px] h-[24px] px-1" value="2025-10-25" />
+                    <input type="date" class="border flatpickr w-[180px] h-[24px] px-1 flatpicker" value="2025-10-25" />
                 </div>
 
                 <div class="flex items-center">
@@ -198,51 +199,113 @@ $datetime = date('YmdHis');
 </div>
 
 <div class="!border-2 !border-black !mx-[9px]">
-    <div class="sheet-tabs">
-        <?
-        foreach ($sheets as $sheet) {
-        ?>
-            <button onclick="showSheet('<?= $sheet ?>')"><?= $sheet ?></button>
-        <?
-        }
-        ?>
+    <div class="sheet-tabs flex border-b border-gray-300 bg-gray-100">
+        <?php foreach ($sheets as $sheet): ?>
+            <button
+                id="sheet_<?= $sheet['name'] ?>"
+                onclick="showSheet('<?= $sheet['name'] ?>')"
+                class="tab-btn px-4 py-2 text-sm font-medium border-r border-gray-300 
+             bg-gray-100 hover:bg-gray-200 transition-colors
+             focus:outline-none"
+                data-sheet="<?= $sheet['name'] ?>">
+                <?= $sheet['name'] ?>
+            </button>
+        <?php endforeach; ?>
     </div>
-    <div id="sheetContainer" class="!max-w-full"></div>
-    <table class="tg">
+
+    <div id="sheetContainer" class="!w-full"></div>
+    <table class="tg !border-t-2 !border-black">
         <thead>
             <tr>
-                <th class="tg-0pky !w-[100px] !text-center !text-black th-bg">납기일자</th>
-                <th class="tg-0pky"></th>
-                <th class="tg-0pky th-bg !w-[100px] !text-center">납품장소</th>
-                <th class="tg-0pky"></th>
+                <th class="tg-0pky !border-t !w-[100px] !text-center !text-black th-bg">납기일자</th>
+                <th class="tg-0pky !border-t w-[400px]">
+                    <input type="date" class="text-black flatpickr border w-full h-[24px] px-1" value="" />
+                </th>
+                <th class="tg-0pky !border-t th-bg !w-[100px] !text-center">납품장소</th>
+                <th class="tg-0pky">
+                    <input type="text" class="text-black border w-full h-[24px] px-1" value="" />
+                </th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td class="tg-0pky !border-1 text-center th-bg">유효일자</td>
-                <td class="tg-0pky !border-1"></td>
+                <td class="tg-0pky !border-1 w-[400px]">
+                    <input type="date" class="text-black flatpickr border w-full h-[24px] px-1" value="" />
+                </td>
                 <td class="tg-0pky !border-1 th-bg !w-[100px] !text-center">결제조건</td>
-                <td class="tg-0pky !border-1"></td>
+                <td class="tg-0pky !border-1">
+                    <input type="text" class="text-black border w-full h-[24px] px-1" value="" />
+                </td>
             </tr>
             <tr>
                 <td class="tg-0pky text-center th-bg ">비고</td>
-                <td class="tg-0pky" colspan="3"></td>
+                <td class="tg-0pky" colspan="3">
+                    <input type="text" class="text-black border w-full h-[24px] px-1" value="" />
+                </td>
             </tr>
         </tbody>
     </table>
 
 </div>
 
+<div class="w-full !px-2 !text-xs font-sans font-300">
+    <div class="flex items-center gap-4">
+        <button
+            id="attachBtn"
+            class="!my-2 flex items-center gap-1 border border-gray-300 rounded h-7 !text-xs !px-1 bg-white hover:bg-gray-50 transition text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paperclip-icon lucide-paperclip">
+                <path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" />
+            </svg>
+            <span>첨부파일</span>
+        </button>
+
+        <!-- 파일 표시 영역 -->
+        <div id="fileList" class="flex items-center flex-wrap gap-2 text-sm"></div>
+    </div>
+
+    <!-- 실제 파일 input (숨김) -->
+    <input type="file" id="fileInput" class="hidden" multiple />
+
+</div>
+
+<div class="w-full !px-2 !text-[13px] flex justify-center items-center gap-1.5 font-sans font-300 !my-2">
+    <!-- 저장 후 인쇄 -->
+    <button
+        class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+        저장 후 인쇄
+    </button>
+
+    <!-- 저장 -->
+    <button
+        class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+        저장
+    </button>
+
+    <!-- 취소 -->
+    <button
+        class="px-2 py-1 bg-[#fff] text-gray-700 hover:bg-gray-100 border border-gray-300">
+        취소
+    </button>
+</div>
+
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js?v=<?= $datetime ?>"></script>
 
 <script>
     // ✅ PHP에서 넘어온 JSON 읽기
-    const sheets = JSON.parse(document.getElementById('sheetData').value);
+    const sheets = Object.values(JSON.parse(document.getElementById('sheetData').value));
     const containers = {};
 
     document.addEventListener('DOMContentLoaded', async () => {
+        flatpickr(".flatpickr", {
+            dateFormat: "Y-m-d", // 날짜 형식: 2025-10-28
+            locale: "ko", // ✅ 한글 로케일 지정
+            // defaultDate: new Date(), // 기본값: 오늘 날짜
+            disableMobile: true, // 모바일에서도 같은 UI 유지 (선택)
+        });
+
         start_loading();
-        await wait(700);
+        // await wait(700);
         initializeHandsontable();
         stop_loading();
     });
@@ -252,13 +315,16 @@ $datetime = date('YmdHis');
         const sheetContainer = document.getElementById('sheetContainer');
         const hotInstances = {};
 
+        const reverseSheets = [...sheets].reverse();
+        for (const reverseSheet of reverseSheets) {
+            hfInstance.addSheet(reverseSheet.name);
+        }
+
         for (const sheet of sheets) {
             const div = document.createElement('div');
             div.style.display = 'none';
             sheetContainer.appendChild(div);
             containers[sheet.name] = div;
-
-            hfInstance.addSheet(sheet.name);
 
             // 🔧 시트별 초기 데이터 세팅 (원하면 서버에서 주입 가능)
             const initData = sheet.data && sheet.data.length ? sheet.data : [
@@ -271,14 +337,42 @@ $datetime = date('YmdHis');
                     engine: hfInstance,
                     sheetName: sheet.name,
                 },
-                colHeaders: true,
+                colHeaders: function(col) {
+                    const title = sheet.title;
+                    return `${title[col]} (${getColumnLetter(col)})`;
+                },
+                columns: sheet.columns,
                 rowHeaders: true,
+                width: '100%',
+                height: sheet.height || 'auto',
+                fixedRowsTop: 0,
+                colWidths: !empty(sheet.colWidth) ? sheet.colWidth : [100, 100],
+                autoWrapRow: true,
+                autoWrapCol: true,
+                afterChange: sheet.name === '견적서' ? function(changes, source) {
+                    // * 0번쨰 품목 수정시
+                    if (source === 'edit' && changes[0][3]?.key) {
+                        const hot = hotInstances[sheet.name]; // ✅ 현재 시트의 Handsontable 인스턴스 가져오기
+
+                        changes.forEach(([row, prop, oldValue, newValue]) => {
+                            if (prop === 0 && oldValue !== newValue.title) {
+                                console.log(newValue)
+                                hot.setDataAtRowProp(row, 0, newValue.title); // * 품목명
+                            }
+
+                            // 품목이 변경되면 관련 셀 자동 입력
+                            // const info = itemInfo[newValue];
+                            // const hot = hotInstances[sheet.name];
+                            // hot.setDataAtRowProp(row, 1, info['규격']); // 규격
+                            // hot.setDataAtRowProp(row, 3, info['단가']); // 단가
+                            // hot.setDataAtRowProp(row, 5, info['세액']); // 세액
+                        });
+                    }
+
+                } : null,
                 licenseKey: 'non-commercial-and-evaluation',
             });
         }
-
-        // 첫 시트 표시
-        containers[sheets[0].name].style.display = 'block';
 
         // 전역 참조
         window._handsontable = {
@@ -287,17 +381,25 @@ $datetime = date('YmdHis');
             hotInstances,
             sheets
         };
-    }
 
+        showSheet(sheets[0].name);
+
+    }
 
     // ✅ 시트 전환
     function showSheet(name) {
         const {
             containers
         } = window._handsontable;
-        console.log(containers, name)
-        Object.values(containers).forEach((el) => (el.style.display = 'none'));
+
+        Object.values(containers).forEach((el) => {
+
+            el.style.display = 'none';
+        });
         containers[name].style.display = 'block';
+
+        $(`.tab-btn`).removeClass('active');
+        $(`#sheet_${name}`).addClass('active');
     }
 
     // ✅ 행 추가/삭제 (현재 표시 중인 시트 기준)
@@ -324,7 +426,6 @@ $datetime = date('YmdHis');
         const hot = hotInstances[activeName];
         if (hot.countRows() > 1) hot.alter('remove_row', hot.countRows() - 1);
     }
-
 
     // const hot = new Handsontable(container, {
     //     data: [
@@ -426,4 +527,50 @@ $datetime = date('YmdHis');
 
     //     licenseKey: 'non-commercial-and-evaluation',
     // });
+
+    const $fileInput = $('#fileInput');
+    const $fileList = $('#fileList');
+    let filesArray = []; // 첨부된 파일 목록 저장용
+
+    // 버튼 클릭 → 파일 선택창 열기
+    $('#attachBtn').on('click', function() {
+        $fileInput.click();
+    });
+
+    // 파일 선택 시 이벤트
+    $fileInput.on('change', function(e) {
+        const newFiles = Array.from(e.target.files);
+
+        // 새로운 파일을 기존 배열에 병합 (중복 방지)
+        newFiles.forEach(f => {
+            if (!filesArray.find(existing => existing.name === f.name && existing.size === f.size)) {
+                filesArray.push(f);
+            }
+        });
+
+        renderFileList();
+        $fileInput.val(''); // input 초기화 (같은 파일 다시 선택 가능)
+    });
+
+    // 파일 리스트 렌더링
+    function renderFileList() {
+        $fileList.empty();
+
+        filesArray.forEach((file, idx) => {
+            const $item = $(`
+        <div class="flex items-center gap-1 border border-gray-200 rounded !px-2 !py-1 bg-gray-50">
+          <span class="text-gray-700 truncate max-w-[150px]">${file.name}</span>
+          <button type="button" class="text-gray-400 hover:text-red-500 transition text-xs" data-idx="${idx}">✕</button>
+        </div>
+      `);
+            $fileList.append($item);
+        });
+    }
+
+    // 삭제 버튼 클릭 시
+    $fileList.on('click', 'button', function() {
+        const idx = $(this).data('idx');
+        filesArray.splice(idx, 1); // 배열에서 제거
+        renderFileList(); // 다시 렌더링
+    });
 </script>

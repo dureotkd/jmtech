@@ -99,8 +99,9 @@ span {
 .active {
   color: var(--color-primary);
   /* font-weight: 900; */
-  text-decoration: underline;
-  text-underline-offset: 4px; /* 👈 이 줄 추가 */
+  /* text-decoration: underline;
+  text-underline-offset: 4px; */
+  background: #fff3e1;
 }
 
 .border-color-sm {

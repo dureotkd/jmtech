@@ -247,7 +247,8 @@ $datetime = date('YmdHis');
         <div class="flex items-center gap-1">
             <!-- Excel Button -->
             <button
-                class="flex items-center gap-1 border border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-sm">
+                onclick="my_modal_1.showModal()"
+                class="flex items-center gap-1 border border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs">
                 <img width="16" alt="Logo of Microsoft Excel since 2019" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Microsoft_Office_Excel_%282019%E2%80%932025%29.svg/32px-Microsoft_Office_Excel_%282019%E2%80%932025%29.svg.png?20190925171014">
                 <span>일괄등록</span>
             </button>
@@ -364,7 +365,194 @@ $datetime = date('YmdHis');
     </button>
 </div>
 
+<dialog id="my_modal_1" class="modal">
+    <div class="modal-box !text-xs !w-[400px] relative">
+
+        <div class="absolute inset-0 modal-loading hidden">
+            <div class="flex items-center justify-center w-full h-full bg-white/70">
+                <img class="w-16" src="/assets/app_hyup/images/loading.gif" alt="loading" />
+            </div>
+        </div>
+
+        <form id="exce_form" onsubmit="handle_excel_form(event);" class="bg-white w-full border border-gray-300">
+            <!-- 헤더 -->
+            <div class="flex justify-between items-center !text-base !px-4 !py-2 bg-[#4b5563]">
+                <h2 class="text-white font-semibold">엑셀 불러오기</h2>
+                <button type="button" class="text-gray-200" onclick="close_modal_1();">
+                    ✕
+                </button>
+            </div>
+
+            <!-- 본문 -->
+            <div class="!p-5 !space-y-4">
+                <!-- 서식 다운로드 -->
+                <div class="flex justify-end text-sm text-gray-700 items-center">
+                    <a href="#" class="flex items-center text-blue-600 hover:underline">
+                        견적서 품목양식
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="ml-1 lucide lucide-download-icon lucide-download">
+                            <path d="M12 15V3" />
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <path d="m7 10 5 5 5-5" />
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- 파일선택 -->
+                <div class="flex items-center">
+                    <label class="block text-sm font-semibold w-[70px] mb-1">파일선택</label>
+                    <div class="flex !w-[300px]">
+                        <!-- 파일 이름 표시 input -->
+                        <input
+                            type="text"
+                            id="fileNameInput"
+                            placeholder="파일을 선택하세요"
+                            class="flex-1 border border-gray-300 !px-2 !py-1.5"
+                            readonly />
+
+                        <!-- 실제 파일 input (숨김) -->
+                        <input
+                            id="excelFileInput"
+                            type="file"
+                            accept=".xls,.xlsx"
+                            class="hidden"
+                            onchange="change_excel_file(event)" />
+
+                        <!-- 파일열기 버튼 -->
+                        <button
+                            type="button"
+                            class="bg-gray-200 border border-l-0 border-gray-300 px-3 hover:bg-gray-300"
+                            onclick="$('#excelFileInput').click()">
+                            파일열기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 시트선택 -->
+                <div class="flex items-center">
+                    <label class="block text-sm font-semibold w-[70px] mb-1">시트선택</label>
+                    <select
+                        class="sheet_select w-[300px] border border-gray-300 !px-2 !py-1">
+                        <?
+                        foreach ($sheets as $sheet) {
+                        ?>
+                            <option value="<?= $sheet['name'] ?>">
+                                <?= $sheet['name'] ?>
+                            </option>
+                        <?
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 하단 버튼 -->
+            <div class="w-full !px-2 !text-[13px] flex justify-center items-center gap-1.5 font-sans font-300 !my-2">
+                <!-- 저장 후 인쇄 -->
+                <button
+                    type="button"
+                    onclick="$('#exce_form').submit();"
+                    class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+                    불러오기
+                </button>
+
+                <!-- 취소 -->
+                <button
+                    type="button"
+                    onclick="close_modal_1();"
+                    class="px-2 py-1 bg-[#fff] text-gray-700 hover:bg-gray-100 border border-gray-300">
+                    취소
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js?v=<?= $datetime ?>"></script>
+
+
+<script>
+    // * 엑셀 일괄등록 모달
+    const excel_upload_modal = document.getElementById('my_modal_1');
+
+    function close_modal_1() {
+        excel_upload_modal.close();
+    }
+
+    function change_excel_file(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // 파일명 표시
+            $('#fileNameInput').val(file.name);
+            console.log("선택된 파일:", file.name);
+        } else {
+            $('#fileNameInput').val('');
+        }
+    }
+
+    async function handle_excel_form(event) {
+        event.preventDefault(); // 폼 기본 전송 막기
+
+        const fileInput = $('#excelFileInput')[0];
+        const file = fileInput.files?.[0];
+
+        // if (!file) {
+        //     alert('엑셀 파일을 선택해주세요.');
+        //     return;
+        // }
+
+        start_modal_loading();
+        await wait(500);
+
+        const formData = new FormData();
+        formData.append('excel_file', file);
+        formData.append('sheet_name', $('select.sheet_select').val());
+
+        $.ajax({
+            type: "POST",
+            url: "/sales/estimate_excel_load",
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: "json",
+            success: function(res) {
+
+                if (res.ok) {
+
+                    const data = res.data; // PHP에서 보낸 엑셀 파싱 결과 배열
+
+                    const {
+                        hotInstances
+                    } = window._handsontable;
+                    const activeName = $('select.sheet_select').val();
+                    const hot = hotInstances[activeName];
+
+                    // 기존 데이터 가져오기
+                    const currentData = hot.getSourceData();
+
+                    // 기존 + 새 데이터 병합
+                    const mergedData = [...currentData, ...data];
+                    console.log(mergedData)
+
+                    // 한번에 반영 (초고속)
+                    // hot.loadData(mergedData);
+
+                } else {
+                    alert(res.msg);
+                }
+
+                // close_modal_1();
+            },
+            error: function(xhr, status, error) {
+                alert(`엑셀 파일 업로드 중 오류가 발생했습니다. 관리자에게 문의하세요.\n${error.message}`);
+            },
+            complete: function() {
+                stop_modal_loading();
+            }
+        });
+    }
+</script>
 
 <script>
     // ✅ PHP에서 넘어온 JSON 읽기
@@ -714,7 +902,7 @@ $datetime = date('YmdHis');
         filesArray.forEach((file, idx) => {
             const $item = $(`
         <div class="flex items-center gap-1 border border-gray-200 rounded !px-2 !py-1 bg-gray-50">
-          <span class="text-gray-700 truncate max-w-[150px]">${file.name}</span>
+          <span class="text-gray-700 truncate max-w-[300px]">${file.name}</span>
           <button type="button" class="text-gray-400 hover:text-red-500 transition text-xs" data-idx="${idx}">✕</button>
         </div>
       `);

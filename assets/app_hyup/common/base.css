@@ -79,6 +79,10 @@ span {
   }
 }
 
+.modal-box {
+  border-radius: 0px !important;
+}
+
 .ld-ext-right > .ld,
 .ld-ext-left > .ld,
 .ld-ext-bottom > .ld,

@@ -5,3 +5,11 @@ function start_loading() {
 function stop_loading() {
   $("#loadingOverlay").removeClass("!flex");
 }
+
+function start_modal_loading() {
+  $(".modal-box .modal-loading").removeClass("hidden");
+}
+
+function stop_modal_loading() {
+  $(".modal-box .modal-loading").addClass("hidden");
+}

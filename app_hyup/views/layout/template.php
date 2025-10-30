@@ -85,8 +85,9 @@
     <meta name="apple-mobile-web-app-title" content="JM ERP">
     <link rel="apple-touch-icon" href="/assets/app_hyup/pwa/pwa-icon-192.png">
 
+    <link rel="stylesheet" href="/assets/app_hyup/common/loading.css?v=<?= $datetime ?>" />
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <!-- <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script> -->
 
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-migrate-3.5.2.js" integrity="sha256-ThFcNr/v1xKVt5cmolJIauUHvtXFOwwqiTP7IbgP8EU=" crossorigin="anonymous"></script>
@@ -136,6 +137,14 @@
 
 <body>
     <div id="page-progress-bar"></div>
+
+    <div class="overlay" id="loadingOverlay">
+        <div class="overlay-text">
+            <img
+                class="w-16"
+                src="/assets/app_hyup/images/loading.gif" alt="">
+        </div>
+    </div>
 
     <!-- <div class="loader"></div> -->
     <div class="relative w-full min-h-screen flex">
@@ -359,19 +368,13 @@
             },
         });
     </script>
-    <!-- 호출 -->
-    <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
-    <script>
-        MicroModal.init();
-    </script>
     <script src="/assets/app_hyup/common/cookie.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/cookie.js') ?>"></script>
     <script src="/assets/app_hyup/common/mask.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/mask.js') ?>"></script>
     <script src="/assets/app_hyup/common/common.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/common.js') ?>"></script>
     <script src="/assets/app_hyup/common/pwa.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/pwa.js') ?>"></script>
-    <script src="/assets/app_hyup/common/alert.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/alert.js') ?>"></script>
-    <script src="/assets/app_hyup/common/customConfirm.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/customConfirm.js') ?>"></script>
     <script src="/assets/app_hyup/common/transition.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/transition.js') ?>"></script>
     <script src="/assets/app_hyup/common/toast.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/toast.js') ?>"></script>
+    <script src="/assets/app_hyup/common/loading.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/loading.js') ?>"></script>
 
 </body>
 

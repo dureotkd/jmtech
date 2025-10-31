@@ -13,8 +13,9 @@ class sales extends MY_Controller
 
         $this->load->library([
             "layout",
-            "/Service/user_service",
             "phpspreadsheet",
+            "/Service/user_service",
+            "/Service/estimate_service",
         ]);
 
         $this->load->model('/Page/service_model');
@@ -447,6 +448,74 @@ JMTech이 거래처 A에게 “철판 100장 단가 1만 원” 견적서를 보
 
         $mpdf->WriteHTML($estimate_pdf_view);
         $mpdf->Output('수주서.pdf', 'I'); // D: 다운로드, I: 브라우저보기
+    }
+
+    # 견적서 저장
+    public function save_estimate()
+    {
+
+        $partner_id = $this->input->post('partner_id') ?? '';
+        $estimate_date = $this->input->post('estimate_date') ?? '';
+        $fax_number = $this->input->post('fax_number') ?? '';
+        $title = $this->input->post('title') ?? '';
+
+        $due_at = $this->input->post('due_at') ?? '';
+        $location = $this->input->post('location') ?? '';
+        $valid_at = $this->input->post('valid_at') ?? '';
+        $payment_type = $this->input->post('payment_type') ?? '';
+        $etc_memo = $this->input->post('etc_memo') ?? '';
+
+
+        $res_array = [
+            'ok'    => true,
+            'msg'   => '견적서가 저장되었습니다.',
+            'data'  => [],
+        ];
+
+        foreach ([1] as $proc) {
+
+            try {
+
+                $insert_estimate_id = $this->estimate_service->create([
+                    'partner_id'        => $partner_id,
+                    'estimate_date'     => $estimate_date,
+                    'fax_number'        => $fax_number,
+                    'title'             => $title,
+                    'location'          => $location,
+                    'due_at'            => $due_at,
+                    'valid_at'          => $valid_at,
+                    'payment_type'      => $payment_type,
+                    'etc_memo'          => $etc_memo,
+                ]);
+
+                if (empty($insert_estimate_id)) {
+                    throw new Exception('견적서 저장에 실패했습니다.');
+                }
+
+                if (!empty($_FILES)) {
+
+                    $this->estimate_service->uploadFile($insert_estimate_id);
+                }
+            } catch (Exception $e) {
+                $res_array['ok'] = false;
+                $res_array['msg'] = $e->getMessage();
+                break;
+            }
+        }
+
+        echo json_encode($res_array);
+    }
+
+    # 거래처 목록 조회 (AJAX)
+    public function get_partner_list()
+    {
+
+        $business_partners = $this->service_model->get_business_partner('all', [
+            1
+        ]);
+
+        echo json_encode($business_partners);
+        exit;
     }
 
     private function layout_config($sub_menu_code = '', $title = '')

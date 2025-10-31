@@ -40,6 +40,17 @@ $datetime = date('YmdHis');
         border-bottom: 1px solid black;
     }
 
+    .ui-autocomplete {
+        max-height: 300px;
+        /* 보여줄 최대 높이 */
+        overflow-y: auto;
+        /* 세로 스크롤 활성화 */
+        overflow-x: hidden;
+        /* 가로 스크롤 숨김 */
+        z-index: 9999 !important;
+        /* 다른 요소보다 위에 표시 */
+    }
+
     .tg-0pky {
         border-right: 1px solid black;
         border-left: 1px solid black;
@@ -120,250 +131,259 @@ $datetime = date('YmdHis');
 <link rel="stylesheet" href="/assets/app_hyup/lib/pqgrid/pqgrid.css" />
 <link rel="stylesheet" href="/assets/app_hyup/lib/pqgrid/pqgrid.min.css" />
 
-<div class="w-full !px-2 !text-xs font-sans font-300">
-    <input type="hidden" id="sheetData"
-        value='<?= json_encode($sheets, JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT) ?>'>
+<form id="form1" onsubmit="handle_form_submit(event);">
+    <div class="w-full !px-2 !text-xs font-sans font-300">
+        <input type="hidden" id="sheetData"
+            value='<?= json_encode($sheets, JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT) ?>'>
 
-    <div class="w-full relative flex justify-center items-center mb-4">
-        <img
-            class="!mb-2 mx-auto"
-            src="/assets/app_hyup/images/견적서.png" alt="견적서">
+        <div class="w-full relative flex justify-center items-center mb-4">
+            <img
+                class="!mb-2 mx-auto"
+                src="/assets/app_hyup/images/견적서.png" alt="견적서">
 
-        <div class="absolute right-2 top-2 px-2 py-1 text-xs cursor-pointer hover:underline">
-            거래내역 불러오기
+            <!-- <div class="absolute right-2 top-2 px-2 py-1 text-xs cursor-pointer hover:underline">
+                거래내역 불러오기
+            </div> -->
         </div>
-    </div>
 
-    <div class="flex !border-x-2 !border-t-2 !border-black">
-        <!-- 왼쪽: 견적 정보 -->
-        <div class="relative flex-1 border-r !border-b border-black !p-3 !pr-14">
-            <div class="!space-y-2">
-                <div class="flex items-center">
-                    <label class="w-[75px]">거 래 처 명 :</label>
+        <div class="flex !border-x-2 !border-t-2 !border-black">
+            <!-- 왼쪽: 견적 정보 -->
+            <div class="relative flex-1 border-r !border-b border-black !p-3 !pr-14">
+                <div class="!space-y-2">
                     <div class="flex items-center">
-                        <input type="text" id="searchBox" class="border w-[250px] h-[24px]" />
-                        <button class="bg-gray-200 border border-gray-400 h-[24px] px-2 text-xs" style="border-left: none !important;">🔍</button>
+                        <label class="w-[75px]">거 래 처 명 :</label>
+                        <div class="flex items-center">
+                            <input type="text" id="searchBox" class="border w-[250px] h-[24px]" />
+                            <input type="hidden" name="partner_id" />
+                            <button class="bg-gray-200 border border-gray-400 h-[24px] px-2 text-xs" style="border-left: none !important;">🔍</button>
+                        </div>
                     </div>
+
+                    <div class="flex items-center">
+                        <label class="w-[75px]">견 적 일 자 :</label>
+                        <input type="date" name="estimate_date" class="border flatpickr w-[180px] h-[24px] px-1 flatpicker" />
+                    </div>
+
+                    <div class="flex items-center">
+                        <label class="w-[75px]">전 화 번 호 :</label>
+                        <input type="text" name="phone_number" class="border w-[100px] h-[24px] px-1" />
+                        <span class="!ml-2 w-[75px]">팩 스 번 호 : </span>
+                        <input type="text" name="fax_number" class="border w-[100px] h-[24px] !px-1" />
+                    </div>
+
+                    <div class="flex items-center">
+                        <label class="w-[75px]">제 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;목 :</label>
+                        <input type="text" name="title" class="border flex-1 h-[24px] px-1" />
+                    </div>
+
                 </div>
 
-                <div class="flex items-center">
-                    <label class="w-[75px]">견 적 일 자 :</label>
-                    <input type="date" class="border flatpickr w-[180px] h-[24px] px-1 flatpicker" value="2025-10-25" />
-                </div>
-
-                <div class="flex items-center">
-                    <label class="w-[75px]">전 화 번 호 :</label>
-                    <input type="text" class="border w-[100px] h-[24px] px-1" />
-                    <span class="!ml-2 w-[75px]">팩 스 번 호 : </span>
-                    <input type="text" class="border w-[100px] h-[24px] !px-1" />
-                </div>
-
-                <div class="flex items-center">
-                    <label class="w-[75px]">제 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;목 :</label>
-                    <input type="text" class="border flex-1 h-[24px] px-1" />
-                </div>
-
+                <p class="absolute bottom-[10px] font-semibold text-[13px]">
+                    견적요청에 감사드리며 아래와 같이 견적합니다.
+                </p>
             </div>
 
-            <p class="absolute bottom-[10px] font-semibold text-[13px]">
-                견적요청에 감사드리며 아래와 같이 견적합니다.
-            </p>
+            <!-- 오른쪽: 공급자 정보 -->
+            <div class="w-[580px] !border-l border-black">
+                <table class="w-full border-collapse text-sm border-l border-black">
+                    <col style="width: 35px">
+                    <col style="width: 82px">
+                    <col style="width: 25px">
+                    <col style="width: 25px">
+                    <col style="width: 53px">
+                    <col style="width: 86px">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <td
+                                class="tg-c3ow  bg-[#d9d9d9] !text-lg !font-semibold font-serif"
+                                rowspan="6">공<br>급<br>자</td>
+                            <td class="tg-0pky !text-center">등록번호</td>
+                            <td class="tg-jgcz" colspan="6"><span style="color:#000">312-86-30100</span></td>
+                        </tr>
+                        <tr>
+                            <td class="tg-0pky !text-center">상&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;호</td>
+                            <td class="tg-wjrz" colspan="3">제이엠테크</td>
+                            <td class="tg-0pky !text-center">성&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;명</td>
+                            <td class="tg-0lax">
+                                <div class="!relative flex items-center">
+                                    <span>전용준</span>
+                                    <img
+                                        class="w-14 h-14 absolute left-6 -top-4"
+                                        src="/assets/app_hyup/images/stamp.png"
+                                        alt="stamp" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="tg-0pky !text-center">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</td>
+                            <td class="" colspan="5">충청남도 천안시 서북구 두정공단1길 149-2 (두정동, 미라클(주)) 제이엠테크</td>
+                        </tr>
+                        <tr>
+                            <td class="tg-0pky !text-center">업&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;태</td>
+                            <td class="tg-0pky" colspan="3">제조업</td>
+                            <td class="tg-0pky !text-center">종&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;목</td>
+                            <td class="tg-0lax">산업기계 설계 및 개발</td>
+                        </tr>
+                        <tr>
+                            <td class="tg-0pky !text-center">전화번호</td>
+                            <td class="tg-0pky" colspan="3">041-483-1111</td>
+                            <td class="tg-0pky !text-center">팩스번호</td>
+                            <td class="tg-0lax">041-1111-1111</td>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+
+
         </div>
 
-        <!-- 오른쪽: 공급자 정보 -->
-        <div class="w-[580px] !border-l border-black">
-            <table class="w-full border-collapse text-sm border-l border-black">
-                <col style="width: 35px">
-                <col style="width: 82px">
-                <col style="width: 25px">
-                <col style="width: 25px">
-                <col style="width: 53px">
-                <col style="width: 86px">
-                </colgroup>
-                <thead>
-                    <tr>
-                        <td
-                            class="tg-c3ow  bg-[#d9d9d9] !text-lg !font-semibold font-serif"
-                            rowspan="6">공<br>급<br>자</td>
-                        <td class="tg-0pky !text-center">등록번호</td>
-                        <td class="tg-jgcz" colspan="6"><span style="color:#000">312-86-30100</span></td>
-                    </tr>
-                    <tr>
-                        <td class="tg-0pky !text-center">상&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;호</td>
-                        <td class="tg-wjrz" colspan="3">제이엠테크</td>
-                        <td class="tg-0pky !text-center">성&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;명</td>
-                        <td class="tg-0lax">
-                            <div class="!relative flex items-center">
-                                <span>전용준</span>
-                                <img
-                                    class="w-14 h-14 absolute left-6 -top-4"
-                                    src="/assets/app_hyup/images/stamp.png"
-                                    alt="stamp" />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="tg-0pky !text-center">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</td>
-                        <td class="" colspan="5">충청남도 천안시 서북구 두정공단1길 149-2 (두정동, 미라클(주)) 제이엠테크</td>
-                    </tr>
-                    <tr>
-                        <td class="tg-0pky !text-center">업&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;태</td>
-                        <td class="tg-0pky" colspan="3">제조업</td>
-                        <td class="tg-0pky !text-center">종&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;목</td>
-                        <td class="tg-0lax">산업기계 설계 및 개발</td>
-                    </tr>
-                    <tr>
-                        <td class="tg-0pky !text-center">전화번호</td>
-                        <td class="tg-0pky" colspan="3">041-483-1111</td>
-                        <td class="tg-0pky !text-center">팩스번호</td>
-                        <td class="tg-0lax">041-1111-1111</td>
-                    </tr>
-                </thead>
-            </table>
+        <div class="flex items-center mt-2 !px-4 !py-1 !border-x-2 !border-b-2 !border-black justify-start">
+            <span class="font-semibold mr-2">합&nbsp;&nbsp;계&nbsp;&nbsp;금&nbsp;&nbsp;액 : 일금 </span>
+            <input type="text" class="border w-[150px] h-[24px] !ml-1 px-1" value="₩0" readonly />
+        </div>
+
+        <div class="flex items-center justify-between !my-1 !py-1">
+
+            <select name="" id="">
+                <?
+                $VAT_CONTROL = unserialize(VAT_CONTROL);
+
+                foreach ($VAT_CONTROL as $key => $value) {
+                ?>
+                    <option value="<?= $key ?>"><?= $value ?></option>
+                <?
+                }
+                ?>
+            </select>
+
+            <div class="flex items-center gap-1">
+                <!-- Excel Button -->
+                <button
+                    onclick="my_modal_1.showModal()"
+                    type="button"
+                    class="flex items-center gap-1 border border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs">
+                    <img width="16" alt="Logo of Microsoft Excel since 2019" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Microsoft_Office_Excel_%282019%E2%80%932025%29.svg/32px-Microsoft_Office_Excel_%282019%E2%80%932025%29.svg.png?20190925171014">
+                    <span>일괄등록</span>
+                </button>
+
+                <!-- Plus Button -->
+                <button
+                    onclick="add_row()"
+                    type="button"
+                    class="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition">
+                    <span class="text-blue-600 !text-xl !font-bold !mb-1 leading-none">+</span>
+                </button>
+
+                <!-- Minus Button -->
+                <button
+                    onclick="remove_row()"
+                    type="button"
+                    class="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition">
+                    <span class="text-red-500 !text-xl !font-bold leading-none">−</span>
+                </button>
+            </div>
         </div>
 
 
     </div>
 
-    <div class="flex items-center mt-2 !px-4 !py-1 !border-x-2 !border-b-2 !border-black justify-start">
-        <span class="font-semibold mr-2">합&nbsp;&nbsp;계&nbsp;&nbsp;금&nbsp;&nbsp;액 : 일금 </span>
-        <input type="text" class="border w-[150px] h-[24px] !ml-1 px-1" value="₩0" readonly />
-    </div>
-
-    <div class="flex items-center justify-between !my-1 !py-1">
-
-        <select name="" id="">
-            <?
-            $VAT_CONTROL = unserialize(VAT_CONTROL);
-
-            foreach ($VAT_CONTROL as $key => $value) {
-            ?>
-                <option value="<?= $key ?>"><?= $value ?></option>
-            <?
-            }
-            ?>
-        </select>
-
-        <div class="flex items-center gap-1">
-            <!-- Excel Button -->
-            <button
-                onclick="my_modal_1.showModal()"
-                class="flex items-center gap-1 border border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs">
-                <img width="16" alt="Logo of Microsoft Excel since 2019" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Microsoft_Office_Excel_%282019%E2%80%932025%29.svg/32px-Microsoft_Office_Excel_%282019%E2%80%932025%29.svg.png?20190925171014">
-                <span>일괄등록</span>
-            </button>
-
-            <!-- Plus Button -->
-            <button
-                onclick="add_row()"
-                type="button"
-                class="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition">
-                <span class="text-blue-600 !text-xl !font-bold !mb-1 leading-none">+</span>
-            </button>
-
-            <!-- Minus Button -->
-            <button
-                onclick="remove_row()"
-                type="button"
-                class="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition">
-                <span class="text-red-500 !text-xl !font-bold leading-none">−</span>
-            </button>
-        </div>
-    </div>
-
-
-</div>
-
-<div class="!border-2 !border-black !mx-[9px]">
-    <div class="sheet-tabs flex border-b border-gray-300 bg-gray-100">
-        <?php foreach ($sheets as $sheet): ?>
-            <button
-                id="sheet_<?= $sheet['name'] ?>"
-                onclick="showSheet('<?= $sheet['name'] ?>')"
-                class="tab-btn px-4 py-2 text-sm font-medium border-r border-gray-300 
+    <div class="!border-2 !border-black !mx-[9px]">
+        <div class="sheet-tabs flex border-b border-gray-300 bg-gray-100">
+            <?php foreach ($sheets as $sheet): ?>
+                <button
+                    type="button"
+                    id="sheet_<?= $sheet['name'] ?>"
+                    onclick="showSheet('<?= $sheet['name'] ?>')"
+                    class="tab-btn px-4 py-2 text-sm font-medium border-r border-gray-300 
              bg-gray-100 hover:bg-gray-200 transition-colors
              focus:outline-none"
-                data-sheet="<?= $sheet['name'] ?>">
-                <?= $sheet['name'] ?>
-            </button>
-        <?php endforeach; ?>
+                    data-sheet="<?= $sheet['name'] ?>">
+                    <?= $sheet['name'] ?>
+                </button>
+            <?php endforeach; ?>
+        </div>
+
+        <div id="sheetContainer" class="!w-full"></div>
+        <table class="tg !border-t-2 !border-black">
+            <thead>
+                <tr>
+                    <th class="tg-0pky !border-t !w-[100px] !text-center !text-black th-bg">납기일자</th>
+                    <th class="tg-0pky !border-t w-[400px]">
+                        <input type="date" name="due_at" class="text-black flatpickr border w-full h-[24px] px-1" value="" />
+                    </th>
+                    <th class="tg-0pky !border-t th-bg !w-[100px] !text-center">납품장소</th>
+                    <th class="tg-0pky">
+                        <input type="text" name="location" class="text-black border w-full h-[24px] px-1" value="" />
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="tg-0pky !border-1 text-center th-bg">유효일자</td>
+                    <td class="tg-0pky !border-1 w-[400px]">
+                        <input type="date" name="valid_at" class="text-black flatpickr border w-full h-[24px] px-1" value="" />
+                    </td>
+                    <td class="tg-0pky !border-1 th-bg !w-[100px] !text-center">결제조건</td>
+                    <td class="tg-0pky !border-1">
+                        <input type="text" name="payment_type" class="text-black border w-full h-[24px] px-1" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="tg-0pky text-center th-bg ">비고</td>
+                    <td class="tg-0pky" colspan="3">
+                        <input type="text" name="etc_memo" class="text-black border w-full h-[24px] px-1" value="" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
     </div>
 
-    <div id="sheetContainer" class="!w-full"></div>
-    <table class="tg !border-t-2 !border-black">
-        <thead>
-            <tr>
-                <th class="tg-0pky !border-t !w-[100px] !text-center !text-black th-bg">납기일자</th>
-                <th class="tg-0pky !border-t w-[400px]">
-                    <input type="date" class="text-black flatpickr border w-full h-[24px] px-1" value="" />
-                </th>
-                <th class="tg-0pky !border-t th-bg !w-[100px] !text-center">납품장소</th>
-                <th class="tg-0pky">
-                    <input type="text" class="text-black border w-full h-[24px] px-1" value="" />
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="tg-0pky !border-1 text-center th-bg">유효일자</td>
-                <td class="tg-0pky !border-1 w-[400px]">
-                    <input type="date" class="text-black flatpickr border w-full h-[24px] px-1" value="" />
-                </td>
-                <td class="tg-0pky !border-1 th-bg !w-[100px] !text-center">결제조건</td>
-                <td class="tg-0pky !border-1">
-                    <input type="text" class="text-black border w-full h-[24px] px-1" value="" />
-                </td>
-            </tr>
-            <tr>
-                <td class="tg-0pky text-center th-bg ">비고</td>
-                <td class="tg-0pky" colspan="3">
-                    <input type="text" class="text-black border w-full h-[24px] px-1" value="" />
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="w-full !px-2 !text-xs font-sans font-300">
+        <div class="flex items-center gap-4">
+            <button
+                type="button"
+                id="attachBtn"
+                class="!my-2 flex items-center gap-1 border border-gray-300 rounded h-7 !text-xs !px-1 bg-white hover:bg-gray-50 transition text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paperclip-icon lucide-paperclip">
+                    <path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" />
+                </svg>
+                <span>첨부파일</span>
+            </button>
 
-</div>
+            <!-- 파일 표시 영역 -->
+            <div id="fileList" class="flex items-center flex-wrap gap-2 text-sm"></div>
+        </div>
 
-<div class="w-full !px-2 !text-xs font-sans font-300">
-    <div class="flex items-center gap-4">
+        <!-- 실제 파일 input (숨김) -->
+        <input type="file" id="fileInput" class="hidden" multiple />
+
+    </div>
+
+    <div class="w-full !px-2 !text-[13px] flex justify-center items-center gap-1.5 font-sans font-300 !my-2">
+        <!-- 저장 후 인쇄 -->
         <button
-            id="attachBtn"
-            class="!my-2 flex items-center gap-1 border border-gray-300 rounded h-7 !text-xs !px-1 bg-white hover:bg-gray-50 transition text-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paperclip-icon lucide-paperclip">
-                <path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" />
-            </svg>
-            <span>첨부파일</span>
+            type="button"
+            class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+            저장 후 인쇄
         </button>
 
-        <!-- 파일 표시 영역 -->
-        <div id="fileList" class="flex items-center flex-wrap gap-2 text-sm"></div>
+        <!-- 저장 -->
+        <button
+            class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+            저장
+        </button>
+
+        <!-- 취소 -->
+        <button
+            type="button"
+            class="px-2 py-1 bg-[#fff] text-gray-700 hover:bg-gray-100 border border-gray-300">
+            취소
+        </button>
     </div>
+</form>
 
-    <!-- 실제 파일 input (숨김) -->
-    <input type="file" id="fileInput" class="hidden" multiple />
-
-</div>
-
-<div class="w-full !px-2 !text-[13px] flex justify-center items-center gap-1.5 font-sans font-300 !my-2">
-    <!-- 저장 후 인쇄 -->
-    <button
-        class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
-        저장 후 인쇄
-    </button>
-
-    <!-- 저장 -->
-    <button
-        class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
-        저장
-    </button>
-
-    <!-- 취소 -->
-    <button
-        class="px-2 py-1 bg-[#fff] text-gray-700 hover:bg-gray-100 border border-gray-300">
-        취소
-    </button>
-</div>
 
 <dialog id="my_modal_1" class="modal">
     <div class="modal-box !text-xs !w-[400px] relative">
@@ -471,107 +491,88 @@ $datetime = date('YmdHis');
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js?v=<?= $datetime ?>"></script>
 
-
-<script>
-    // * 엑셀 일괄등록 모달
-    const excel_upload_modal = document.getElementById('my_modal_1');
-
-    function close_modal_1() {
-        excel_upload_modal.close();
-    }
-
-    function change_excel_file(event) {
-        const file = event.target.files[0];
-        if (file) {
-            // 파일명 표시
-            $('#fileNameInput').val(file.name);
-            console.log("선택된 파일:", file.name);
-        } else {
-            $('#fileNameInput').val('');
-        }
-    }
-
-    async function handle_excel_form(event) {
-        event.preventDefault(); // 폼 기본 전송 막기
-
-        const fileInput = $('#excelFileInput')[0];
-        const file = fileInput.files?.[0];
-
-        // if (!file) {
-        //     alert('엑셀 파일을 선택해주세요.');
-        //     return;
-        // }
-
-        start_modal_loading();
-        await wait(500);
-
-        const formData = new FormData();
-        formData.append('excel_file', file);
-        formData.append('sheet_name', $('select.sheet_select').val());
-
-        $.ajax({
-            type: "POST",
-            url: "/sales/estimate_excel_load",
-            data: formData,
-            processData: false,
-            contentType: false,
-            dataType: "json",
-            success: function(res) {
-
-                if (res.ok) {
-
-                    const data = res.data; // PHP에서 보낸 엑셀 파싱 결과 배열
-
-                    const {
-                        hotInstances
-                    } = window._handsontable;
-                    const activeName = $('select.sheet_select').val();
-                    const hot = hotInstances[activeName];
-
-                    // 기존 데이터 가져오기
-                    const currentData = hot.getSourceData();
-
-                    // 기존 + 새 데이터 병합
-                    const mergedData = [...currentData, ...data];
-                    console.log(mergedData)
-
-                    // 한번에 반영 (초고속)
-                    // hot.loadData(mergedData);
-
-                } else {
-                    alert(res.msg);
-                }
-
-                // close_modal_1();
-            },
-            error: function(xhr, status, error) {
-                alert(`엑셀 파일 업로드 중 오류가 발생했습니다. 관리자에게 문의하세요.\n${error.message}`);
-            },
-            complete: function() {
-                stop_modal_loading();
-            }
-        });
-    }
-</script>
-
 <script>
     // ✅ PHP에서 넘어온 JSON 읽기
     const sheets = Object.values(JSON.parse(document.getElementById('sheetData').value));
     const containers = {};
 
     document.addEventListener('DOMContentLoaded', async () => {
-        flatpickr(".flatpickr", {
-            dateFormat: "Y-m-d", // 날짜 형식: 2025-10-28
-            locale: "ko", // ✅ 한글 로케일 지정
-            // defaultDate: new Date(), // 기본값: 오늘 날짜
-            disableMobile: true, // 모바일에서도 같은 UI 유지 (선택)
-        });
 
         start_loading();
         // await wait(700);
+
+        // * Handsontable 초기화 (Excel)
         initializeHandsontable();
+
+        // * 거래처 목록 가져오기
+        fetchPartners();
+
         stop_loading();
     });
+
+    function fetchPartners() {
+        let availableTags = []
+
+        $.ajax({
+            type: "GET",
+            url: "/sales/get_partner_list",
+            dataType: "json",
+            success: function(response) {
+                availableTags = response;
+            }
+        });
+
+        $("#searchBox").autocomplete({
+                minLength: 1,
+                delay: 100,
+                source: availableTags,
+                // ✅ hover 시 input 값 바꾸지 않음
+                focus: function() {
+                    return false; // 🔥 여기서 UI만 유지하고 값은 변경 안 함
+                },
+                select: function(event, ui) {
+                    console.log("선택:", ui.item);
+                    $("#searchBox").val(ui.item.company_name);
+                    return false;
+                },
+                source: function(request, response) {
+                    const term = $.trim(request.term).toLowerCase();
+
+                    const results = availableTags.filter(item => {
+                        // label, person, account 전부 검색 조건 포함
+                        return (
+                            item.company_name.toLowerCase().includes(term) ||
+                            item.company_num.toLowerCase().includes(term) ||
+                            item.ceo_name.toLowerCase().includes(term)
+                        );
+                    });
+
+                    // ✅ 최대 30개까지만 보여줌
+                    const limitedResults = results.slice(0, 30);
+
+                    response(limitedResults);
+                },
+            })
+            // ✅ 항목 렌더링 커스텀 + 하이라이트
+            .data("ui-autocomplete")._renderItem = function(ul, item) {
+                const term = this.term.toLowerCase(); // 사용자가 입력한 검색어
+                const highlight = (text) => {
+                    if (!term) return text;
+                    const regex = new RegExp("(" + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ")", "gi");
+                    return text.replace(regex, '<span class="highlight">$1</span>');
+                };
+
+                return $("<li>")
+                    .append(`
+      <div class="item-row">
+        <div class="item-name">${highlight(item.company_name)}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+        <div class="item-person">${highlight(item.ceo_name)}</div>
+        <div class="item-account">${highlight(item.company_num)}</div>
+      </div>
+    `)
+                    .appendTo(ul);
+            };
+    }
 
     function initializeHandsontable() {
         const hfInstance = HyperFormula.buildEmpty({});
@@ -690,190 +691,8 @@ $datetime = date('YmdHis');
         if (hot.countRows() > 1) hot.alter('remove_row', hot.countRows() - 1);
     }
 
-    // const hot = new Handsontable(container, {
-    //     data: [
-    //         ['철판', 'SS400', 10, 15000, '=D1*E1', '=F1*0.1', ''],
-    //         ['볼트', 'M10', 20, 500, '=D2*E2', '=F2*0.1', ''],
-    //         ['너트', 'M10', 20, 400, '=D3*E3', '=F3*0.1', ''],
-    //         ['용접봉', '6013', 5, 10000, '=D4*E4', '=F4*0.1', ''],
-    //         ['기타', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
-    //         ['합계', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
-    //     ],
-
-    //     // ✅ 여기서 헤더 지정
-    //     colHeaders: function(col) {
-    //         const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-    //         const titles = ['품목', '규격', '수량', '단가', '공급가액', '세액', '비고'];
-    //         return `${titles[col]} ${letters[col]}`;
-    //     },
-    //     colWidths: [344, 120, 80, 100, 120, 100, 150],
-
-    //     rowHeaders: true,
-    //     height: 'auto',
-    //     width: '100%',
-    //     autoWrapRow: true,
-    //     autoWrapCol: true,
-
-    //     formulas: {
-    //         engine: hfInstance,
-    //         sheetName: 'Sheet1',
-    //     },
-
-    //     mergeCells: [
-    //         // {row, col, rowspan, colspan}
-    //         {
-    //             row: 5,
-    //             col: 0,
-    //             rowspan: 1,
-    //             colspan: 3
-    //         }, // “합계”를 왼쪽 3칸 병합
-    //     ],
-
-    //     columns: [{
-    //             data: 0
-    //         }, // 품목
-    //         {
-    //             data: 1
-    //         }, // 규격
-    //         {
-    //             data: 2,
-    //             type: 'numeric',
-    //             numericFormat: {
-    //                 pattern: '0,0'
-    //             },
-    //             allowInvalid: false
-    //         },
-    //         {
-    //             data: 3,
-    //             type: 'numeric',
-    //             numericFormat: {
-    //                 pattern: '0,0'
-    //             },
-    //             allowInvalid: false
-    //         },
-    //         {
-    //             data: 4,
-    //             type: 'numeric',
-    //             numericFormat: {
-    //                 pattern: '0,0'
-    //             },
-    //         },
-    //         {
-    //             data: 5,
-    //             type: 'numeric',
-    //             numericFormat: {
-    //                 pattern: '0,0'
-    //             },
-    //         },
-    //         {
-    //             data: 6
-    //         }, // 비고
-    //     ],
-
-    //     // ✅ 특정 셀 스타일 지정
-    //     cells(row, col) {
-    //         const cellProperties = {};
-
-    //         // 오른쪽 정렬 열들 → 규격(1), 수량(2), 단가(3), 공급가액(4), 세액(5)
-    //         const rightAlignedCols = [1, 2, 3, 4, 5];
-    //         if (rightAlignedCols.includes(col)) {
-    //             cellProperties.className = 'htRight'; // Handsontable 기본 오른쪽 정렬 클래스
-    //         }
-
-    //         // “합계” 행 스타일
-    //         if (row === 5) {
-    //             cellProperties.className = '!font-bold text-black htRight font-serif';
-    //         }
-
-    //         return cellProperties;
-    //     },
-
-    //     licenseKey: 'non-commercial-and-evaluation',
-    // });
-
-    // ✅ 객체 배열 형태로 구성
-    const availableTags = [{
-            label: "삼성전자",
-            person: "김도현",
-            account: "302-1111-2222-33"
-        },
-        {
-            label: "삼성SDI",
-            person: "이준호",
-            account: "312-1234-5678-90"
-        },
-        {
-            label: "LG전자",
-            person: "박정우",
-            account: "333-2222-1111-00"
-        },
-        {
-            label: "LG화학",
-            person: "홍길동",
-            account: "1002-999-888888"
-        },
-        {
-            label: "현대자동차",
-            person: "최지훈",
-            account: "1111-2222-3333"
-        },
-        {
-            label: "포스코",
-            person: "윤수민",
-            account: "312-111111-1111"
-        }
-    ];
-    $("#searchBox").autocomplete({
-            minLength: 1,
-            delay: 100,
-            source: availableTags,
-            // ✅ hover 시 input 값 바꾸지 않음
-            focus: function() {
-                return false; // 🔥 여기서 UI만 유지하고 값은 변경 안 함
-            },
-            select: function(event, ui) {
-                console.log("선택:", ui.item);
-                $("#searchBox").val(ui.item.label);
-                return false;
-            },
-            source: function(request, response) {
-                const term = $.trim(request.term).toLowerCase();
-
-                const results = availableTags.filter(item => {
-                    // label, person, account 전부 검색 조건 포함
-                    return (
-                        item.label.toLowerCase().includes(term) ||
-                        item.person.toLowerCase().includes(term) ||
-                        item.account.toLowerCase().includes(term)
-                    );
-                });
-
-                response(results);
-            },
-        })
-        // ✅ 항목 렌더링 커스텀 + 하이라이트
-        .data("ui-autocomplete")._renderItem = function(ul, item) {
-            const term = this.term.toLowerCase(); // 사용자가 입력한 검색어
-            const highlight = (text) => {
-                if (!term) return text;
-                const regex = new RegExp("(" + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ")", "gi");
-                return text.replace(regex, '<span class="highlight">$1</span>');
-            };
-
-            return $("<li>")
-                .append(`
-      <div class="item-row">
-        <div class="item-name">${highlight(item.label)}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
-        <div class="item-person">${highlight(item.person)}</div>
-        <div class="item-account">${highlight(item.account)}</div>
-      </div>
-    `)
-                .appendTo(ul);
-        };
-
     const $fileInput = $('#fileInput');
     const $fileList = $('#fileList');
-    let filesArray = []; // 첨부된 파일 목록 저장용
 
     // 버튼 클릭 → 파일 선택창 열기
     $('#attachBtn').on('click', function() {
@@ -916,4 +735,158 @@ $datetime = date('YmdHis');
         filesArray.splice(idx, 1); // 배열에서 제거
         renderFileList(); // 다시 렌더링
     });
+</script>
+
+<script>
+    let filesArray = []; // 첨부된 파일 목록 저장용
+
+    function handle_form_submit(e) {
+        e.preventDefault(); // 기본 폼 제출 방지
+
+        start_loading();
+
+        const formData = new FormData(e.target);
+        const serial = $(e.target).serializeArray();
+
+        serial.forEach(item => {
+            formData.append(item.name, item.value);
+        });
+
+        if (!empty(filesArray)) {
+
+            filesArray.forEach((file, index) => {
+                formData.append('files[]', file);
+            });
+        }
+
+        /**
+         * * handsontable 입력된 데이터 전부 가져오기.
+         */
+        const sheet_data = get_sheet_data('견적서');
+        formData.append('sheet_data', JSON.stringify(sheet_data));
+
+        $.ajax({
+            type: "POST",
+            url: "/sales/save_estimate",
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: "json",
+            success: function(response) {
+                alert(response.msg);
+
+                if (response.ok) {
+                    // 저장 후 처리 (예: 페이지 리로드 또는 다른 작업)
+                } else {
+                    alert(response.msg);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert(`견적서 저장 중 오류가 발생했습니다. 관리자에게 문의하세요.\n${error.message}`);
+            },
+            complete: function() {
+                stop_loading();
+            }
+        });
+    }
+
+    function get_sheet_data(sheetName) {
+        const {
+            hotInstances
+        } = window._handsontable;
+        const hot = hotInstances[sheetName];
+        return hot.getSourceData();
+    }
+</script>
+
+
+<script>
+    flatpickr(".flatpickr", {
+        dateFormat: "Y-m-d", // 날짜 형식: 2025-10-28
+        locale: "ko", // ✅ 한글 로케일 지정
+        // defaultDate: new Date(), // 기본값: 오늘 날짜
+        disableMobile: true, // 모바일에서도 같은 UI 유지 (선택)
+    });
+
+    // * 엑셀 일괄등록 모달
+    const excel_upload_modal = document.getElementById('my_modal_1');
+
+    function close_modal_1() {
+        excel_upload_modal.close();
+    }
+
+    function change_excel_file(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // 파일명 표시
+            $('#fileNameInput').val(file.name);
+            console.log("선택된 파일:", file.name);
+        } else {
+            $('#fileNameInput').val('');
+        }
+    }
+
+    async function handle_excel_form(event) {
+        event.preventDefault(); // 폼 기본 전송 막기
+
+        const fileInput = $('#excelFileInput')[0];
+        const file = fileInput.files?.[0];
+
+        // if (!file) {
+        //     alert('엑셀 파일을 선택해주세요.');
+        //     return;
+        // }
+
+        start_modal_loading();
+
+        await wait(500);
+
+        const formData = new FormData();
+
+        formData.append('excel_file', file);
+        formData.append('sheet_name', $('select.sheet_select').val());
+
+        $.ajax({
+            type: "POST",
+            url: "/sales/estimate_excel_load",
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: "json",
+            success: function(res) {
+
+                if (res.ok) {
+
+                    const data = res.data; // PHP에서 보낸 엑셀 파싱 결과 배열
+
+                    const {
+                        hotInstances
+                    } = window._handsontable;
+                    const activeName = $('select.sheet_select').val();
+                    const hot = hotInstances[activeName];
+
+                    // 기존 데이터 가져오기
+                    const currentData = hot.getSourceData();
+
+                    // 기존 + 새 데이터 병합
+                    const mergedData = [...currentData, ...data];
+                    console.log(mergedData)
+
+                    // 한번에 반영 (초고속)
+                    // hot.loadData(mergedData);
+
+                } else {
+                    alert(res.msg);
+                }
+
+                // close_modal_1();
+            },
+            error: function(xhr, status, error) {
+                alert(`엑셀 파일 업로드 중 오류가 발생했습니다. 관리자에게 문의하세요.\n${error.message}`);
+            },
+            complete: function() {
+                stop_modal_loading();
+            }
+        });
+    }
 </script>

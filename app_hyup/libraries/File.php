@@ -1,10 +1,39 @@
 <?
 class file
 {
+    protected $allowedExtensions = [
+        // 이미지
+        'jpg',
+        'jpeg',
+        'png',
+        'gif',
+        'bmp',
+        'webp',
+
+        // 문서
+        'pdf',
+        'hwp',
+        'hwpx',
+        'doc',
+        'docx',
+        'xls',
+        'xlsx',
+        'csv',
+        'ppt',
+        'pptx',
+        'txt',
+
+        // 압축파일 (원하면 포함)
+        'zip',
+        'rar',
+        '7z'
+    ];
 
     // 파일 업로드 함수
-    public function upload($fileInputName, $uploadDirectory, $maxSizeMB = 5, $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'])
+    public function upload($fileInputName, $uploadDirectory, $maxSizeMB = 5, $allowedExtensions = null)
     {
+        $allowedExtensions = $allowedExtensions ?? $this->allowedExtensions;
+
         $result = [
             'status' => 'error',  // 기본 상태를 'error'로 설정
             'message' => '',      // 메시지
@@ -54,6 +83,8 @@ class file
                 $result['status'] = 'success';  // 성공 상태
                 $result['message'] = "파일 업로드 성공";
                 $result['fileName'] = $fileName;
+                $result['originalFileName'] = $file['name'];
+                $result['fileSize'] = $file['size'];
                 $result['filePath'] = $uploadPath;
                 $result['fileSrc'] = 도메인 .  $uploadPath;  // 서버 경로 추가
             } else {
@@ -65,8 +96,9 @@ class file
         return $result;  // 결과 배열 리턴
     }
 
-    public function upload_multiple($fileInputName, $uploadDirectory, $maxSizeMB = 5, $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'])
+    public function upload_multiple($fileInputName, $uploadDirectory, $maxSizeMB = 5, $allowedExtensions = null)
     {
+        $allowedExtensions = $allowedExtensions ?? $this->allowedExtensions;
         $results = [];
 
         // 파일 배열 체크

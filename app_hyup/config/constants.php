@@ -377,12 +377,12 @@ define('MID', 'mosi00001m');
 define('MKEY', '+m4H1h8V5VCvM3K5uoHKTY8M4Hbg34pIdbQrlsnyR6MOyeET50GS0Rfi0IfuACjLz4hXXSN1eT4xCyusBAuy9A==');
 
 define('ROOT_PATH', ($_SERVER['REMOTE_ADDR'] === '127.0.0.1') ? 'C:/workSpace/hihome/assets/app_hyup' : '/var/www/html/hihome/assets/app_hyup');
-define('도메인', ($_SERVER['REMOTE_ADDR'] === '127.0.0.1') ? 'https://mosihealth.test' : 'https://mosihealth.com');
+define('도메인', ($_SERVER['REMOTE_ADDR'] === '127.0.0.1') ? 'https://jmtech.test' : 'https://jmtech.com');
 
-define('DEFAULT_PROFILE_IMAGE', 'https://mosihealth.com/assets/app_hyup/images/default_profile.png');
+define('DEFAULT_PROFILE_IMAGE', 'https://jmtech.com/assets/app_hyup/images/default_profile.png');
 
 define('NICE_PROGRAM_PATH', "/var/www/html/gamemarket-service-new1/assets/app_hyup/lib/CPClient_linux_x64");
-define('NAVER_CALLBACK_URL', ($_SERVER['REMOTE_ADDR'] === '127.0.0.1') ? 'http://mosihealth.test/api/auth/callback/naver' : 'https://www.mosihealth.com/api/auth/callback/naver');
+define('NAVER_CALLBACK_URL', ($_SERVER['REMOTE_ADDR'] === '127.0.0.1') ? 'http://jmtech.test/api/auth/callback/naver' : 'https://www.jmtech.com/api/auth/callback/naver');
 
 
 define('VAT_CONTROL', serialize([

@@ -333,20 +333,13 @@
             success: function(response) {
                 if (response.ok) {
                     my_modal_2.close()
-                    Swal.fire({
-                        html: response.msg,
-                        confirmButtonText: "닫기",
-                    });
+                    alert(response.msg);
                 } else {
                     $("#find_pw_error").text(response.data);
                 }
             },
             error: function(xhr, status, error) {
-                Swal.fire({
-                    text: JSON.parse(xhr.responseText).msg,
-                    icon: "error",
-                    confirmButtonText: "닫기",
-                });
+                alert(JSON.parse(xhr.responseText).msg);
             }
         });
     }
@@ -401,18 +394,11 @@
                     window.location.href = '/sales/estimate';
 
                 } else {
-                    Swal.fire({
-                        html: response.msg,
-                        confirmButtonText: "닫기",
-                    });
+                    alert(response.msg);
                 }
             },
             error: function(xhr, status, error) {
-                Swal.fire({
-                    text: JSON.parse(xhr.responseText).msg,
-                    icon: "error",
-                    confirmButtonText: "닫기",
-                });
+                alert(JSON.parse(xhr.responseText).msg);
             },
             complete: function() {
                 stop_loading();

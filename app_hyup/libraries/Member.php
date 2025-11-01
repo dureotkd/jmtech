@@ -15,12 +15,12 @@ class member
 
         @session_start();
 
-        $mseq = $_SESSION['mseq'] ?? '';
+        $uid = isset($_SESSION['uid']) ? $_SESSION['uid'] : '';
 
-        $tb_member_row = !empty($mseq) ? $this->obj->service_model->get_tb_user('row', [
-            "seq = '{$mseq}'"
+        $user = !empty($uid) ? $this->obj->service_model->get_user('row', [
+            "id" => $uid,
         ]) : [];
 
-        return $tb_member_row;
+        return $user;
     }
 }

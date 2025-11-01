@@ -26,6 +26,7 @@ class Estimate_service
         $partner_id = $payloads['partner_id'];
         $estimate_date = $payloads['estimate_date'];
         $fax_number = $payloads['fax_number'];
+        $phone_number = $payloads['phone_number'];
         $title = $payloads['title'];
         $due_at = $payloads['due_at'];
         $location = $payloads['location'];
@@ -33,6 +34,19 @@ class Estimate_service
         $payment_type = $payloads['payment_type'];
         $etc_memo = $payloads['etc_memo'];
         $no = $this->makeUniqueNo();
+
+        if (empty($partner_id)) {
+            throw new Exception("거래처명을 선택해주세요.");
+        }
+        if (empty($estimate_date)) {
+            throw new Exception("견적일자를 입력해주세요.");
+        }
+        if (empty($phone_number)) {
+            throw new Exception("전화번호를 입력해주세요.");
+        }
+        if (empty($title)) {
+            throw new Exception("제목을 입력해주세요.");
+        }
 
         $res = $this->obj->service_model->insert_estimate(DEBUG, [
             'type'          => '견적서',

@@ -65,18 +65,18 @@
                 <td class="cursor-pointer">
                     <div class="w-full flex items-center justify-center gap-2">
                         <!-- Excel Button -->
-                        <button
-                            onclick="download_estimate_excel(event);"
-                            class="flex !w-fit gap-2  min-w-[60px] items-center gap-1 border border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs">
+                        <a
+                            href="/sales/download_estimate_excel"
+                            class="flex !w-fit gap-2  min-w-[60px] items-center gap-1 !border !border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs">
                             <img width="16" alt="Logo of Microsoft Excel since 2019" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Microsoft_Office_Excel_%282019%E2%80%932025%29.svg/32px-Microsoft_Office_Excel_%282019%E2%80%932025%29.svg.png?20190925171014">
                             <span class="font-bold">엑셀</span>
-                        </button>
-                        <button
-                            onclick="download_estimate_pdf(event);"
-                            class="flex !w-fit gap-2 min-w-[60px] items-center gap-1 border border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs">
+                        </a>
+                        <a
+                            href="/sales/download_estimate_pdf"
+                            class="flex !w-fit gap-2 min-w-[60px] items-center gap-1 !border !border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs">
                             <img width="14" alt="Logo of Microsoft Excel since 2019" src="https://media.istockphoto.com/id/1298834280/ko/%EB%B2%A1%ED%84%B0/pdf-%EC%95%84%EC%9D%B4%EC%BD%98-%EC%A3%BC%EC%9A%94-%ED%8C%8C%EC%9D%BC-%ED%98%95%EC%8B%9D-%EB%B2%A1%ED%84%B0-%EC%95%84%EC%9D%B4%EC%BD%98-%EA%B7%B8%EB%A6%BC.jpg?s=612x612&w=0&k=20&c=p1hZH6NRAUA1tToGtDQ5weAxeJhVjtdlkhCD7Tsra0g=">
                             <span class="font-bold">PDF</span>
-                        </button>
+                        </a>
                     </div>
                 </td>
             </tr>
@@ -97,42 +97,3 @@
     </table>
 
 </div>
-
-<script>
-    function download_estimate_excel(e) {
-        start_loading();
-
-        // Simulate a download process
-        $.ajax({
-            type: "POST",
-            url: "/sales/download_estimate_excel",
-            data: {
-                type: 'suju'
-            },
-            dataType: "json",
-            success: function(response) {
-
-            }
-        });
-    }
-
-    function download_estimate_pdf(e) {
-        start_loading();
-
-        // Simulate a download process
-        $.ajax({
-            type: "POST",
-            url: "/sales/download_estimate_pdf",
-            data: {
-                type: 'suju'
-            },
-            dataType: "json",
-            success: function(response) {
-                window.open('/sales/download_estimate_pdf', '_blank');
-            },
-            complete: function() {
-                stop_loading();
-            }
-        });
-    }
-</script>

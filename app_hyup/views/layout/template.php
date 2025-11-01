@@ -64,7 +64,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
     <?
-    $datetime = time();
     $current_path = $_SERVER['REQUEST_URI'];
     ?>
 
@@ -75,7 +74,7 @@
         rel="stylesheet" type="text/css"
         href="https://cdn.jsdelivr.net/gh/loadingio/ldbutton@latest/dist/index.min.css" />
     <link rel="stylesheet" href="/assets/app_hyup/common/reset.css" />
-    <link rel="stylesheet" href="/assets/app_hyup/common/base.css?v=<?= $datetime ?>" />
+    <link rel="stylesheet" href="/assets/app_hyup/common/base.css" />
 
     <!-- Ladda CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Ladda/1.0.6/ladda-themeless.min.css" />
@@ -85,7 +84,7 @@
     <meta name="apple-mobile-web-app-title" content="JM ERP">
     <link rel="apple-touch-icon" href="/assets/app_hyup/pwa/pwa-icon-192.png">
 
-    <link rel="stylesheet" href="/assets/app_hyup/common/loading.css?v=<?= $datetime ?>" />
+    <link rel="stylesheet" href="/assets/app_hyup/common/loading.css" />
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <!-- <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script> -->
 
@@ -368,6 +367,7 @@
             },
         });
     </script>
+    <script src="/assets/app_hyup/common/base.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/base.js') ?>"></script>
     <script src="/assets/app_hyup/common/cookie.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/cookie.js') ?>"></script>
     <script src="/assets/app_hyup/common/mask.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/mask.js') ?>"></script>
     <script src="/assets/app_hyup/common/common.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/common.js') ?>"></script>
@@ -375,7 +375,6 @@
     <script src="/assets/app_hyup/common/transition.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/transition.js') ?>"></script>
     <script src="/assets/app_hyup/common/toast.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/toast.js') ?>"></script>
     <script src="/assets/app_hyup/common/loading.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/loading.js') ?>"></script>
-
 </body>
 
 </html>

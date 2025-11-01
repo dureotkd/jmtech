@@ -166,9 +166,10 @@ $datetime = date('YmdHis');
 
                     <div class="flex items-center">
                         <label class="w-[75px]">전 화 번 호 :</label>
-                        <input type="text" name="phone_number" class="border w-[100px] h-[24px] px-1" />
+                        <input type="text" name="phone_number" oninput="phoneNumberMask(this)"
+                            class="border w-[100px] h-[24px] px-1" />
                         <span class="!ml-2 w-[75px]">팩 스 번 호 : </span>
-                        <input type="text" name="fax_number" class="border w-[100px] h-[24px] !px-1" />
+                        <input type="text" name="fax_number" oninput="phoneNumberMask(this)" class="border w-[100px] h-[24px] !px-1" />
                     </div>
 
                     <div class="flex items-center">
@@ -489,7 +490,7 @@ $datetime = date('YmdHis');
     </div>
 </dialog>
 
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js?v=<?= $datetime ?>"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
 
 <script>
     // ✅ PHP에서 넘어온 JSON 읽기
@@ -613,6 +614,12 @@ $datetime = date('YmdHis');
                 colWidths: !empty(sheet.colWidth) ? sheet.colWidth : [100, 100],
                 autoWrapRow: true,
                 autoWrapCol: true,
+
+                renderAllRows: false, // ✅ 가상 스크롤만 렌더
+                rowHeights: 23,
+                stretchH: 'all',
+                viewportRowRenderingOffset: 20, // 화면 근처 20행만 유지
+
                 afterChange: sheet.name === '견적서' ? function(changes, source) {
                     // * 0번쨰 품목 수정시
                     if (source === 'edit' && changes[0][3]?.key) {
@@ -621,7 +628,7 @@ $datetime = date('YmdHis');
                         changes.forEach(([row, prop, oldValue, newValue]) => {
                             if (prop === 0 && oldValue !== newValue.title) {
                                 console.log(newValue)
-                                hot.setDataAtRowProp(row, 0, newValue.title); // * 품목명
+                                hot.setDataAtRowProp(row, 0, newValue.title); // * ㅋ명
                             }
 
                             // 품목이 변경되면 관련 셀 자동 입력
@@ -777,12 +784,10 @@ $datetime = date('YmdHis');
 
                 if (response.ok) {
                     // 저장 후 처리 (예: 페이지 리로드 또는 다른 작업)
-                } else {
-                    alert(response.msg);
                 }
             },
             error: function(xhr, status, error) {
-                alert(`견적서 저장 중 오류가 발생했습니다. 관리자에게 문의하세요.\n${error.message}`);
+                alert(`견적서 저장 중 오류가 발생했습니다. 관리자에게 문의하세요.`);
             },
             complete: function() {
                 stop_loading();
@@ -798,7 +803,6 @@ $datetime = date('YmdHis');
         return hot.getSourceData();
     }
 </script>
-
 
 <script>
     flatpickr(".flatpickr", {
@@ -853,7 +857,7 @@ $datetime = date('YmdHis');
             processData: false,
             contentType: false,
             dataType: "json",
-            success: function(res) {
+            success: async function(res) {
 
                 if (res.ok) {
 
@@ -869,11 +873,25 @@ $datetime = date('YmdHis');
                     const currentData = hot.getSourceData();
 
                     // 기존 + 새 데이터 병합
-                    const mergedData = [...currentData, ...data];
-                    console.log(mergedData)
+                    const mergedData = [...data];
+
+                    hot.updateSettings({
+                        data: mergedData
+                    });
+                    close_modal_1();
+                    // * 페이징 처리
+                    // const itemsPerPage = 100; // 페이지당 항목 수
+                    // const totalPages = Math.ceil(mergedData.length / itemsPerPage);
+                    // let currentPage = 1;
+                    // const pageList = mergedData.slice(0, itemsPerPage);
 
                     // 한번에 반영 (초고속)
-                    // hot.loadData(mergedData);
+                    // hot.suspendRender();
+                    // await hot.loadData(mergedData);
+                    // hot.resumeRender();
+                    // hot.render();
+
+                    // close_modal_1();
 
                 } else {
                     alert(res.msg);
@@ -882,9 +900,11 @@ $datetime = date('YmdHis');
                 // close_modal_1();
             },
             error: function(xhr, status, error) {
-                alert(`엑셀 파일 업로드 중 오류가 발생했습니다. 관리자에게 문의하세요.\n${error.message}`);
+                alert('엑셀 파일의 양식이 올바르지 않습니다. 다시 확인해주세요.');
             },
-            complete: function() {
+            complete: async function() {
+                await wait(1500);
+
                 stop_modal_loading();
             }
         });

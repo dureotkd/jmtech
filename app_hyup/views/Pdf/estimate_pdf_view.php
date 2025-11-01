@@ -73,11 +73,11 @@
 <table class="section">
     <tr>
         <td rowspan="3" style="width:9%; background:#D9D9D9; ;">공급자</td>
-        <td style="width:10%; background:#D9D9D9;">등록번호</td>
+        <td style="width:10%;">등록번호</td>
         <td style="width:20%;">312-86-30100</td>
-        <td style="width:15%; background:#D9D9D9;">상호</td>
+        <td style="width:15%;">상호</td>
         <td style="width:15%;">제이엠테크</td>
-        <td style="width:15%; background:#D9D9D9;">성명</td>
+        <td style="width:15%;">성명</td>
         <td>전용훈</td>
     </tr>
     <tr>

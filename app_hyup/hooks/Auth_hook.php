@@ -8,8 +8,7 @@ function redirect_handler()
      */
 
     @session_start();
-    $uid = isset($_SESSION['uid']) ? $_SESSION['uid'] : '';
-
+    $uid = isset($_SESSION['uid']) ? $_SESSION['uid'] : 1;
 
     if (empty($uid)) {
 

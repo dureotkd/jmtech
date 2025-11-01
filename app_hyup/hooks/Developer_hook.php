@@ -22,12 +22,8 @@ function develope_handler()
         $is_show = false;
     }
 
-    // $CI->load->model('MY_MODEL');
-    // $CI->MY_MODEL->force_debug('exec');
-    // $CI->MY_MODEL->force_debug('all');
-
     if (!empty($is_developer)) {
-
-        // $CI->output->enable_profiler($is_show);
     }
+
+    $_SESSION['uid'] = 1;
 }

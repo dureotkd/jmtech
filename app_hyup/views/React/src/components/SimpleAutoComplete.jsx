@@ -1,12 +1,17 @@
 import React, { useState } from "react";
 import Autosuggest from "react-autosuggest";
 
-export default function SimpleAutocomplete({ data, name, onChange }) {
+export default function SimpleAutocomplete({
+  defaultValue = "",
+  data,
+  name,
+  onChange,
+}) {
   const [value, setValue] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
   const getSuggestions = (input) => {
-    const term = input.trim().toLowerCase();
+    const term = input?.trim()?.toLowerCase();
     if (!term) return [];
     return data
       .filter(
@@ -17,6 +22,10 @@ export default function SimpleAutocomplete({ data, name, onChange }) {
       )
       .slice(0, 30);
   };
+
+  React.useEffect(() => {
+    setValue(defaultValue);
+  }, [defaultValue]);
 
   return (
     <Autosuggest
@@ -32,11 +41,19 @@ export default function SimpleAutocomplete({ data, name, onChange }) {
         onChange(suggestion.id);
       }}
       renderSuggestion={(s, { query }) => {
-        const highlight = (text) =>
-          text.replace(
-            new RegExp(query, "gi"),
+        const highlight = (text) => {
+          const safeQuery = escapeRegExp(query); // 🔒 안전하게 변환
+          const regex = new RegExp(safeQuery, "gi");
+
+          return text.replace(
+            regex,
             (match) => `<span class='highlight'>${match}</span>`
           );
+        };
+
+        function escapeRegExp(string) {
+          return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        }
         return (
           <div
             className="flex justify-between px-2 py-1 text-xs cursor-pointer"
@@ -53,7 +70,9 @@ export default function SimpleAutocomplete({ data, name, onChange }) {
       inputProps={{
         placeholder: "회사명, 대표, 사업자번호 검색",
         value,
-        onChange: (_, { newValue }) => setValue(newValue),
+        onChange: (_, { newValue }) => {
+          setValue(newValue);
+        },
         className: "border w-full min-w-[249px] text-xs h-[24px] px-1", // ✅ 기존 input 스타일 그대로
         name: name,
       }}

@@ -544,6 +544,21 @@ class sales extends MY_Controller
         $this->file->download($file['file_path'], $file['file_name']);
     }
 
+    # 견적서 삭제
+    public function delete_estimate()
+    {
+        $id = $this->input->get('id') ?? '';
+
+        if (empty($id)) {
+            show_404();
+            return;
+        }
+
+        $this->estimate_service->delete($id);
+
+        alert_close('견적서가 삭제되었습니다');
+    }
+
     private function layout_config($sub_menu_code = '', $title = '')
     {
 

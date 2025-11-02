@@ -124,13 +124,10 @@ $datetime = date('YmdHis');
     .item-account {
         width: 120px;
         font-family: monospace;
-        color: #666;
     }
 
     table.estimate {
-        width: 100%;
         border-collapse: collapse;
-        font-size: 13px;
         text-align: center;
     }
 
@@ -346,61 +343,59 @@ $datetime = date('YmdHis');
     </div>
 
     <div class="!border-2 !border-black !mx-[9px] !my-3">
-        <div class="">
-            <table class="estimate">
-                <thead>
-                    <tr>
-                        <th>순번</th>
-                        <th>품목</th>
-                        <th>규격</th>
-                        <th>수량</th>
-                        <th>단가</th>
-                        <th>공급가액</th>
-                        <th>세액</th>
-                        <th>비고</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?
-                    if (!empty($sheets)) {
+        <table class="estimate">
+            <thead>
+                <tr>
+                    <th>순번</th>
+                    <th>품목</th>
+                    <th>규격</th>
+                    <th>수량</th>
+                    <th>단가</th>
+                    <th>공급가액</th>
+                    <th>세액</th>
+                    <th>비고</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?
+                if (!empty($sheets)) {
 
-                        $no = count($sheets);
+                    $no = count($sheets);
 
-                        foreach ($sheets as $index => $item) {
-                    ?>
-                            <tr>
-                                <td><?= $no - $index ?></td>
-                                <td class="text-left">
-                                    <?= $item[0] ?>
-                                </td>
-                                <td>
-                                    <?= $item[1] ?>
-                                </td>
-                                <td class="!text-right">
-                                    <?= $item[2] ?>
-                                </td>
-                                <td class="!text-right">
-                                    <?= number_format($item[3]) ?>
-                                </td>
-                                <td class="!text-right">
-                                    <?= number_format($item[4]) ?>
-                                </td>
-                                <td class="!text-right">
-                                    <?= number_format($item[5]) ?>
-                                </td>
-                                <td></td>
-                            </tr>
-                        <?
-                        }
-                    } else {
-                        ?>
-
+                    foreach ($sheets as $index => $item) {
+                ?>
+                        <tr>
+                            <td><?= $no - $index ?></td>
+                            <td class="text-left">
+                                <?= $item[0] ?>
+                            </td>
+                            <td>
+                                <?= $item[1] ?>
+                            </td>
+                            <td class="!text-right">
+                                <?= $item[2] ?>
+                            </td>
+                            <td class="!text-right">
+                                <?= !empty($item[3]) ? number_format($item[3]) : '' ?>
+                            </td>
+                            <td class="!text-right">
+                                <?= !empty($item[4]) ? number_format($item[4]) : '' ?>
+                            </td>
+                            <td class="!text-right">
+                                <?= !empty($item[5]) ? number_format($item[5]) : '' ?>
+                            </td>
+                            <td></td>
+                        </tr>
                     <?
                     }
+                } else {
                     ?>
-                </tbody>
-            </table>
-        </div>
+
+                <?
+                }
+                ?>
+            </tbody>
+        </table>
         <table class="tg !border-t-2 !border-black">
             <thead>
                 <tr>
@@ -465,10 +460,10 @@ $datetime = date('YmdHis');
 </div>
 
 <script>
-    // const handle_delete = (e) => {
-    if (confirm('정말로 삭제하시겠습니까? \n삭제된 견적서는 복구할 수 없습니다.')) {
-        window.location.href = '/sales/delete_estimate?id=<?= $estimate['id'] ?>';
-    }
+    const handle_delete = (e) => {
+        if (confirm('정말로 삭제하시겠습니까? \n삭제된 견적서는 복구할 수 없습니다.')) {
+            window.location.href = '/sales/delete_estimate?id=<?= $estimate['id'] ?>';
+        }
     }
 
     const handle_copy = (e) => {

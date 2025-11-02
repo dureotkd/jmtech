@@ -1,6 +1,12 @@
 import request from "../utils/request";
 
 const estimateApi = {
+  저장된엑셀템플릿: async (params) => {
+    const res = await request.get("load_saved_excel_template", { params });
+
+    return res;
+  },
+
   엑셀불러오기: async (formData) => {
     const res = await request.post("estimate_excel_load", formData);
 

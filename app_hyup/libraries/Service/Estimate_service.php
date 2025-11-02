@@ -73,6 +73,26 @@ class Estimate_service
         return $res;
     }
 
+    public function update($update_data, $id)
+    {
+
+        $res = $this->obj->service_model->update_estimate(DEBUG, $update_data, [
+            "id = '{$id}'"
+        ]);
+
+        return $res;
+    }
+
+    public function delete($id)
+    {
+
+        $res = $this->obj->service_model->delete_estimate(DEBUG, [
+            "id = '{$id}'"
+        ]);
+
+        return $res;
+    }
+
     public function uploadFile($estimate_id)
     {
 
@@ -105,6 +125,23 @@ class Estimate_service
         } catch (Exception $e) {
 
             throw new Error("파일 업로드 중 오류가 발생했습니다: " . $e->getMessage());
+        }
+    }
+
+    public function deleteFile($estimate_id, $file_ids)
+    {
+        if (!empty($file_ids)) {
+
+            $this->obj->service_model->delete_file(DEBUG, [
+                "ref_table = 'estimate'",
+                "ref_id = {$estimate_id}",
+                "id NOT IN ({$file_ids})"
+            ]);
+        } else {
+            $this->obj->service_model->delete_file(DEBUG, [
+                "ref_table = 'estimate'",
+                "ref_id = {$estimate_id}"
+            ]);
         }
     }
 

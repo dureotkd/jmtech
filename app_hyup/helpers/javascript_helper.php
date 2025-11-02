@@ -35,7 +35,7 @@ if (! function_exists('custom_alert')) {
  * @param string $url (옵션) 디폴트는 창닫기.. 다른 자바스크립트 작성해도 됨.
  */
 if (! function_exists('alert_close')) {
-	function alert_close($msg, $action = "window.close()")
+	function alert_close($msg, $action = "window.close(); window.opener?.location?.reload();")
 	{
 		echo sprintf("<script>alert('%s');%s</script>", $msg, $action);
 	}

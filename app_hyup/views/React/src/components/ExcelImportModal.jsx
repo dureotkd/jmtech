@@ -102,9 +102,15 @@ export default function ExcelImportModal({
         ];
       });
 
-      console.log(resData);
-
       activeHotRef.loadData([]); // 기존 데이터 초기화
+
+      // ^ 공급가액 + 세액 합계 계산
+      const amount = resData.reduce(
+        (acc, row) => acc + (row[4] || 0) + (row[5] || 0),
+        0
+      );
+      console.log(amount);
+      setAmount(amount);
 
       // ^ 시트 데이터 업데이트
       setSheets((prevSheets) =>
@@ -112,14 +118,6 @@ export default function ExcelImportModal({
           sheet.name === sheetName ? { ...sheet, ...options } : sheet
         )
       );
-
-      // ^ 합계금액 계산
-      const totalAmount = resData.reduce((acc, row) => {
-        const amount = parseFloat(row[4]) || 0; // 공급가액 열
-        return acc + amount;
-      }, 0);
-
-      setAmount(totalAmount);
 
       onClose();
     } catch (error) {

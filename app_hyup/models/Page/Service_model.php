@@ -80,6 +80,15 @@ class service_model extends MY_Model
         }
         return $this->excute($sql, 'exec', 'main');
     }
+    public function delete_estimate($debug = false, $where = [])
+    {
+        $sql = $this->getDeleteQuery('jmtech.estimate', $where);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
 
     // ===== item =====
     public function get_item($type, $where = [1])
@@ -889,6 +898,24 @@ class service_model extends MY_Model
     {
 
         $sql = $this->getUpdateQuery('jmtech.file', $data, $where);
+
+        if ($debug) {
+
+            echo $sql . "<br/>";
+
+            $res = 1;
+        } else {
+
+            $res = $this->excute($sql, 'exec', 'main');
+        }
+
+        return $res;
+    }
+
+    public function delete_file($debug = false, $where = [])
+    {
+
+        $sql = $this->getDeleteQuery('jmtech.file', $where);
 
         if ($debug) {
 

@@ -10,9 +10,20 @@ import request from "./utils/request";
 import estimateApi from "./apis/estimateApi";
 import SimpleAutocomplete from "./components/SimpleAutoComplete";
 import { useExcelStore } from "./store/useExcelStore";
-import { deepClone, empty, serializeForm, wait } from "./utils/util";
+import {
+  deepClone,
+  empty,
+  numberToKorean,
+  serializeForm,
+  wait,
+} from "./utils/util";
 
 export default function App() {
+  // ? & (queryString)
+  const queryString = new URLSearchParams(window.location.search);
+  const id = queryString.get("id");
+  const tab = queryString.get("tab");
+
   const { getActiveHotRef, setActiveSheet } = useExcelStore((state) => state);
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
@@ -21,22 +32,24 @@ export default function App() {
     phone_number: "",
     fax_number: "",
     title: "",
-    vat_type: "",
+    vat_type: "N",
     due_at: "",
     location: "",
     valid_at: "",
     payment_type: "",
     etc_memo: "",
+    fileIds: [],
   });
   const [files, setFiles] = React.useState([]);
+  const [fileIds, setFileIds] = React.useState([]);
   const fileInputRef = React.useRef(null);
-
+  const [amount, setAmount] = React.useState(0);
   const [partners, setPartners] = React.useState([]);
   const [sheets, setSheets] = React.useState([
     // * 모의 데이터 (템플릿은 PHP 서버에서 가져옴)
     {
       name: "견적서",
-      data: new Array(20).fill(["='내역서'!D2"]),
+      data: [],
       columns: [
         { title: "품목", type: "dropdown", source: [] },
         { title: "규격" },
@@ -51,7 +64,7 @@ export default function App() {
     },
     {
       name: "내역서",
-      data: new Array(20).fill(["='견적서'!D2"]),
+      data: [],
       columns: [
         { title: "품목" },
         { title: "규격" },
@@ -65,18 +78,53 @@ export default function App() {
       height: 400,
     },
   ]);
-  const [amount, setAmount] = React.useState(0);
 
+  // * 기존 견적서 불러오기
+  const loadSaveExcelTemplate = async (id) => {
+    const res = await estimateApi.저장된엑셀템플릿({ id });
+
+    if (!res?.ok && empty(res?.data)) {
+      alert(res?.msg || "저장된 엑셀 템플릿 로드에 실패했습니다.");
+      await loadExcelTemplate();
+      return;
+    }
+
+    const estimate = res.data.estimate || {};
+    const files = res.data.files || [];
+    const fileIds = files.map((f) => f.id) || [];
+    const cloneForm = { ...form };
+    cloneForm.partner_id = estimate.partner_id || "";
+    cloneForm.estimate_date = estimate.estimate_date || "";
+    cloneForm.phone_number = estimate.phone_number || "";
+    cloneForm.fax_number = estimate.fax_number || "";
+    cloneForm.title = estimate.title || "";
+    cloneForm.due_at = estimate.due_at || "";
+    cloneForm.location = estimate.location || "";
+    cloneForm.valid_at = estimate.valid_at || "";
+    cloneForm.payment_type = estimate.payment_type || "";
+    cloneForm.etc_memo = estimate.etc_memo || "";
+    cloneForm.partner_name = estimate.partner_name || "";
+
+    setForm(cloneForm);
+    setFiles(files);
+    setFileIds(fileIds);
+    setAmount(estimate.amount || 0);
+    setSheets(estimate.sheets || []);
+  };
+
+  // * 초기 엑셀 템플릿 로드
   const loadExcelTemplate = async () => {
     const res = await estimateApi.초기엑셀템플릿();
     setSheets(res);
   };
 
+  // * 거래처 목록 로드
   const loadPartnerList = async () => {
     const res = await estimateApi.거래처목록();
     setPartners(res);
   };
 
+  // * 시트 이벤트 등록 (한바퀴 돌아야 Formula 적용 가능)
   const registerSheetEvents = async () => {
     if (!sheets.length) return;
 
@@ -107,27 +155,6 @@ export default function App() {
     return () => clearInterval(interval);
   };
 
-  React.useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-
-        // * 엑셀 템플릿 로드
-        await loadExcelTemplate();
-
-        // * 거래처 목록 로드
-        await loadPartnerList();
-
-        // * 시트 이벤트 등록 (한바퀴 돌아야 Formula 적용 가능)
-        await registerSheetEvents();
-      } catch (error) {
-        alert("엑셀 템플릿 로드 중 오류가 발생했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
   // * 견적서 저장 핸들러
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -137,9 +164,13 @@ export default function App() {
     const target = e.target;
     const formData = new FormData(target);
 
+    console.log(fileIds);
+
     formData.append("sheets", JSON.stringify(sheets));
+    formData.append("file_ids", fileIds);
     formData.append("partner_id", form.partner_id);
     formData.append("amount", amount);
+    formData.append("id", id);
 
     if (files && files.length > 0) {
       files.forEach((file, i) => {
@@ -163,6 +194,7 @@ export default function App() {
     }
   };
 
+  // * 전화번호 마스킹
   const phoneNumberMask = (e) => {
     const raw = e.target.value.replace(/[^0-9]/g, "");
     const name = e.target.name;
@@ -176,12 +208,12 @@ export default function App() {
     }));
   };
 
-  // 📎 파일 첨부 버튼 클릭 → input 클릭 트리거
+  // * 파일 첨부 버튼 클릭
   const handleAttachClick = () => {
     fileInputRef.current?.click();
   };
 
-  // 📂 파일 선택 시 이벤트
+  // * 파일 선택
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files);
     setFiles((prev) => {
@@ -199,9 +231,12 @@ export default function App() {
     e.target.value = "";
   };
 
-  // ❌ 파일 삭제
+  // * 파일 삭제
   const handleRemove = (idx) => {
-    setFiles((prev) => prev.filter((_, i) => i !== idx));
+    if (confirm("선택한 파일을 삭제하시겠습니까?")) {
+      setFiles((prev) => prev.filter((_, i) => i !== idx));
+      setFileIds((prev) => prev.filter((_, i) => i !== idx));
+    }
   };
 
   // * 부가세 처리
@@ -266,10 +301,37 @@ export default function App() {
         break;
     }
 
-    console.log(cloneSheets);
-
+    setForm((prev) => ({ ...prev, vat_type: vatOption }));
     setSheets(cloneSheets);
   };
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        console.log("LOad..");
+
+        setLoading(true);
+
+        if (id) {
+          // * 기존 견적서 불러오기
+          await loadSaveExcelTemplate(id);
+        } else {
+          // * 초기 엑셀 템플릿 로드
+          await loadExcelTemplate();
+        }
+
+        // * 거래처 목록 로드
+        await loadPartnerList();
+
+        // * 시트 이벤트 등록 (한바퀴 돌아야 Formula 적용 가능)
+        await registerSheetEvents();
+      } catch (error) {
+        alert("엑셀 템플릿 로드 중 오류가 발생했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   return (
     <>
@@ -280,6 +342,7 @@ export default function App() {
         setAmount={setAmount}
       />
       <form id="form1" onSubmit={handleFormSubmit}>
+        <input type="hidden" name="id" value={id} />
         <h1 className="!text-md bg-[#4b5563] !text-white !font-sans  !px-4 !py-2 !mb-4">
           견적서 등록{" "}
         </h1>
@@ -301,6 +364,7 @@ export default function App() {
                   <label className="w-[75px]">거 래 처 명 :</label>
                   <div className="flex items-center">
                     <SimpleAutocomplete
+                      defaultValue={form.partner_name}
                       data={partners}
                       name="partner_name"
                       onChange={(id) => {
@@ -450,15 +514,20 @@ export default function App() {
           </div>
         </div>
         <div className="relative flex items-center mx-2 !py-1 px-3 text-xs !border-x-2 !border-b-2 !border-black justify-start">
-          <span className="font-semibold mr-2">
+          <span className="font-semibold mr-1">
             합&nbsp;&nbsp;계&nbsp;&nbsp;금&nbsp;&nbsp;액 : 일금{" "}
           </span>
-          <input
-            type="text"
-            className="border w-[150px] h-[24px]"
-            value={`₩ ${amount.toLocaleString()}`}
-            readOnly
-          />
+
+          <h2 className="font-bold">
+            {numberToKorean(amount)}
+            <input
+              type="text"
+              name="amount"
+              className="ml-1 border w-[150px] h-[24px]"
+              value={`₩ ${amount.toLocaleString()}`}
+              readOnly
+            />
+          </h2>
         </div>
 
         <div className="flex items-center justify-between px-2.5 !my-1 !py-1">
@@ -466,6 +535,7 @@ export default function App() {
             id="select-vat"
             name="vat_type"
             className="text-[12px]"
+            defaultValue={form.vat_type}
             onChange={handleVat}
           >
             <option value="N">부가세 별도</option>
@@ -522,7 +592,13 @@ export default function App() {
         </div>
 
         <div className="border-2 border-black mx-[9px]">
-          <SheetSection sheets={sheets} />
+          {!loading && (
+            <SheetSection
+              sheets={sheets}
+              vatType={form.vat_type}
+              setAmount={setAmount}
+            />
+          )}
 
           {/* 하단 입력 테이블 */}
           <table className="w-full border-t-2 border-black text-black text-xs">
@@ -633,7 +709,7 @@ export default function App() {
                       className="flex items-center justify-between border border-gray-200 rounded px-2 py-1 bg-gray-50 text-sm"
                     >
                       <span className="text-gray-700 truncate max-w-[350px]">
-                        {file.name}
+                        {file?.name || file?.file_name}
                       </span>
                       <button
                         type="button"
@@ -653,19 +729,15 @@ export default function App() {
         </div>
 
         <div className="w-full !px-2 !text-[13px] flex justify-center items-center gap-1.5 font-sans font-300 !my-2">
-          <button
-            type="button"
-            className="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]"
-          >
-            저장 후 인쇄
-          </button>
-
           <button className="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
             저장
           </button>
 
           <button
             type="button"
+            onClick={() => {
+              window.close();
+            }}
             className="px-2 py-1 bg-[#fff] text-gray-700 hover:bg-gray-100 border border-gray-300"
           >
             취소

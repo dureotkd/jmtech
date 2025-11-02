@@ -146,9 +146,56 @@ class api extends MY_Controller
         exit;
     }
 
+    # 저장된 Excel Template Load
+    public function load_saved_excel_template()
+    {
+
+        $id = $this->input->get('id') ?? '';
+
+        $res_array = [
+            'ok'    => true,
+            'msg'   => '',
+            'data'  => [],
+        ];
+
+        try {
+
+            if (empty($id)) {
+                throw new Exception('견적서 ID가 누락되었습니다.');
+            }
+
+            $estimate = $this->service_model->get_estimate('row', [
+                "id = '{$id}'"
+            ]);
+
+            if (empty($estimate)) {
+                throw new Exception('존재하지 않는 견적서입니다.');
+            }
+
+            $sheets = !empty($estimate['sheets']) ? json_decode($estimate['sheets'], true) : [];
+
+            $files = $this->service_model->get_file('all', [
+                "ref_table = 'estimate'",
+                "ref_id = '{$id}'"
+            ]);
+
+            $estimate['sheets'] = $sheets;
+            $res_array['data'] = [
+                'estimate' => $estimate,
+                'files'    => $files,
+            ];
+        } catch (Exception $e) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = $e->getMessage();
+        }
+
+        echo json_encode($res_array);
+    }
+
     # 견적서 저장
     public function save_estimate()
     {
+        $id = $this->input->post('id') ?? '';
 
         $partner_id = $this->input->post('partner_id') ?? '';
         $estimate_date = $this->input->post('estimate_date') ?? '';
@@ -163,6 +210,7 @@ class api extends MY_Controller
         $valid_at = $this->input->post('valid_at') ?? '';
         $payment_type = $this->input->post('payment_type') ?? '';
         $etc_memo = $this->input->post('etc_memo') ?? '';
+        $file_ids = $this->input->post('file_ids') ?? '';
 
         $res_array = [
             'ok'    => true,
@@ -174,29 +222,62 @@ class api extends MY_Controller
 
             try {
 
-                $insert_estimate_id = $this->estimate_service->create([
-                    'partner_id'        => $partner_id,
-                    'estimate_date'     => $estimate_date,
-                    'phone_number'      => $phone_number,
-                    'fax_number'        => $fax_number,
-                    'title'             => $title,
-                    'location'          => $location,
-                    'amount'            => $amount,
-                    'vat_type'          => $vat_type,
-                    'sheets'            => $sheets,
-                    'due_at'            => $due_at,
-                    'valid_at'          => $valid_at,
-                    'payment_type'      => $payment_type,
-                    'etc_memo'          => $etc_memo,
-                ]);
+                if (!empty($id)) {
 
-                if (empty($insert_estimate_id)) {
-                    throw new Exception('견적서 저장에 실패했습니다.');
-                }
 
-                if (!empty($_FILES)) {
+                    $update_result = $this->estimate_service->update([
+                        'partner_id'        => $partner_id,
+                        'estimate_date'     => $estimate_date,
+                        'phone_number'      => $phone_number,
+                        'fax_number'        => $fax_number,
+                        'title'             => $title,
+                        'location'          => $location,
+                        'amount'            => $amount,
+                        'vat_type'          => $vat_type,
+                        'sheets'            => $sheets,
+                        'due_at'            => $due_at,
+                        'valid_at'          => $valid_at,
+                        'payment_type'      => $payment_type,
+                        'etc_memo'          => $etc_memo,
+                        'updated_at'        => date('Y-m-d H:i:s'),
+                    ], $id);
 
-                    $this->estimate_service->uploadFile($insert_estimate_id);
+                    if (empty($update_result)) {
+                        throw new Exception('견적서 수정에 실패했습니다.');
+                    }
+
+                    $this->estimate_service->deleteFile($id, $file_ids);
+
+                    if (!empty($_FILES)) {
+
+                        $this->estimate_service->uploadFile($id);
+                    }
+                } else {
+
+                    $insert_estimate_id = $this->estimate_service->create([
+                        'partner_id'        => $partner_id,
+                        'estimate_date'     => $estimate_date,
+                        'phone_number'      => $phone_number,
+                        'fax_number'        => $fax_number,
+                        'title'             => $title,
+                        'location'          => $location,
+                        'amount'            => $amount,
+                        'vat_type'          => $vat_type,
+                        'sheets'            => $sheets,
+                        'due_at'            => $due_at,
+                        'valid_at'          => $valid_at,
+                        'payment_type'      => $payment_type,
+                        'etc_memo'          => $etc_memo,
+                    ]);
+
+                    if (empty($insert_estimate_id)) {
+                        throw new Exception('견적서 저장에 실패했습니다.');
+                    }
+
+                    if (!empty($_FILES)) {
+
+                        $this->estimate_service->uploadFile($insert_estimate_id);
+                    }
                 }
             } catch (Exception $e) {
                 $res_array['ok'] = false;

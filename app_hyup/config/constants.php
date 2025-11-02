@@ -320,6 +320,16 @@ define('MENU', serialize([
     ],
 ]));
 
+define('VAT_TYPE', serialize([
+    'Y' => '부가세포함',
+    'N' => '부가세별도',
+    'X' => '부가세없음'
+]));
+
+// * React 개발 서버 주소 (견적서 작성 및 수정)
+// ^ Handsontable Hot Table때문에 React사용 (Virtual Row Rendering 지원)
+define('REACT_PATH', 'http://localhost:5173/');
+
 
 define('PAY_METHOD_CODE', serialize([
     "CARD"       => "신용카드",

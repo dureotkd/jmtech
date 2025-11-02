@@ -51,6 +51,16 @@ export default function SheetSection({ sheets }) {
     setActiveSheet(sheetName);
   };
 
+  const columnsWithHeader = (activeSheetOptions.columns || []).map(
+    (col, index) => {
+      const alphabet = String.fromCharCode(65 + index);
+      return {
+        ...col,
+        title: `${col.title || ""} ${alphabet}`,
+      };
+    }
+  );
+
   return (
     <>
       <div className="sheet-tabs flex border-b border-gray-300 bg-gray-100">
@@ -74,13 +84,10 @@ export default function SheetSection({ sheets }) {
       <HotTable
         ref={hotRef}
         themeName="ht-theme-main"
+        columns={columnsWithHeader}
         data={activeSheetOptions.data || []}
         colWidths={activeSheetOptions.colWidths || 100}
-        columns={activeSheetOptions.columns || []}
         height={activeSheetOptions.height || "auto"}
-        colHeaders={true}
-        autoWrapRow={true}
-        autoWrapCol={true}
         stretchH="all"
         viewportColumnRenderingOffset={5}
         viewportColumnRenderingThreshold={10}

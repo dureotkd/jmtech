@@ -7,14 +7,25 @@
 		name="viewport"
 		content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 
-	<title>제이엠테크 | 무설탕 건강 감미료</title>
+	<title>NOT 404 | 제이엠테크</title>
 
-	<meta name="keywords" content="이눌린, 스위틀린, 무설탕 감미료, 혈당관리, 장 건강, 프리바이오틱스, 식이섬유, 건강 습관, 다이어트 설탕 대체품">
-	<meta name="description" content="당 걱정 없이 달콤하게! 프리바이오틱스와 식이섬유가 함유된 스위틀린 이눌린 액상 스위트린으로 건강한 단맛을 즐기세요.">
-	<meta property="og:title" content="스위틀린 이눌린 액상 스위트린 - 당 걱정 없는 건강한 단맛">
-	<meta property="og:description" content="장 건강, 혈당 관리, 무설탕! 달콤하게 챙기는 식이섬유 스위틀린 스위트린. 건강을 위한 새로운 습관.">
-	<meta property="og:image" content="/assets/app_hyup/images/logo.jpg">
-	<meta property="og:url" content="https://mosihealth.com">
+	<link rel="apple-touch-icon" sizes="57x57" href="/assets/app_hyup/images/favicon/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/assets/app_hyup/images/favicon/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/assets/app_hyup/images/favicon/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/assets/app_hyup/images/favicon/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/assets/app_hyup/images/favicon/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/assets/app_hyup/images/favicon/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/assets/app_hyup/images/favicon/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/assets/app_hyup/images/favicon/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/assets/app_hyup/images/favicon/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192" href="/assets/app_hyup/images/favicon/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/assets/app_hyup/images/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/assets/app_hyup/images/favicon/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/assets/app_hyup/images/favicon/favicon-16x16.png">
+	<link rel="manifest" href="/assets/app_hyup/pwa/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/assets/app_hyup/images/favicon/ms-icon-144x144.png">
+	<meta name="theme-color" content="#2a4c8f">
 
 	<link data-n-head="1" rel="icon" type="image/x-icon" href="/assets/app_hyup/images/favicon.ico">
 
@@ -78,63 +89,10 @@
 		<h1 class="!text-2xl font-extrabold text-gray-800 !my-4">PAGE NOT FOUND 404</h1>
 		<p class="!text-lg text-gray-500 !mb-2">페이지를 찾을 수 없습니다.</p>
 		<p class="!text-lg text-gray-500 !mb-6 text-center">요청하신 페이지가 존재하지 않거나<br /> 이동되었을 수 있습니다.</p>
-		<button onclick="fadeOutButton('/')" type="button" class="btn-primary-sm !px-6 !py-3 rounded transition">
+		<button onclick="window.location.href = '/'" type="button" class="btn-primary-sm !px-6 !py-3 rounded transition">
 			메인으로 돌아가기
 		</button>
 	</div>
-
-	<script>
-		AOS.init();
-
-		tippy('#myButton1', {
-			placement: 'bottom',
-			arrow: false,
-			content: "검색",
-		});
-		tippy('#myButton2', {
-			placement: 'bottom',
-			arrow: false,
-			content: "마이페이지",
-		});
-		tippy('#myButton3', {
-			placement: 'bottom',
-			arrow: false,
-			content: "장바구니",
-		});
-
-		function handle_aside() {
-			const drawer = $('#my-drawer');
-			drawer.click();
-		}
-
-		function close_top_banner(event) {
-			const $banner = $(event.currentTarget).closest("#top_banner");
-
-			$banner
-				.css("overflow", "hidden")
-				.animate({
-						height: 0,
-						paddingTop: 0,
-						paddingBottom: 0,
-						marginTop: 0,
-						marginBottom: 0,
-						opacity: 0,
-					},
-					300,
-					function() {
-						setCookie("top_banner_closed", 1, 7); // 쿠키 설정 (7일 동안 유지)
-						$(this).remove(); // 필요 없으면 생략 가능
-					}
-				);
-		}
-	</script>
-	<!-- 호출 -->
-	<script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
-	<script src="/assets/app_hyup/common/cookie.js"></script>
-	<script src="/assets/app_hyup/common/mask.js"></script>
-	<script src="/assets/app_hyup/common/common.js"></script>
-	<script src="/assets/app_hyup/common/channel.js"></script>
-	<script src="/assets/app_hyup/common/transition.js"></script>
 
 </body>
 

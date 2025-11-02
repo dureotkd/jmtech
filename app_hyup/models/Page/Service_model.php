@@ -58,8 +58,7 @@ class service_model extends MY_Model
     {
         $select = $type == 'one' ?
             "COUNT(*)"
-            : "* , 
-            (SELECT number FROM jmtech.product WHERE id = a.product_id) AS number";
+            : "* , (SELECT company_name FROM jmtech.business_partner bp WHERE bp.id = a.partner_id) AS partner_name";
         $sql = sprintf("SELECT {$select} FROM jmtech.estimate a WHERE %s", join(" AND ", $where));
         return $this->excute($sql, $type, 'main');
     }

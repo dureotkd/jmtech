@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Autosuggest from "react-autosuggest";
 
-export default function SimpleAutocomplete({ data }) {
+export default function SimpleAutocomplete({ data, name, onChange }) {
   const [value, setValue] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
@@ -29,7 +29,7 @@ export default function SimpleAutocomplete({ data }) {
       getSuggestionValue={(s) => s.company_name}
       onSuggestionSelected={(_, { suggestion }) => {
         setValue(suggestion.company_name);
-        console.log("선택:", suggestion);
+        onChange(suggestion.id);
       }}
       renderSuggestion={(s, { query }) => {
         const highlight = (text) =>
@@ -39,7 +39,7 @@ export default function SimpleAutocomplete({ data }) {
           );
         return (
           <div
-            className="flex justify-between px-2 py-1 text-sm"
+            className="flex justify-between px-2 py-1 text-xs cursor-pointer"
             dangerouslySetInnerHTML={{
               __html: `
                 <div style="width:200px;">${highlight(s.company_name)}</div>
@@ -55,7 +55,7 @@ export default function SimpleAutocomplete({ data }) {
         value,
         onChange: (_, { newValue }) => setValue(newValue),
         className: "border w-full min-w-[249px] text-xs h-[24px] px-1", // ✅ 기존 input 스타일 그대로
-        name: "faxNumber",
+        name: name,
       }}
     />
   );

@@ -875,10 +875,6 @@ $datetime = date('YmdHis');
                     // 기존 + 새 데이터 병합
                     const mergedData = [...data];
 
-                    hot.updateSettings({
-                        data: mergedData
-                    });
-                    close_modal_1();
                     // * 페이징 처리
                     // const itemsPerPage = 100; // 페이지당 항목 수
                     // const totalPages = Math.ceil(mergedData.length / itemsPerPage);
@@ -886,12 +882,12 @@ $datetime = date('YmdHis');
                     // const pageList = mergedData.slice(0, itemsPerPage);
 
                     // 한번에 반영 (초고속)
-                    // hot.suspendRender();
-                    // await hot.loadData(mergedData);
-                    // hot.resumeRender();
-                    // hot.render();
+                    hot.suspendRender();
+                    await hot.loadData(mergedData);
+                    hot.resumeRender();
+                    hot.render();
 
-                    // close_modal_1();
+                    close_modal_1();
 
                 } else {
                     alert(res.msg);

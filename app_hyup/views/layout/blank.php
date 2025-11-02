@@ -125,7 +125,7 @@
     <?
     if (!empty($pop_header)) {
     ?>
-        <h1 class="!text-md bg-[#4b5563] !text-white !font-sans  !px-4 !py-2 !mb-4">
+        <h1 class="!text-md bg-[#4b5563] !text-white !font-sans  !px-4 !py-2 !mb-4 print-hide">
             <?= $pop_header ?>
         </h1>
     <?

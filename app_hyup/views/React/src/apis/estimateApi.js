@@ -17,6 +17,12 @@ const estimateApi = {
     const res = await request.get("get_partner_list");
     return res;
   },
+
+  견적저장: async (formData) => {
+    const res = await request.post("save_estimate", formData);
+
+    return res;
+  },
 };
 
 export default estimateApi;

@@ -16,6 +16,7 @@ class sales extends MY_Controller
             "phpspreadsheet",
             "/Service/user_service",
             "/Service/estimate_service",
+            "file",
         ]);
 
         $this->load->model('/Page/service_model');
@@ -37,35 +38,78 @@ class sales extends MY_Controller
     # 견적서
     public function estimate()
     {
+
         /**
-         * .
-
-🧾 견적서 (Estimate / Quotation)
-
-➡️ 판매자가 작성하는 문서
-
-목적: 고객(구매자)에게 가격·조건을 제시하기 위해 작성
-
-작성 시점: 거래가 아직 확정되지 않았을 때
-
-주요 내용:
-
-제품명, 규격, 수량, 단가, 공급가액, 부가세, 총금액
-
-납기일, 결제조건, 유효기간, 담당자 정보 등
-
-의미: “이 조건으로 판매할 수 있습니다”라는 제안서
-
-📘 예시
-
-JMTech이 거래처 A에게 “철판 100장 단가 1만 원” 견적서를 보냄 → A가 검토 후 발주 여부 결정
+         *     [id] => 10
+            [type] => 
+            [no] => 20251102-24B91C
+            [estimate_date] => 2025-11-01
+            [phone_number] => 010-5653-9944
+            [fax_number] => 042-111-1111
+            [title] => 112
+            [amount] => 13237543
+            [amount_in_words] => 
+            [status] => draft
+            [memo] => 
+            [created_at] => 2025-11-02 13:13:13
+            [updated_at] => 2025-11-02 13:13:13
+            [due_at] => 2025-11-01 00:00:00
+            [location] => 11
+            [valid_at] => 2025-11-29 00:00:00
+            [payment_type] => 22
+            [etc_memo] => 22
+            [vat_type] => N
+            [partner_name] => (유)에이지케이특수강
+            [partner_id] => 2
          */
+        $estimate_all = $this->service_model->get_estimate('all', [
+            1
+        ]);
 
         $view_data =  [
             'layout_data'           => $this->layout_config('estimate', '견적서'),
+            'estimate_all'          => $estimate_all,
         ];
 
         $this->layout->view('/Sales/estimate_view', $view_data);
+    }
+
+    # 견적서 상세
+    public function estimate_detail()
+    {
+        $id = $this->input->get('id') ?? '';
+
+        if (empty($id)) {
+            show_404();
+            return;
+        }
+
+        $estimate = $this->service_model->get_estimate('row', [
+            "id = {$id}"
+        ]);
+
+        if (empty($estimate)) {
+            show_404();
+            return;
+        }
+
+        $files = $this->service_model->get_file('all', [
+            "ref_table = 'estimate'",
+            "ref_id = {$id}"
+        ]);
+
+        $sheets_json = json_decode($estimate['sheets'], true);
+        $sheets = $sheets_json[0]['data'] ?? [];
+
+        $view_data =  [
+            'id'            => $id,
+            'estimate'      => $estimate,
+            'sheets'        => $sheets,
+            'files'         => $files,
+            'layout_data'   => $this->layout_blank_config('estimate', '견적서'),
+        ];
+
+        $this->layout->view('/Sales/estimate_detail_view', $view_data);
     }
 
     # 수주서
@@ -477,6 +521,29 @@ JMTech이 거래처 A에게 “철판 100장 단가 1만 원” 견적서를 보
         exit;
     }
 
+    # 파일 다운로드
+    public function download_file()
+    {
+        $id = $this->input->get('id') ?? '';
+
+        if (empty($id)) {
+            show_404();
+            return;
+        }
+
+        $file = $this->service_model->get_file('row', [
+            "id = {$id}"
+        ]);
+
+        if (empty($file)) {
+            show_404();
+            return;
+        }
+
+
+        $this->file->download($file['file_path'], $file['file_name']);
+    }
+
     private function layout_config($sub_menu_code = '', $title = '')
     {
 
@@ -494,7 +561,7 @@ JMTech이 거래처 A에게 “철판 100장 단가 1만 원” 견적서를 보
     private function layout_blank_config($sub_menu_code = '', $title = '')
     {
 
-        $this->layout->setPopHeader('견적서 등록');
+        $this->layout->setPopHeader($title);
         $this->layout->setLayout("layout/blank");
         $this->layout->setTitle($title);
         $this->layout->setCss([]);

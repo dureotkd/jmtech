@@ -79,6 +79,12 @@ span {
   }
 }
 
+@media print {
+  .print-hide {
+    display: none !important;
+  }
+}
+
 .modal-box {
   border-radius: 0px !important;
 }

@@ -131,4 +131,41 @@ class file
 
         return $results;  // 전체 결과 리턴
     }
+
+    public function download($filePath, $originalFileName = null)
+    {
+        $file_path = str_replace('//', '/', $_SERVER['DOCUMENT_ROOT'] . $filePath);
+        $file_name = $originalFileName ?? basename($file_path);
+
+        if (!file_exists($file_path)) {
+            header('HTTP/1.1 404 Not Found');
+            exit('파일이 존재하지 않습니다.');
+        }
+
+        // ✅ 기존 출력 버퍼 정리 (HTML, 공백 등 제거)
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        // ✅ 파일명 인코딩 처리
+        $encoded_filename = rawurlencode($file_name);
+        if (preg_match("/MSIE|Trident|Edge/", $_SERVER['HTTP_USER_AGENT'])) {
+            header("Content-Disposition: attachment; filename=\"{$encoded_filename}\"");
+        } else {
+            header("Content-Disposition: attachment; filename*=UTF-8''{$encoded_filename}");
+        }
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($file_path));
+
+        // ✅ 파일 읽기 전 버퍼 플러시
+        flush();
+        readfile($file_path);
+        exit;
+    }
 }

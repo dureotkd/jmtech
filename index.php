@@ -63,6 +63,7 @@ $__dev_ip_array[] = "127.0.0.1";
 /* 우리 사무실 아이피만 경고창 보이도록 처리 */
 
 define('ENVIRONMENT', 'development');
+
 if (isset($_SERVER['REMOTE_ADDR']) && in_array($_SERVER['REMOTE_ADDR'], $__dev_ip_array)) {
 	// define('ENVIRONMENT', 'development');
 } else {

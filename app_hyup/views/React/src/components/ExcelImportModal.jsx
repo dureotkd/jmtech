@@ -5,25 +5,36 @@ import Loading from "./Loading";
 import estimateApi from "../apis/estimateApi";
 import { useExcelStore } from "../store/useExcelStore";
 
-export default function ExcelImportModal({ sheets = [], setSheets }) {
-  const [fileName, setFileName] = React.useState("");
+export default function ExcelImportModal({
+  sheets = [],
+  setSheets,
+  setAmount,
+}) {
   const [loading, setLoading] = React.useState(false);
+
+  const [fileName, setFileName] = React.useState("");
   const fileInputRef = React.useRef(null);
+
   const { getHotRef } = useExcelStore((state) => state);
 
+  // * 엑셀 파일 선택 처리
   const handleChangeExcelFile = (e) => {
     const file = e.target.files?.[0];
     setFileName(file ? file.name : "");
   };
 
+  // * 모달 닫기
   const onClose = () => {
     const modal = document.getElementById("my_modal_1");
     setFileName("");
+    fileInputRef.current.value = "";
     modal.close();
   };
 
+  // * 엑셀 불러오기 처리
   const handleExcelForm = async (e) => {
     e.preventDefault();
+    document.querySelector("#select-vat").value = "N"; // 부가세 별도 초기화
 
     const file = fileInputRef.current?.files?.[0];
     console.log("🚀 Debug: ~ handleExcelForm ~ file:", file);
@@ -41,6 +52,7 @@ export default function ExcelImportModal({ sheets = [], setSheets }) {
     formData.append("sheet_name", sheetName);
 
     try {
+      // ^ 엑셀 불러오기 API 호출
       const res = await estimateApi.엑셀불러오기(formData);
 
       if (!res?.ok) {
@@ -49,11 +61,9 @@ export default function ExcelImportModal({ sheets = [], setSheets }) {
       }
 
       const data = res.data;
-      console.log("🚀 Debug: ~ handleExcelForm ~ data:", data);
-      const hotRefs = getHotRef();
-      console.log("🚀 Debug: ~ handleExcelForm ~ hotRefs:", hotRefs);
-      const activeHotRef = hotRefs[sheetName];
       const merged = [...data];
+      const hotRefs = getHotRef();
+      const activeHotRef = hotRefs[sheetName];
 
       let options = {
         data: merged,
@@ -64,11 +74,52 @@ export default function ExcelImportModal({ sheets = [], setSheets }) {
         options.height = 500;
       }
 
+      /**
+       * * A [0] : 품명
+       * * B [1] : 규격
+       * * C [2] : 수량
+       * * D [3] : 단가
+       * * E [4] : 공급가액
+       * * F [5] : 세액
+       * * G [6] : 비고
+       */
+      const resData = merged.map((row) => {
+        const 품명 = row[0] || "";
+        const 규격 = row[1] || "";
+        const 수량 = row[2] || 0;
+        const 단가 = row[3] || 0;
+        const 공급가액 = 수량 * 단가;
+        const 세액 = Math.round(공급가액 * 0.1);
+
+        return [
+          품명,
+          규격,
+          수량,
+          단가,
+          공급가액,
+          세액,
+          "", // 비고
+        ];
+      });
+
+      console.log(resData);
+
+      activeHotRef.loadData([]); // 기존 데이터 초기화
+
+      // ^ 시트 데이터 업데이트
       setSheets((prevSheets) =>
         prevSheets.map((sheet) =>
           sheet.name === sheetName ? { ...sheet, ...options } : sheet
         )
       );
+
+      // ^ 합계금액 계산
+      const totalAmount = resData.reduce((acc, row) => {
+        const amount = parseFloat(row[4]) || 0; // 공급가액 열
+        return acc + amount;
+      }, 0);
+
+      setAmount(totalAmount);
 
       onClose();
     } catch (error) {

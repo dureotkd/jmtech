@@ -21,25 +21,17 @@ const request = {
       const fullUrl = searchParams ? `${url}?${searchParams}` : url;
       return await base.get(fullUrl).json();
     } catch (error) {
-      console.log("🚀 Debug: ~ error:", error);
+      throw new Error(error);
     }
   },
 
   post: async (url, body) => {
     try {
-      const res = await base.post(url, { body: body }).json();
+      const res = await base.post(url, { body: body, timeout: false }).json();
       return res;
     } catch (error) {
-      console.log("🚀 Debug: ~ error:", error);
+      throw new Error(error);
     }
-  },
-
-  put: async (url, body, opts = {}) => {
-    return base.put(url, { json: body, ...opts }).json();
-  },
-
-  delete: async (url, opts = {}) => {
-    return base.delete(url, { ...opts }).json();
   },
 };
 

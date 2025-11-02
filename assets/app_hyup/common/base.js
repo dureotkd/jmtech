@@ -32,3 +32,9 @@ function download_estimate_pdf(e) {
     },
   });
 }
+
+// all_check
+$("#all_check").on("change", function () {
+  var isChecked = $(this).is(":checked");
+  $("input[type='checkbox']").prop("checked", isChecked);
+});

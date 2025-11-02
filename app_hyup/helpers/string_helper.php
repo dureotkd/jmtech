@@ -118,6 +118,43 @@ function status_badge($status)
     return $badges[$status] ?? '';
 }
 
+function number_to_korean($number)
+{
+    $number = intval($number); // 정수 변환
+
+    if ($number === 0) return '영원정';
+
+    $unit1 = ['', '만', '억', '조', '경'];
+    $unit2 = ['', '십', '백', '천'];
+    $numChar = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구'];
+
+    $result = '';
+    $pos = 0;
+
+    while ($number > 0) {
+        $part = $number % 10000;
+        $number = floor($number / 10000);
+
+        $subResult = '';
+        $digits = str_pad($part, 4, '0', STR_PAD_LEFT);
+
+        for ($i = 0; $i < 4; $i++) {
+            $n = intval($digits[$i]);
+            if ($n > 0) {
+                $subResult .= $numChar[$n] . $unit2[3 - $i];
+            }
+        }
+
+        if ($subResult !== '') {
+            $result = $subResult . $unit1[$pos] . $result;
+        }
+
+        $pos++;
+    }
+
+    return $result . ' 원정';
+}
+
 function isValidPassword($password)
 {
     // 최소 8자리, 영문자, 숫자, 특수문자 포함

@@ -29,10 +29,14 @@ class Estimate_service
         $phone_number = $payloads['phone_number'];
         $title = $payloads['title'];
         $due_at = $payloads['due_at'];
+        $sheets = $payloads['sheets'];
+        $vat_type = $payloads['vat_type'];
+        $amount = $payloads['amount'];
         $location = $payloads['location'];
         $valid_at = $payloads['valid_at'];
         $payment_type = $payloads['payment_type'];
         $etc_memo = $payloads['etc_memo'];
+
         $no = $this->makeUniqueNo();
 
         if (empty($partner_id)) {
@@ -56,6 +60,10 @@ class Estimate_service
             'fax_number'    => $fax_number,
             'title'         => $title,
             'location'      => $location,
+            'sheets'        => $sheets,
+            'vat_type'      => $vat_type,
+            'amount'        => $amount,
+            'phone_number'  => $phone_number,
             'due_at'        => $due_at,
             'valid_at'      => $valid_at,
             'payment_type'  => $payment_type,
@@ -72,7 +80,7 @@ class Estimate_service
 
             // 견적서 저장 로직 구현 (예: DB에 저장)
             $uploadDir = '/assets/app_hyup/uploads/estimate/';
-            $file_upload_res = $this->file->upload_multiple('files', $uploadDir);
+            $file_upload_res = $this->obj->file->upload_multiple('files', $uploadDir);
 
             $ref_table = 'estimate';
 
@@ -81,7 +89,7 @@ class Estimate_service
 
                     if ($file_res['status'] === 'success') {
 
-                        $this->service_model->insert_file(DEBUG, [
+                        $this->obj->service_model->insert_file(DEBUG, [
                             'ref_table'     => $ref_table,
                             'ref_id'        => $estimate_id,
                             'file_name'     => $file_res['originalFileName'],

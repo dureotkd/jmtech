@@ -73,21 +73,40 @@ class api extends MY_Controller
                     ],
                     [
                         'title' => '수량',
+                        'type' => 'numeric',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
                     ],
                     [
                         'title' => '단가',
+                        'type' => 'numeric',
+                        'className' => 'ht-yellow-bg',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
                     ],
                     [
                         'title' => '공급가액',
+                        'type' => 'numeric',
+                        'className' => 'ht-red-text',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
                     ],
                     [
                         'title' => '세액',
+                        'type' => 'numeric',
+                        'className' => 'ht-red-text',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
                     ],
                     [
                         'title' => '비고',
                     ]
                 ],
-                'colWidths' => [328, 100, 60, 100, 120, 100, 120],
+                'colWidths' => [300, 100, 60, 100, 120, 100, 100],
                 'height' => 'auto',
             ],
             [
@@ -118,7 +137,7 @@ class api extends MY_Controller
                         'title' => '비고',
                     ]
                 ],
-                'colWidths' => [328, 100, 60, 100, 120, 100, 120],
+                'colWidths' => [300, 100, 60, 100, 120, 100, 100],
                 'height' => 'auto',
             ],
         ];
@@ -126,7 +145,6 @@ class api extends MY_Controller
         echo json_encode($sheets);
         exit;
     }
-
 
     # 견적서 저장
     public function save_estimate()
@@ -137,7 +155,9 @@ class api extends MY_Controller
         $phone_number = $this->input->post('phone_number') ?? '';
         $fax_number = $this->input->post('fax_number') ?? '';
         $title = $this->input->post('title') ?? '';
-
+        $sheets = $this->input->post('sheets') ?? '';
+        $amount = $this->input->post('amount') ?? 0;
+        $vat_type = $this->input->post('vat_type') ?? '';
         $due_at = $this->input->post('due_at') ?? '';
         $location = $this->input->post('location') ?? '';
         $valid_at = $this->input->post('valid_at') ?? '';
@@ -161,6 +181,9 @@ class api extends MY_Controller
                     'fax_number'        => $fax_number,
                     'title'             => $title,
                     'location'          => $location,
+                    'amount'            => $amount,
+                    'vat_type'          => $vat_type,
+                    'sheets'            => $sheets,
                     'due_at'            => $due_at,
                     'valid_at'          => $valid_at,
                     'payment_type'      => $payment_type,

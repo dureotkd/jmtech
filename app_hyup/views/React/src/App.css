@@ -160,6 +160,17 @@ body {
   font-weight: 400;
 }
 
+/* 💛 단가 컬럼용 연한 노랑 배경 */
+.ht-yellow-bg {
+  background-color: #fff7cc !important;
+}
+
+/* 🔴 공급가액, 세액용 빨간 글씨 */
+.ht-red-text {
+  color: #e53935 !important;
+  font-weight: 600;
+}
+
 table {
   border-collapse: collapse;
   width: 100%;

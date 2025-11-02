@@ -6,20 +6,27 @@ import Loading from "./components/Loading";
 import SheetSection from "./components/SheetSection";
 import ExcelImportModal from "./components/ExcelImportModal";
 
+import request from "./utils/request";
 import estimateApi from "./apis/estimateApi";
 import SimpleAutocomplete from "./components/SimpleAutoComplete";
 import { useExcelStore } from "./store/useExcelStore";
-import { wait } from "./utils/util";
+import { deepClone, empty, serializeForm, wait } from "./utils/util";
 
 export default function App() {
   const { getActiveHotRef, setActiveSheet } = useExcelStore((state) => state);
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
-    partnerId: "",
-    estimateDate: "",
-    phoneNumber: "",
-    faxNumber: "",
+    parent_id: "",
+    estimate_date: "",
+    phone_number: "",
+    fax_number: "",
     title: "",
+    vat_type: "",
+    due_at: "",
+    location: "",
+    valid_at: "",
+    payment_type: "",
+    etc_memo: "",
   });
   const [files, setFiles] = React.useState([]);
   const fileInputRef = React.useRef(null);
@@ -58,6 +65,7 @@ export default function App() {
       height: 400,
     },
   ]);
+  const [amount, setAmount] = React.useState(0);
 
   const loadExcelTemplate = async () => {
     const res = await estimateApi.초기엑셀템플릿();
@@ -120,17 +128,52 @@ export default function App() {
     })();
   }, []);
 
-  const handleFormSubmit = (e) => {
+  // * 견적서 저장 핸들러
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    console.log("폼 제출:", form);
+
+    setLoading(true);
+
+    const target = e.target;
+    const formData = new FormData(target);
+
+    formData.append("sheets", JSON.stringify(sheets));
+    formData.append("partner_id", form.partner_id);
+    formData.append("amount", amount);
+
+    if (files && files.length > 0) {
+      files.forEach((file, i) => {
+        formData.append(`files[${i}]`, file);
+      });
+    }
+
+    try {
+      const res = await request.post("save_estimate", formData);
+
+      if (!res?.ok) {
+        alert(res?.msg || "견적서 저장에 실패했습니다.");
+        return;
+      }
+
+      alert("견적서가 성공적으로 저장되었습니다.");
+    } catch (err) {
+      console.error("업로드 실패:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const phoneNumberMask = (e) => {
-    const value = e.target.value.replace(/\D/g, "");
-    const masked = value
+    const raw = e.target.value.replace(/[^0-9]/g, "");
+    const name = e.target.name;
+    const formatted = raw
       .replace(/^(\d{2,3})(\d{3,4})(\d{4})$/, "$1-$2-$3")
       .slice(0, 13);
-    setForm({ ...form, [e.target.name]: masked });
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: formatted,
+    }));
   };
 
   // 📎 파일 첨부 버튼 클릭 → input 클릭 트리거
@@ -161,10 +204,81 @@ export default function App() {
     setFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  // * 부가세 처리
+  const handleVat = (e) => {
+    const vatOption = e.target.value;
+    const cloneSheets = deepClone(sheets);
+
+    if (empty(cloneSheets[0]?.data)) return;
+
+    switch (vatOption) {
+      // * 부가세 별도
+      case "N":
+        cloneSheets[0].data = cloneSheets[0].data.map((row, rowIndex) => {
+          const 수량 = row[2];
+          const 단가 = row[3];
+
+          const 공급가액 = 단가 > 0 ? 수량 * 단가 : "";
+          const 세액 = 공급가액 > 0 ? Math.round(공급가액 * 0.1) : "";
+
+          row[4] = 공급가액;
+          row[5] = 세액;
+
+          return row;
+        });
+
+        break;
+
+      // * 부가세 포함
+      case "Y":
+        cloneSheets[0].data = cloneSheets[0].data.map((row, rowIndex) => {
+          const 수량 = row[2];
+          const 단가 = row[3];
+
+          const 공급가액 = 단가 > 0 ? Math.round((수량 * 단가) / 1.1) : "";
+          const 세액 = 공급가액 > 0 ? 수량 * 단가 - 공급가액 : "";
+
+          row[4] = 공급가액;
+          row[5] = 세액;
+
+          return row;
+        });
+
+        break;
+
+      // * 부가세 없음
+      case "X":
+        cloneSheets[0].data = cloneSheets[0].data.map((row, rowIndex) => {
+          const 수량 = row[2];
+          const 단가 = row[3];
+
+          const 공급가액 = 단가 > 0 ? 수량 * 단가 : 0;
+          const 세액 = 0;
+
+          row[4] = 공급가액;
+          row[5] = 세액;
+
+          return row;
+        });
+
+        break;
+      default:
+        break;
+    }
+
+    console.log(cloneSheets);
+
+    setSheets(cloneSheets);
+  };
+
   return (
     <>
       {loading && <Loading />}
-      <ExcelImportModal sheets={sheets} setSheets={setSheets} />
+      <ExcelImportModal
+        sheets={sheets}
+        setSheets={setSheets}
+        setAmount={setAmount}
+      />
       <form id="form1" onSubmit={handleFormSubmit}>
         <h1 className="!text-md bg-[#4b5563] !text-white !font-sans  !px-4 !py-2 !mb-4">
           견적서 등록{" "}
@@ -186,7 +300,18 @@ export default function App() {
                 <div className="flex items-center">
                   <label className="w-[75px]">거 래 처 명 :</label>
                   <div className="flex items-center">
-                    <SimpleAutocomplete data={partners} />
+                    <SimpleAutocomplete
+                      data={partners}
+                      name="partner_name"
+                      onChange={(id) => {
+                        setForm((prev) => ({ ...prev, partner_id: id }));
+                      }}
+                    />
+                    <input
+                      type="hidden"
+                      name="partner_id"
+                      defaultValue={form.parent_id}
+                    />
                     <button
                       type="button"
                       className="bg-gray-200 border border-gray-400 h-[24px] px-2 text-xs"
@@ -201,12 +326,9 @@ export default function App() {
                   <label className="w-[75px]">견 적 일 자 :</label>
                   <input
                     type="date"
-                    name="estimateDate"
+                    name="estimate_date"
                     className="border w-[180px] h-[24px] px-1"
-                    value={form.estimateDate}
-                    onChange={(e) =>
-                      setForm({ ...form, estimateDate: e.target.value })
-                    }
+                    defaultValue={form.estimate_date}
                   />
                 </div>
 
@@ -215,17 +337,17 @@ export default function App() {
                   <label className="w-[75px]">전 화 번 호 :</label>
                   <input
                     type="text"
-                    name="phoneNumber"
+                    name="phone_number"
                     className="border w-[100px] h-[24px] px-1"
-                    value={form.phoneNumber}
+                    value={form.phone_number}
                     onChange={phoneNumberMask}
                   />
                   <span className="ml-2 w-[75px]">팩 스 번 호 :</span>
                   <input
                     type="text"
-                    name="faxNumber"
+                    name="fax_number"
                     className="border w-[100px] h-[24px] px-1"
-                    value={form.faxNumber}
+                    value={form.fax_number}
                     onChange={phoneNumberMask}
                   />
                 </div>
@@ -239,10 +361,7 @@ export default function App() {
                     type="text"
                     name="title"
                     className="border flex-1 h-[24px] px-1"
-                    value={form.title}
-                    onChange={(e) =>
-                      setForm({ ...form, title: e.target.value })
-                    }
+                    defaultValue={form.title}
                   />
                 </div>
               </div>
@@ -330,20 +449,25 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div className="flex items-center mx-2 !py-1 px-3 text-xs !border-x-2 !border-b-2 !border-black justify-start">
+        <div className="relative flex items-center mx-2 !py-1 px-3 text-xs !border-x-2 !border-b-2 !border-black justify-start">
           <span className="font-semibold mr-2">
             합&nbsp;&nbsp;계&nbsp;&nbsp;금&nbsp;&nbsp;액 : 일금{" "}
           </span>
           <input
             type="text"
             className="border w-[150px] h-[24px]"
-            value="₩0"
+            value={`₩ ${amount.toLocaleString()}`}
             readOnly
           />
         </div>
 
         <div className="flex items-center justify-between px-2.5 !my-1 !py-1">
-          <select className="text-[12px]" id="">
+          <select
+            id="select-vat"
+            name="vat_type"
+            className="text-[12px]"
+            onChange={handleVat}
+          >
             <option value="N">부가세 별도</option>
             <option value="Y">부가세 포함</option>
             <option value="X">부가세 없음</option>
@@ -398,7 +522,7 @@ export default function App() {
         </div>
 
         <div className="border-2 border-black mx-[9px]">
-          {!loading && <SheetSection sheets={sheets} />}
+          <SheetSection sheets={sheets} />
 
           {/* 하단 입력 테이블 */}
           <table className="w-full border-t-2 border-black text-black text-xs">
@@ -411,6 +535,7 @@ export default function App() {
                   <input
                     type="date"
                     name="due_at"
+                    defaultValue={form.due_at}
                     className="text-black border w-full h-[24px] px-1"
                   />
                 </th>
@@ -421,6 +546,7 @@ export default function App() {
                   <input
                     type="text"
                     name="location"
+                    defaultValue={form.location}
                     className="text-black border w-full h-[24px] px-1"
                   />
                 </th>
@@ -434,6 +560,7 @@ export default function App() {
                   <input
                     type="date"
                     name="valid_at"
+                    defaultValue={form.valid_at}
                     className="text-black border w-full h-[24px] px-1"
                   />
                 </td>
@@ -444,6 +571,7 @@ export default function App() {
                   <input
                     type="text"
                     name="payment_type"
+                    defaultValue={form.payment_type}
                     className="text-black border w-full h-[24px] px-1"
                   />
                 </td>
@@ -455,6 +583,7 @@ export default function App() {
                   <input
                     type="text"
                     name="etc_memo"
+                    defaultValue={form.etc_memo}
                     className="text-black border w-full h-[24px] px-1"
                   />
                 </td>

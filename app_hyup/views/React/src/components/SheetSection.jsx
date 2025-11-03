@@ -100,6 +100,18 @@ const SheetSection = ({ sheets, vatType, setAmount }) => {
         }}
         afterChange={function (changes, source) {
           if (source === "edit" && changes) {
+            // * 0번쨰 품목 수정시
+            if (changes[0][3]?.key) {
+              console.log("zz");
+
+              changes.forEach(([row, prop, oldValue, newValue]) => {
+                console.log(oldValue, newValue);
+                if (prop === 0 && oldValue !== newValue.title) {
+                  this.setDataAtCell(row, 0, newValue.title); // * 품목
+                }
+              });
+            }
+
             changes.forEach(([row, prop, oldValue, newValue]) => {
               if (prop === 2 || prop === 3) {
                 console.log(row, prop, newValue, vatType);

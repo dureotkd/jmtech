@@ -10,6 +10,10 @@ const BACKEND_URL = isLocal
   ? "https://jmtech.test/api"
   : "https://api.infoverse.club/api";
 
+const STATIC_URL = isLocal
+  ? "https://jmtech.test"
+  : "https://api.infoverse.club";
+
 const base = ky.create({
   prefixUrl: BACKEND_URL,
   credentials: "include",
@@ -36,5 +40,5 @@ const request = {
   },
 };
 
-export { BACKEND_URL };
+export { BACKEND_URL, STATIC_URL };
 export default request;

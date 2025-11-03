@@ -461,7 +461,7 @@ $datetime = date('YmdHis');
 
 <script>
     const handle_delete = (e) => {
-        if (confirm('정말로 삭제하시겠습니까? \n삭제된 견적서는 복구할 수 없습니다.')) {
+        if (confirm('정말로 삭제하시겠습니까? \n삭제된 견적서는 복구할 수 없습니다.\n(관련된 수주서도 함께 삭제됩니다.)')) {
             window.location.href = '/sales/delete_estimate?id=<?= $estimate['id'] ?>';
         }
     }

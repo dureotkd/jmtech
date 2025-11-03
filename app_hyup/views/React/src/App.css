@@ -165,6 +165,10 @@ body {
   background-color: #fff7cc !important;
 }
 
+.autocompleteEditor {
+  min-width: 500px !important;
+}
+
 /* 🔴 공급가액, 세액용 빨간 글씨 */
 .ht-red-text {
   color: #e53935 !important;

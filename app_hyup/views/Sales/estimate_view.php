@@ -8,7 +8,7 @@
     <div class="flex items-center gap-2 mb-4 !text-sm">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
-            <button type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+            <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
                 삭제
             </button>
             <button
@@ -40,8 +40,8 @@
                 foreach ($estimate_all as $estimate) :
             ?>
 
-                    <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $estimate['id'] ?>')">
-                        <td><input type="checkbox" /></td>
+                    <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $estimate['id'] ?>')" data-estimate-id="<?= $estimate['id'] ?>">
+                        <td><input type="checkbox" estimate-id="<?= $estimate['id'] ?>" onclick="event.stopPropagation();" /></td>
                         <td class="">2025-10-24</td>
                         <td class="">주식회사 지아이베컴</td>
                         <td class="">31,834,400</td>
@@ -67,7 +67,7 @@
                                     <button
                                         onclick="event.stopPropagation(); open_popup_default(`/sales/estimate_detail?id=<?= $estimate['su_estimate_id'] ?>`, '수주서 상세', 1000, 820);"
                                         type="button"
-                                        class="sm-btn bg-primary text-xs">
+                                        class="sm-btn bg-primary !m-0 text-xs">
                                         수주서 보기
                                     </button>
                                 <?
@@ -115,6 +115,53 @@
 
     function handle_select(event) {
         event.stopPropagation(); // 트리거링 방지
+    }
+
+    function delete_estimate(e) {
+
+        const checked_ids = [];
+        $('tbody input[type="checkbox"]:checked').each(function() {
+            const row = $(this).closest('tr');
+            const estimate_id = row.data('estimate-id');
+            checked_ids.push(estimate_id);
+        });
+
+        if (checked_ids.length === 0) {
+            alert('삭제할 견적서를 선택해주세요.');
+            return;
+        }
+
+        if (!confirm('선택한 견적서를 삭제하시겠습니까?')) {
+            return;
+        }
+
+        console.log(checked_ids)
+
+        start_loading();
+
+        $.ajax({
+            type: "GET",
+            url: "/sales/delete_estimate",
+            data: {
+                id: checked_ids
+            },
+            dataType: "json",
+            success: function(response) {
+
+                alert(response.msg);
+
+                if (response.ok) {
+                    window.location.reload();
+                }
+
+            },
+            error: function(xhr, status, error) {
+                alert("에러가 발생했습니다: " + error);
+            },
+            complete: function() {
+                stop_loading();
+            }
+        });
     }
 
     function change_status(estimate_id, e) {

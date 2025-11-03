@@ -714,9 +714,20 @@ class sales extends MY_Controller
             return;
         }
 
-        $this->estimate_service->delete($id);
+        if (is_array($id)) {
+            foreach ($id as $estimate_id) {
+                $this->estimate_service->delete($estimate_id);
 
-        alert_close('견적서가 삭제되었습니다');
+                echo json_encode([
+                    'ok'    => true,
+                    'msg'   => '견적서가 삭제되었습니다',
+                ]);
+            }
+        } else {
+            $this->estimate_service->delete($id);
+
+            alert_close('견적서가 삭제되었습니다');
+        }
     }
 
     # 비밀번호 변경

@@ -10,7 +10,7 @@ import SimpleAutocomplete from "./components/SimpleAutoComplete";
 import { deepClone, empty, numberToKorean, wait } from "./utils/util";
 import { ESTIMATE_SUB_TYPE } from "../constants";
 
-import request from "./utils/request";
+import request, { STATIC_URL } from "./utils/request";
 import estimateApi from "./apis/estimateApi";
 
 import { useExcelStore } from "./store/useExcelStore";
@@ -24,7 +24,9 @@ export default function App() {
 
   // * title 설정
 
-  const { getActiveHotRef, setActiveSheet } = useExcelStore((state) => state);
+  const { hotRefs, getActiveHotRef, setActiveSheet } = useExcelStore(
+    (state) => state
+  );
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
     parent_id: "",
@@ -164,7 +166,18 @@ export default function App() {
     const target = e.target;
     const formData = new FormData(target);
 
-    formData.append("sheets", JSON.stringify(sheets));
+    console.log(hotRefs);
+
+    const hot1 = hotRefs["견적서"];
+    const hot2 = hotRefs["내역서"];
+
+    const hots = [hot1, hot2].map((hot) => hot.getData());
+
+    const cloneSheets = deepClone(sheets);
+    cloneSheets[0].data = hots[0];
+    cloneSheets[1].data = hots[1];
+
+    formData.append("sheets", JSON.stringify(cloneSheets));
     formData.append("file_ids", fileIds);
 
     formData.append("type", type);
@@ -188,6 +201,12 @@ export default function App() {
       }
 
       alert("견적서가 성공적으로 저장되었습니다.");
+
+      if (res?.redirect_url) {
+        window.location.href = `${STATIC_URL}${res.redirect_url}`;
+      }
+
+      window?.opener?.location.reload();
     } catch (err) {
       console.error("업로드 실패:", err);
     } finally {

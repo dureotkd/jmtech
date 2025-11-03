@@ -57,8 +57,8 @@ class api extends MY_Controller
             foreach ($items as $item) {
                 $source[] = [
                     'key'   => $item['id'],
-                    'value' => "{$item['code']} // {$item['name']} // {$item['unit']}",
-                    'title' => $item['name'],
+                    'value' => "{$item['item_code']}&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;&nbsp;&nbsp;&nbsp;{$item['item_name']}&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;&nbsp;&nbsp;&nbsp;{$item['unit']}",
+                    'title' => $item['item_name'],
                 ];
             }
         }
@@ -117,8 +117,8 @@ class api extends MY_Controller
                         'title' => '비고',
                     ]
                 ],
-                'colWidths' => [300, 100, 60, 100, 120, 100, 100],
-                'height' => 'auto',
+                'colWidths' => [360, 60, 60, 100, 120, 100, 80],
+                'height' => 300,
             ],
             [
                 'name' => '내역서',
@@ -225,13 +225,13 @@ class api extends MY_Controller
         $payment_type = $this->input->post('payment_type') ?? '';
         $etc_memo = $this->input->post('etc_memo') ?? '';
         $file_ids = $this->input->post('file_ids') ?? '';
-
         $amount = (int)preg_replace('/[^0-9]/u', '', $amount); // 숫자만 남김
 
         $res_array = [
             'ok'    => true,
             'msg'   => '견적서가 저장되었습니다.',
             'data'  => [],
+            'redirect_url' => ''
         ];
 
         foreach ([1] as $proc) {
@@ -267,6 +267,8 @@ class api extends MY_Controller
 
                         $this->estimate_service->uploadFile($id);
                     }
+
+                    $res_array['redirect_url'] = "/sales/estimate_detail?id={$id}";
                 } else {
 
                     $insert_estimate_id = $this->estimate_service->create([
@@ -295,6 +297,8 @@ class api extends MY_Controller
 
                         $this->estimate_service->uploadFile($insert_estimate_id);
                     }
+
+                    $res_array['redirect_url'] = "/sales/estimate_detail?id={$insert_estimate_id}";
                 }
             } catch (Exception $e) {
                 $res_array['ok'] = false;
@@ -302,9 +306,6 @@ class api extends MY_Controller
                 break;
             }
         }
-
-        printr($res_array);
-        exit;
 
         echo json_encode($res_array);
     }

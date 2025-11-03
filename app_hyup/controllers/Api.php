@@ -47,6 +47,21 @@ class api extends MY_Controller
     # Excel 템플릿 Load Init
     public function load_excel_template()
     {
+        $items = $this->service_model->get_item('all', [
+            "is_active = 1"
+        ]);
+
+        $source = [];
+
+        if (!empty($items)) {
+            foreach ($items as $item) {
+                $source[] = [
+                    'key'   => $item['id'],
+                    'value' => "{$item['code']} // {$item['name']} // {$item['unit']}",
+                    'title' => $item['name'],
+                ];
+            }
+        }
 
         $sheets = [
             [
@@ -60,15 +75,9 @@ class api extends MY_Controller
                     [
                         'title'     => '품목',
                         'type'      => 'dropdown',
-                        'source'    =>  [   // ^ 드롭다운 샘플 데이터
-                            // ['key' => '1', 'value' => '00000000041 // 너트(스캔) // EA', 'title' => '너트(스캔)11'],
-                            // ['key' => '2', 'value' => '00000000042 // 너트(스캔) // EA', 'title' => '품목'],
-                            // ['key' => '3', 'value' => '00000000043 // 너트(스캔) // EA', 'title' => '품목'],
-                            // ['key' => '3', 'value' => '00000000044 // 너트(스캔) // EA', 'title' => '품목'],
-                            // ['key' => '3', 'value' => '00000000045 // 너트(스캔) // EA', 'title' => '품목'],
-                            // ['key' => '3', 'value' => '00000000046 // 너트(스캔) // EA', 'title' => '품목'],
-                            // ['key' => '3', 'value' => '000000000473 // 너트(스캔) // EA', 'title' => '품목'],
-                        ]
+
+                        // ^ 드롭다운 샘플 데이터
+                        'source'    => $source,
                     ],
                     [
                         'title' => '규격',

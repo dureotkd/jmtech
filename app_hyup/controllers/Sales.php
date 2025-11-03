@@ -63,7 +63,8 @@ class sales extends MY_Controller
             [partner_id] => 2
          */
         $estimate_all = $this->service_model->get_estimate('all', [
-            1
+            "type = 'SELL'",    // SELL:판매, BUY:구매
+            "sub_type = 'G'",   // G:견적서, S:수주서
         ]);
 
         $view_data =  [
@@ -356,7 +357,32 @@ class sales extends MY_Controller
     # 엑셀 다운로드 (견적서,수주서,발주서)
     public function download_estimate_excel()
     {
-        $file_path = $_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/excel/base_estimate_excel.xlsx';
+        $id = $this->input->get('id') ?? '';
+
+        if (empty($id)) {
+            show_404();
+            return;
+        }
+
+        $estimate_row = $this->service_model->get_estimate('row', [
+            "id = {$id}"
+        ]);
+
+        if (empty($estimate_row)) {
+            show_404();
+            return;
+        }
+
+        $sub_type = $estimate_row['sub_type'] ?? ''; // G:견적서, S:수주서
+        $SUB_TYPE = unserialize(SUB_TYPE);
+        $title = $SUB_TYPE[$sub_type] ?? '';
+
+        if (empty($title)) {
+            show_404();
+            return;
+        }
+
+        $file_path = $_SERVER['DOCUMENT_ROOT'] . "/assets/app_hyup/excel/{$sub_type}_estimate_excel.xlsx";
 
         if (!file_exists($file_path)) {
             show_404();
@@ -373,7 +399,7 @@ class sales extends MY_Controller
         $sheet->setCellValue('E10', '주식회사 지아이베콤');
 
         // 3️⃣ 한글 파일명 처리
-        $filename = '견적서_' . date('Ymd_His') . '.xlsx';
+        $filename = $title . '_' . date('Ymd_His') . '.xlsx';
         $encoded_filename = rawurlencode($filename);
 
         // 4️⃣ 출력 버퍼 비우기 (가장 중요)
@@ -399,7 +425,30 @@ class sales extends MY_Controller
     # /sales/download_estimate_pdf
     public function download_estimate_pdf()
     {
-        $type = $this->input->post('type') ?? '';
+        $id = $this->input->post('id') ?? '';
+
+        if (empty($id)) {
+            throw new Error("견적서 아이디가 올바르지 않습니다.");
+        }
+
+        $estimate_row = $this->service_model->get_estimate('row', [
+            "id = {$id}"
+        ]);
+
+        if (empty($estimate_row)) {
+            show_404();
+            return;
+        }
+
+        $sub_type = $estimate_row['sub_type'] ?? ''; // G:견적서, S:수주서
+        $SUB_TYPE = unserialize(SUB_TYPE);
+        $title = $SUB_TYPE[$sub_type] ?? '';
+
+        $sheets = json_decode($estimate_row['sheets'], true);
+        $sheets_data = $sheets[0]['data'] ?? [];
+
+        printr($sheets_data);
+        exit;
 
         // ✅ 한글 깨짐 방지 폰트 설정
         $mpdf = new Mpdf([
@@ -438,6 +487,8 @@ class sales extends MY_Controller
             'items'         => $items,
             'total'         => $total,
             'tax'           => $tax,
+            'estimate'      => $estimate_row,
+            'title'         => $title,
             'totalWithTax'  => $totalWithTax,
         ], true);
 
@@ -542,6 +593,31 @@ class sales extends MY_Controller
 
 
         $this->file->download($file['file_path'], $file['file_name']);
+    }
+
+    # 견적서 상태 변경
+    public function change_status()
+    {
+        $id = $this->input->post('id') ?? '';
+        $status = $this->input->post('status') ?? '';
+
+        $res_array = [
+            'ok'                => true,
+            'msg'               => '견적서 상태가 변경되었습니다.',
+            'su_estimate_id'    => '',
+        ];
+
+        try {
+
+            $res = $this->estimate_service->change_status($id, $status);
+
+            $res_array['su_estimate_id'] = $res;
+        } catch (Exception $e) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = $e->getMessage();
+        }
+
+        echo json_encode($res_array);
     }
 
     # 견적서 삭제

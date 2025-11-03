@@ -1,9 +1,10 @@
 import ky from "ky";
 
 const isLocal =
-  typeof window !== "undefined" &&
-  (window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1");
+  (typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1")) ||
+  window.location.hostname.includes("jmtech.test");
 
 const BACKEND_URL = isLocal
   ? "https://jmtech.test/api"

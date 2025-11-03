@@ -21,6 +21,8 @@ class api extends MY_Controller
         $allowed_origins = [
             "http://localhost:5173",
             "http://127.0.0.1:5173",
+            "http://jmtech.test",
+            "https://jmtech.test",
             "https://www.saju.asia",
             "https://saju.asia",
             "https://api.saju.asia",
@@ -197,6 +199,9 @@ class api extends MY_Controller
     {
         $id = $this->input->post('id') ?? '';
 
+        $type = $this->input->post('type') ?? ''; // * sell / buy (판매,구매)
+        $sub_type = $this->input->post('sub_type') ?? ''; // * g / s (견적서,수주서)
+
         $partner_id = $this->input->post('partner_id') ?? '';
         $estimate_date = $this->input->post('estimate_date') ?? '';
         $phone_number = $this->input->post('phone_number') ?? '';
@@ -212,6 +217,8 @@ class api extends MY_Controller
         $etc_memo = $this->input->post('etc_memo') ?? '';
         $file_ids = $this->input->post('file_ids') ?? '';
 
+        $amount = (int)preg_replace('/[^0-9]/u', '', $amount); // 숫자만 남김
+
         $res_array = [
             'ok'    => true,
             'msg'   => '견적서가 저장되었습니다.',
@@ -223,7 +230,6 @@ class api extends MY_Controller
             try {
 
                 if (!empty($id)) {
-
 
                     $update_result = $this->estimate_service->update([
                         'partner_id'        => $partner_id,
@@ -243,7 +249,7 @@ class api extends MY_Controller
                     ], $id);
 
                     if (empty($update_result)) {
-                        throw new Exception('견적서 수정에 실패했습니다.');
+                        throw new Error('견적서 수정에 실패했습니다.');
                     }
 
                     $this->estimate_service->deleteFile($id, $file_ids);
@@ -255,6 +261,8 @@ class api extends MY_Controller
                 } else {
 
                     $insert_estimate_id = $this->estimate_service->create([
+                        'type'              => $type,
+                        'sub_type'          => $sub_type,
                         'partner_id'        => $partner_id,
                         'estimate_date'     => $estimate_date,
                         'phone_number'      => $phone_number,
@@ -271,7 +279,7 @@ class api extends MY_Controller
                     ]);
 
                     if (empty($insert_estimate_id)) {
-                        throw new Exception('견적서 저장에 실패했습니다.');
+                        throw new Error('견적서 저장에 실패했습니다.');
                     }
 
                     if (!empty($_FILES)) {
@@ -285,6 +293,9 @@ class api extends MY_Controller
                 break;
             }
         }
+
+        printr($res_array);
+        exit;
 
         echo json_encode($res_array);
     }

@@ -328,8 +328,21 @@ define('VAT_TYPE', serialize([
 
 // * React 개발 서버 주소 (견적서 작성 및 수정)
 // ^ Handsontable Hot Table때문에 React사용 (Virtual Row Rendering 지원)
-define('REACT_PATH', 'http://localhost:5173/');
+define('REACT_PATH', 'http://localhost:5173');
+// define('REACT_PATH', 'http://jmtech.test/React/estimate');
 
+define('SUB_TYPE', serialize([
+    'G' => '견적서',
+    'S' => '수주서',
+]));
+
+
+define('ESTIMATE_STATUS', serialize([
+    '견적진행중' => '견적진행중',
+    '네고중' => '네고중',
+    '확정' => '확정',
+    '수주전환' => '수주전환',
+]));
 
 define('PAY_METHOD_CODE', serialize([
     "CARD"       => "신용카드",

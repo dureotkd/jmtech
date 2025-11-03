@@ -22,6 +22,8 @@ class Estimate_service
      */
     public function create($payloads)
     {
+        $type = $payloads['type'] ?? ''; // * sell / buy (판매,구매)
+        $sub_type = $payloads['sub_type'] ?? ''; // * g / s (견적서,수주서)
 
         $partner_id = $payloads['partner_id'];
         $estimate_date = $payloads['estimate_date'];
@@ -39,21 +41,28 @@ class Estimate_service
 
         $no = $this->makeUniqueNo();
 
+        if (empty($type)) {
+            throw new Error("견적서 유형이 올바르지 않습니다.");
+        }
+        if (empty($sub_type)) {
+            throw new Error("견적서 하위 유형이 올바르지 않습니다.");
+        }
         if (empty($partner_id)) {
-            throw new Exception("거래처명을 선택해주세요.");
+            throw new Error("거래처명을 선택해주세요.");
         }
         if (empty($estimate_date)) {
-            throw new Exception("견적일자를 입력해주세요.");
+            throw new Error("견적일자를 입력해주세요.");
         }
         if (empty($phone_number)) {
-            throw new Exception("전화번호를 입력해주세요.");
+            throw new Error("전화번호를 입력해주세요.");
         }
         if (empty($title)) {
-            throw new Exception("제목을 입력해주세요.");
+            throw new Error("제목을 입력해주세요.");
         }
 
         $res = $this->obj->service_model->insert_estimate(DEBUG, [
-            'type'          => '견적서',
+            'type'          => $type,
+            'sub_type'      => $sub_type,
             'no'            => $no,
             'partner_id'    => $partner_id,
             'estimate_date' => $estimate_date,
@@ -87,6 +96,67 @@ class Estimate_service
     {
 
         $res = $this->obj->service_model->delete_estimate(DEBUG, [
+            "id = '{$id}'"
+        ]);
+
+        return $res;
+    }
+
+    public function change_status($id, $status)
+    {
+        $res = null;
+
+        if (empty($status)) {
+            throw new Error("변경할 상태값이 올바르지 않습니다.");
+        }
+
+        if (empty($id)) {
+            throw new Error("견적서 아이디가 올바르지 않습니다.");
+        }
+
+        if ($status === '수주전환') {
+
+            // * 수주전환 로직 구현 필요
+            $estimate_row = $this->obj->service_model->get_estimate('row', [
+                "id = '{$id}'"
+            ]);
+
+            if (empty($estimate_row)) {
+                throw new Error("해당 견적서를 찾을 수 없습니다.");
+            }
+
+            $su_estimate_row = [
+                'type'              => $estimate_row['type'],
+                'no'                => $estimate_row['no'],
+                'estimate_date'     => date('Y-m-d'),
+                'phone_number'      => $estimate_row['phone_number'],
+                'partner_id'        => $estimate_row['partner_id'],
+                'title'             => $estimate_row['title'],
+                'amount'            => $estimate_row['amount'],
+                'memo'              => $estimate_row['memo'],
+                'created_at'        => date('Y-m-d H:i:s'),
+                'updated_at'        => date('Y-m-d H:i:s'),
+                'due_at'            => $estimate_row['due_at'],
+                'valid_at'          => $estimate_row['valid_at'],
+                'payment_type'      => $estimate_row['payment_type'],
+                'etc_memo'          => $estimate_row['etc_memo'],
+                'vat_type'          => $estimate_row['vat_type'],
+                'sheets'            => $estimate_row['sheets'],
+                'sub_type'          => 'S', // 수주서로 생성
+                'status'            => '수주전환',
+            ];
+
+            $res = $this->obj->service_model->insert_estimate(DEBUG, $su_estimate_row);
+
+            if (empty($res)) {
+                throw new Error("수주전환 중 오류가 발생했습니다.");
+            }
+        }
+
+        $this->obj->service_model->update_estimate(DEBUG, [
+            'status'        => $status,
+            'updated_at'    => date('Y-m-d H:i:s')
+        ], [
             "id = '{$id}'"
         ]);
 

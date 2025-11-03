@@ -12,7 +12,7 @@
                 삭제
             </button>
             <button
-                onclick="open_popup_default('http://localhost:5173/','견적서 등록',1000,820);"
+                onclick="open_popup_default('<?= REACT_PATH ?>','견적서 등록',1000,820);"
                 type="button"
                 class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
                 견적서 등록 +
@@ -30,6 +30,7 @@
                 <th class="">공급가액</th>
                 <th class="">세액</th>
                 <th class="">합계금액</th>
+                <th class="">상태</th>
                 <th class=" w-32"></th>
             </tr>
         </thead>
@@ -46,6 +47,35 @@
                         <td class="">31,834,400</td>
                         <td class="">3,183,940</td>
                         <td class="">35,023,340</td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <select onclick="handle_select(event);" onchange="change_status(<?= $estimate['id'] ?>, event);" name="estimate_status" id="">
+                                    <?
+                                    $ESTIMATE_STATUS = unserialize(ESTIMATE_STATUS);
+                                    foreach ($ESTIMATE_STATUS as $status_key => $status_val) {
+                                    ?>
+                                        <option <?= $status_key === $estimate['status'] ? 'selected' : '' ?> value="<?= $status_key ?>"><?= $status_val ?></option>
+                                    <?
+                                    }
+
+                                    ?>
+                                </select>
+
+                                <?
+                                if ($estimate['status'] === '수주전환' && !empty($estimate['su_estimate_id'])) {
+                                ?>
+                                    <button
+                                        onclick="event.stopPropagation(); open_popup_default(`/sales/estimate_detail?id=<?= $estimate['su_estimate_id'] ?>`, '수주서 상세', 1000, 820);"
+                                        type="button"
+                                        class="sm-btn bg-primary text-xs">
+                                        수주서 보기
+                                    </button>
+                                <?
+                                }
+                                ?>
+                            </div>
+
+                        </td>
                         <td class="cursor-pointer">
                             <div class="flex items-center gap-1">
                                 <img src="https://ai.serp.co.kr/img/serp/btn/btn_send.png" alt="">
@@ -67,6 +97,8 @@
                 <td class="!font-bold">공급가액 : 34,609,400</td>
                 <td class="!font-bold">세액 : 3,460,940</td>
                 <td class="!font-bold">합계금액 : 38,070,340</td>
+                <td class="!font-bold">
+                </td>
                 <td class="cursor-pointer">
                 </td>
             </tr>
@@ -79,5 +111,52 @@
 <script>
     function go_detail(estimate_id) {
         open_popup_default(`/sales/estimate_detail?id=${estimate_id}`, '견적서 상세', 1000, 820);
+    }
+
+    function handle_select(event) {
+        event.stopPropagation(); // 트리거링 방지
+    }
+
+    function change_status(estimate_id, e) {
+
+        start_loading();
+
+        const selected_status = e.target.value;
+
+        if (selected_status === '수주전환') {
+            if (!confirm('수주전환 하시겠습니까?')) {
+                return;
+            }
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/sales/change_status",
+            data: {
+                id: estimate_id,
+                status: selected_status
+            },
+            dataType: "json",
+            success: function(response) {
+
+                alert(response.msg);
+
+                if (response.ok && selected_status == '수주전환' && response.su_estimate_id) {
+
+                    open_popup_default(`/sales/estimate_detail?id=${response.su_estimate_id}`, '수주서 상세', 1000, 820);
+                }
+
+                if (response.ok) {
+                    window.location.reload();
+                }
+
+            },
+            error: function(xhr, status, error) {
+                alert("에러가 발생했습니다: " + error);
+            },
+            complete: function() {
+                stop_loading();
+            }
+        });
     }
 </script>

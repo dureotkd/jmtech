@@ -5,24 +5,24 @@ import "./App.css";
 import Loading from "./components/Loading";
 import SheetSection from "./components/SheetSection";
 import ExcelImportModal from "./components/ExcelImportModal";
+import SimpleAutocomplete from "./components/SimpleAutoComplete";
+
+import { deepClone, empty, numberToKorean, wait } from "./utils/util";
+import { ESTIMATE_SUB_TYPE } from "../constants";
 
 import request from "./utils/request";
 import estimateApi from "./apis/estimateApi";
-import SimpleAutocomplete from "./components/SimpleAutoComplete";
+
 import { useExcelStore } from "./store/useExcelStore";
-import {
-  deepClone,
-  empty,
-  numberToKorean,
-  serializeForm,
-  wait,
-} from "./utils/util";
 
 export default function App() {
   // ? & (queryString)
   const queryString = new URLSearchParams(window.location.search);
-  const id = queryString.get("id");
-  const tab = queryString.get("tab");
+  const id = queryString.get("id") ?? "";
+  const type = queryString.get("type") ?? "SELL"; // * SELL / BUY (판매,구매)
+  const subType = queryString.get("sub_type") ?? "G"; // * G / S (견적서,수주서)
+
+  // * title 설정
 
   const { getActiveHotRef, setActiveSheet } = useExcelStore((state) => state);
   const [loading, setLoading] = React.useState(false);
@@ -164,13 +164,14 @@ export default function App() {
     const target = e.target;
     const formData = new FormData(target);
 
-    console.log(fileIds);
-
     formData.append("sheets", JSON.stringify(sheets));
     formData.append("file_ids", fileIds);
-    formData.append("partner_id", form.partner_id);
-    formData.append("amount", amount);
-    formData.append("id", id);
+
+    formData.append("type", type);
+    formData.append("sub_type", subType);
+    formData.append("partner_id", form?.partner_id || "");
+    formData.append("amount", amount || 0);
+    formData.append("id", id || "");
 
     if (files && files.length > 0) {
       files.forEach((file, i) => {
@@ -308,7 +309,7 @@ export default function App() {
   React.useEffect(() => {
     (async () => {
       try {
-        console.log("LOad..");
+        document.title = `${ESTIMATE_SUB_TYPE[subType]} 등록`;
 
         setLoading(true);
 
@@ -344,13 +345,13 @@ export default function App() {
       <form id="form1" onSubmit={handleFormSubmit}>
         <input type="hidden" name="id" value={id} />
         <h1 className="!text-md bg-[#4b5563] !text-white !font-sans  !px-4 !py-2 !mb-4">
-          견적서 등록{" "}
+          {ESTIMATE_SUB_TYPE[subType]} 등록{" "}
         </h1>
         <div className="w-full px-2 text-xs font-sans font-light">
           <div className="w-full relative flex justify-center items-center">
             <img
               className="mb-2 mx-auto"
-              src="https://jmtech.test/assets/app_hyup/images/%EA%B2%AC%EC%A0%81%EC%84%9C.png"
+              src={`https://jmtech.test/assets/app_hyup/images/${ESTIMATE_SUB_TYPE[subType]}.png`}
               alt="견적서"
             />
           </div>

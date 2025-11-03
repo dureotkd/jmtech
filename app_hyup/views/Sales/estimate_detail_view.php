@@ -218,7 +218,7 @@ $datetime = date('YmdHis');
         <div class="w-full relative flex justify-center items-center !mt-4">
             <img
                 class="!mb-2 mx-auto"
-                src="/assets/app_hyup/images/견적서.png" alt="견적서">
+                src="/assets/app_hyup/images/<?= $estimate['sub_type'] == 'G' ? '견적서' : '수주서' ?>.png" alt="견적서">
 
             <!-- <div class="absolute right-2 top-2 px-2 py-1 text-xs cursor-pointer hover:underline">
                 거래내역 불러오기

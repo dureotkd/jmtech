@@ -33,7 +33,7 @@
     }
 
     .title {
-        background: ##788496;
+        background: '#788496';
     }
 
     .no-border td {
@@ -46,25 +46,29 @@
         display: inline-block;
         width: 95px;
         margin: 12px auto;
+        letter-spacing: 10px;
+        /* 🔹 글자 간격을 10px 만큼 띄움 */
     }
 </style>
 
 <!-- #f2f2f2 (예비)-->
-<h1 class="header pdf_title">수 주 서</h1>
+<h1 class="header pdf_title ">
+    <?= $title ?>
+</h1>
 
 <table class="section" style="width:100%; border:1px solid #000; border-collapse:collapse;">
     <tr>
         <!-- 왼쪽 영역 -->
         <td style="width:70%; font-size:9pt; text-align:center; vertical-align:top; padding:8px;">
-            <h2 style="margin:0;">주식회사 지아이베콤 귀하</h2><br />
-            <p style="margin:4px 0;">전화 : 02-3453-1234&nbsp;&nbsp;&nbsp;팩스 : 02-3453-1234</p><br />
+            <h2 style="margin:0;"><?= $estimate['partner_name'] ?> 귀하</h2><br />
+            <p style="margin:4px 0;">전화 : <?= $estimate['phone_number'] ?>&nbsp;&nbsp;&nbsp;팩스 : <?= $estimate['fax_number'] ?></p><br />
             <p style="margin:4px 0;">아래와 같이 수주합니다.</p>
         </td>
 
         <!-- 오른쪽 영역 -->
         <td style="width:30%; font-size:9pt; text-align:center; padding:8px;">
-            수주일자 : 2025-10-24<br /><br />
-            NO : 20251024-S002
+            수주일자 : <?= $estimate['created_at'] ?><br /><br />
+            NO : <?= $estimate['no'] ?>
         </td>
     </tr>
 </table>
@@ -91,8 +95,10 @@
         <td colspan="3">산업기계 설계 및 개발</td>
     </tr>
 </table>
-
-<p style="margin:8px 0; font-size:12pt; font-weight:700;">합계금액 : 삼백사만칠천원정 (₩ 100,000,000) (부가세별도)</p>
+<?
+$VAT_TYPE = unserialize(VAT_TYPE);
+?>
+<p style="margin:8px 0; font-size:12pt; font-weight:700;">합계금액 : <?= number_to_korean($estimate['amount']) ?> (₩ <?= number_format($estimate['amount']) ?>) (<?= $VAT_TYPE[$estimate['vat_type']] ?>)</p>
 
 <table>
     <thead>
@@ -107,10 +113,9 @@
             <th>비고</th>
         </tr>
     </thead>
-    <tbody>';
-
+    <tbody>
         <tr>
-            <td>111.'</td>
+            <td>111</td>
             <td>22</td>
             <td>33</td>
             <td>44</td>
@@ -132,14 +137,18 @@
 <table class="section no-border" style="margin-top:10px;">
     <tr>
         <td class="title" style="width:25%; background:#D9D9D9; border-bottom:1px solid black; border-right:1px solid black;">납기일자</td>
-        <td style="width:25%; border-bottom:1px solid black; "></td>
+        <td style="width:25%; border-bottom:1px solid black; ">
+            <?= $estimate['due_at'] ?>
+        </td>
         <td class="title" style="width:25%; background:#D9D9D9; border-bottom:1px solid black; border-right:1px solid black; border-left:1px solid black;">납품장소</td>
-        <td style="width:25%; border-bottom:1px solid black;"></td>
+        <td style="width:25%; border-bottom:1px solid black;">
+            <?= $estimate['location'] ?>
+        </td>
     </tr>
     <tr>
         <td class="title" style="background:#D9D9D9; border-right:1px solid black;">유효일자</td>
-        <td></td>
+        <td><?= $estimate['valid_at'] ?></td>
         <td class="title" style="background:#D9D9D9; border-right:1px solid black; border-left:1px solid black;">결제조건</td>
-        <td></td>
+        <td><?= $estimate['payment_type'] ?></td>
     </tr>
 </table>

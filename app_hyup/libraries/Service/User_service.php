@@ -424,62 +424,28 @@ class User_service
     }
 
     # 비밀번호 수정 (사용자)
-    public function changePassword($token, $new_password, $new_repassword)
+    public function changePassword($new_password, $new_repassword)
     {
-        if ($token != -1) {
-
-            if (empty($token)) throw new Exception('비밀번호 변경을 위한 토큰이 필요합니다.');
-
-            // 사용자 정보 조회
-            $password_reset_token = $this->obj->service_model->get_password_reset_token('row', [
-                "token = '{$token}'"
-            ]);
-
-            if (empty($password_reset_token)) {
-                throw new Exception('유효하지 않은 비밀번호 변경 요청입니다.');
-            }
-        }
 
         if ($new_password !== $new_repassword) {
             throw new Exception('새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.');
         }
 
-        if ($token == -1) {
+        $login_user = $this->getLoginUser();
 
-            $login_user = $this->getLoginUser();
-
-            if (empty($login_user)) {
-                throw new Exception('로그인이 필요합니다.');
-            }
-
-            $res = $this->obj->service_model->update_user(DEBUG,  [
-                'password' => password_hash($new_password, PASSWORD_BCRYPT),
-            ], [
-                "id = '{$login_user['id']}'"
-            ]);
-        } else {
-
-            $user_id = $password_reset_token['user_id'] ?? '';
-
-            $res = $this->obj->service_model->update_user(DEBUG,  [
-                'password' => password_hash($new_password, PASSWORD_BCRYPT),
-            ], [
-                "id = '{$user_id}'"
-            ]);
+        if (empty($login_user)) {
+            throw new Exception('로그인이 필요합니다.');
         }
+
+        $res = $this->obj->service_model->update_user(DEBUG,  [
+            'password' => password_hash($new_password, PASSWORD_BCRYPT),
+        ], [
+            "id = '{$login_user['id']}'"
+        ]);
 
 
         if (!$res) {
             throw new Exception(DB_ERR_MSG);
-        }
-
-        if ($token != -1) {
-            // 비밀번호 재설정 토큰 상태 업데이트
-            $this->obj->service_model->update_password_reset_token(DEBUG, [
-                'status' => 0,
-            ], [
-                "token = '{$token}'"
-            ]);
         }
 
         return true;

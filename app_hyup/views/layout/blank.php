@@ -15,8 +15,6 @@
     <meta name="description" content="">
     <meta property="og:title" content="">
     <meta property="og:description" content="">
-    <meta property="og:image" content="/assets/app_hyup/images/logo.jpg">
-    <!-- <meta property="og:url" content="https://mosihealth.com"> -->
 
     <link rel="apple-touch-icon" sizes="57x57" href="/assets/app_hyup/images/favicon/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/assets/app_hyup/images/favicon/apple-icon-60x60.png">

@@ -2,6 +2,7 @@
 
 use Mpdf\Mpdf;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class sales extends MY_Controller
@@ -389,14 +390,104 @@ class sales extends MY_Controller
             return;
         }
 
-        // 1️⃣ PhpSpreadsheet 로드
+        $sheets = json_decode($estimate_row['sheets'], true);
+        $items = $sheets[0]['data'] ?? [];
+
         $spreadsheet = IOFactory::load($file_path);
         $sheet = $spreadsheet->getSheet(0);
 
+        $count = count($items);
+        $insertAt = 15; // 15행부터 삽입
+        $lastAt = $insertAt + $count - 1;
+
+        // * C+D  merge
+
+        // ✅ 열 너비 설정
+        $sheet->getColumnDimension('C')->setAutoSize(true); // 순번
+        $sheet->getColumnDimension('E')->setAutoSize(true); // 품목
+        $sheet->getColumnDimension('F')->setWidth(10); // 규격
+        $sheet->getColumnDimension('G')->setWidth(10); // 수량
+        $sheet->getColumnDimension('H')->setWidth(15); // 단가
+        $sheet->getColumnDimension('J')->setWidth(15); // 공급가액
+        $sheet->getColumnDimension('L')->setWidth(15); // 세액
+        $sheet->getColumnDimension('P')->setAutoSize(true); // 비고
+
+        // ✅ 기존 행 아래로 밀기
+        $sheet->insertNewRowBefore($insertAt, $count);
+
+
+        foreach ($items as $index => $item) {
+            // ✅ 새로 밀린 만큼 offset
+            $row_num = $insertAt + $index;
+
+            $tmp_index = $count - $index;
+
+            $sheet->setCellValue("C{$row_num}", $tmp_index); // 순번
+            $sheet->mergeCells("C{$row_num}:D{$row_num}"); // C+D 병합
+
+            $sheet->setCellValue("E{$row_num}", $item[0]); // 품목
+
+            $sheet->setCellValue("F{$row_num}", $item[1]); // 규격
+
+            $sheet->setCellValue("G{$row_num}", $item[2]); // 수량
+
+            $sheet->setCellValue("H{$row_num}", !empty($item[3]) ? number_format($item[3]) : ''); // 단가
+            $sheet->mergeCells("H{$row_num}:I{$row_num}"); // H+I 병합
+
+            $sheet->setCellValue("J{$row_num}", !empty($item[4]) ? number_format($item[4]) : ''); // 공급가액
+            $sheet->mergeCells("J{$row_num}:K{$row_num}"); // J+K 병합
+
+            $sheet->setCellValue("L{$row_num}", !empty($item[5]) ? number_format($item[5]) : ''); // 세액
+            $sheet->mergeCells("L{$row_num}:O{$row_num}"); // L+M+N+O 병합
+
+            $sheet->setCellValue("P{$row_num}", $item[6]); // 비고
+            $sheet->mergeCells("P{$row_num}:U{$row_num}"); // P 병합
+        }
+
+        // * 순번 가운데 정렬
+        $sheet->getStyle("D{$insertAt}:D{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 품목 왼쪽 정렬
+        $sheet->getStyle("E{$insertAt}:E{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 규격 가운데 정렬
+        $sheet->getStyle("F{$insertAt}:F{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 수량 오른쪽 정렬
+        $sheet->getStyle("G{$insertAt}:G{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 단가 오른쪽 정렬
+        $sheet->getStyle("H{$insertAt}:I{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 공급가액 오른쪽 정렬
+        $sheet->getStyle("J{$insertAt}:K{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 세액 오른쪽 정렬
+        $sheet->getStyle("L{$insertAt}:O{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 비고 왼쪽 정렬
+        $sheet->getStyle("P{$insertAt}:U{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
         // 2️⃣ 셀 값 입력
-        $sheet->setCellValue('B5', '홍길동');
-        $sheet->setCellValue('C6', '2025-10-30');
-        $sheet->setCellValue('E10', '주식회사 지아이베콤');
+        $sheet->setCellValue('C5', 'No. : 20251024-S0021111111');
+        $sheet->setCellValue('C6', '주식회사 지아이베콤 귀하');
+        $sheet->setCellValue('C9', '수주일자 : 2025-10-24');
 
         // 3️⃣ 한글 파일명 처리
         $filename = $title . '_' . date('Ymd_His') . '.xlsx';
@@ -425,7 +516,7 @@ class sales extends MY_Controller
     # /sales/download_estimate_pdf
     public function download_estimate_pdf()
     {
-        $id = $this->input->post('id') ?? '';
+        $id = $this->input->get('id') ?? '';
 
         if (empty($id)) {
             throw new Error("견적서 아이디가 올바르지 않습니다.");
@@ -445,10 +536,23 @@ class sales extends MY_Controller
         $title = $SUB_TYPE[$sub_type] ?? '';
 
         $sheets = json_decode($estimate_row['sheets'], true);
-        $sheets_data = $sheets[0]['data'] ?? [];
 
-        printr($sheets_data);
-        exit;
+        /**
+         * Array
+(
+    [0] => Array
+        (
+            [0] => black matt,bk0005 - 에이치비외 (품목)
+            [1] =>   (규격)
+            [2] => 1 (수량)
+            [3] => 600000 (단가)
+            [4] => 600000 (공급가액)
+            [5] => 60000 (세액)
+            [6] =>  (비고)
+        )
+         */
+        $items = $sheets[0]['data'] ?? [];
+        // $items = [];
 
         // ✅ 한글 깨짐 방지 폰트 설정
         $mpdf = new Mpdf([
@@ -456,27 +560,6 @@ class sales extends MY_Controller
             'format' => 'A4',
             'default_font' => 'unbatang',
         ]);
-
-        // ✅ 샘플 데이터
-        $items = [
-            ['D110-60645A_R001', '', 24, 20000, 480000, 48000],
-            ['D201-29479A_R001', '', 4, 40000, 160000, 16000],
-            ['D201-29479A_R001', '', 6, 40000, 240000, 24000],
-            ['SCP-000171-R04', '', 4, 45000, 180000, 18000],
-            ['7375-005-100-203', '', 4, 10000, 40000, 4000],
-            ['M27 TAP', '', 1, 70000, 70000, 7000],
-            ['D110-60645A_R001', '', 12, 20000, 240000, 24000],
-            ['D110-60644A_R001', '', 12, 20000, 240000, 24000],
-            ['SUB EARTH BAR', '', 2, 140000, 280000, 28000],
-            ['PDCPRW-PM103016A', '', 6, 15000, 90000, 9000],
-            ['DEP-101998', '', 1, 50000, 50000, 5000],
-            ['DEP-101974', '', 1, 150000, 150000, 15000],
-            ['DEP-101275', '', 1, 40000, 40000, 4000],
-            ['D104-26390A_R003', '', 2, 140000, 280000, 28000],
-            ['D201-29479A_R001', '', 1, 40000, 40000, 4000],
-            ['13706A-111299', '', 2, 7000, 14000, 1400],
-            ['MK72-152-004-00', '', 32, 5500, 176000, 17600],
-        ];
 
         $total = array_sum(array_column($items, 4));
         $tax = array_sum(array_column($items, 5));
@@ -492,14 +575,15 @@ class sales extends MY_Controller
             'totalWithTax'  => $totalWithTax,
         ], true);
 
-        // ✅ PDF 출력
-        $mpdf->SetHTMLHeader('
-  <div style="width:100%; position:relative;">
-    <img src="http://jmtech.net/theme/mv305/img/logo-color.png" style="width:150px; margin-top:27px;">
-  </div>
-');
+        //         $mpdf->SetHTMLHeader('
+        //   <div class="firstpage-header" style="width:100%; text-align:left;">
+        //     <img src="http://jmtech.net/theme/mv305/img/logo-color.png"
+        //          style="width:150px; margin-top:27px;">
+        //   </div>
+        // ');
 
         $mpdf->WriteHTML($estimate_pdf_view);
+
         $mpdf->Output('수주서.pdf', 'I'); // D: 다운로드, I: 브라우저보기
     }
 
@@ -633,6 +717,29 @@ class sales extends MY_Controller
         $this->estimate_service->delete($id);
 
         alert_close('견적서가 삭제되었습니다');
+    }
+
+    # 비밀번호 변경
+    public function change_password()
+    {
+        $pw = $this->input->post('pw') ?? '';
+        $pw_confirm = $this->input->post('pw_confirm') ?? '';
+
+        $res_array = [
+            'ok'    => true,
+            'msg'   => '비밀번호가 변경되었습니다.',
+            'data'  => [],
+        ];
+
+        try {
+
+            $this->user_service->changePassword($pw, $pw_confirm);
+        } catch (Exception $e) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = $e->getMessage();
+        }
+
+        echo json_encode($res_array);
     }
 
     private function layout_config($sub_menu_code = '', $title = '')

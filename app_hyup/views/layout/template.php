@@ -19,13 +19,8 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="<?= $title ?>">
     <meta property="og:description" content="<?= $meta_description ?>">
-    <meta property="og:image" content="/assets/app_hyup/images/logo.jpg">
-    <meta property="og:url" content="https://mosihealth.com">
-
-    <meta name="twitter:card" content="/assets/app_hyup/images/logo.jpg">
     <meta name="twitter:title" content="<?= $title ?>">
     <meta name="twitter:description" content="<?= $meta_description ?>">
-    <meta name="twitter:image" content="https://assets/app_hyup/images/logo.jpg">
 
     <link rel="apple-touch-icon" sizes="57x57" href="/assets/app_hyup/images/favicon/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/assets/app_hyup/images/favicon/apple-icon-60x60.png">
@@ -321,13 +316,8 @@
                             </p>
 
                             <!-- 내정보수정 -->
-                            <button class="flex items-center gap-1 text-gray-700 hover:text-blue-600 text-sm !mb-2">
+                            <button type="button" onclick="show_my_info_modal(event);" class="flex !mb-4 items-center gap-1 text-gray-700 hover:text-blue-600 text-sm !mb-2">
                                 내정보수정
-                            </button>
-
-                            <!-- 환경설정 -->
-                            <button class="flex items-center gap-1 text-gray-700 hover:text-blue-600 text-sm !mb-5">
-                                환경설정
                             </button>
 
                             <!-- 로그아웃 버튼 -->
@@ -344,8 +334,88 @@
             </main>
         </div>
 
-    </div>
+        <dialog id="my_info_modal" class="modal">
+            <div class="modal-box !text-xs !w-[400px] relative">
+                <div class="absolute inset-0 modal-loading hidden">
+                    <div class="flex items-center justify-center w-full h-full bg-white/70">
+                        <img class="w-16" src="/assets/app_hyup/images/loading.gif" alt="loading" />
+                    </div>
+                </div>
 
+                <div class="absolute inset-0 modal-loading hidden">
+                    <div class="flex items-center justify-center w-full h-full bg-white/70">
+                        <img class="w-16" src="/assets/app_hyup/images/loading.gif" alt="loading" />
+                    </div>
+                </div>
+
+                <form id="exce_form" onsubmit="handle_excel_form(event);" class="bg-white w-full border border-gray-300">
+                    <!-- 헤더 -->
+                    <div class="flex justify-between items-center !text-base !px-4 !py-2 bg-[#4b5563]">
+                        <h2 class="text-white font-semibold">내 정보 수정</h2>
+                        <button type="button" class="text-gray-200" onclick="close_my_info_modal();">
+                            ✕
+                        </button>
+                    </div>
+
+                    <!-- 본문 -->
+                    <div class="!p-5 !space-y-4 flex !gap-4 w-full">
+                        <!-- 정보 영역 -->
+                        <div class="!space-y-2">
+                            <div class="flex items-center">
+                                <div class="w-42 text-sm font-medium text-gray-500">성명</div>
+                                <div class="text-sm text-gray-800">유성균</div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <div class="w-42 text-sm font-medium text-gray-500">휴대전화번호</div>
+                                <div class="text-sm text-gray-800">010-4571-9170</div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <div class="w-42 text-sm font-medium text-gray-500">이메일</div>
+                                <div class="text-sm text-gray-800">jjs7158@naver.com</div>
+                            </div>
+
+                            <hr class="my-3 border-gray-200" />
+
+                            <div class="flex items-center">
+                                <div class="w-42 text-sm font-medium text-gray-500">아이디</div>
+                                <div class="text-sm text-gray-800">jmlaser@empas.com</div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <div class="w-42 text-sm font-medium text-gray-500">비밀번호</div>
+                                <div class="flex flex-col gap-1">
+                                    <input type="password" class="!px-2 !py-1 reset_pw" placeholder="비밀번호">
+                                    <input type="password" class="!px-2 !py-1 reset_pw_confirm" placeholder="비밀번호 재확인">
+                                    <button onclick="password_reset(event);" type="button" class="sm-btn !text-xs text-center">
+                                        비밀번호 재설정
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <div class="w-42 text-sm font-medium text-gray-500">유형</div>
+                                <div class="text-sm text-gray-800">사용자</div>
+                            </div>
+                        </div>
+
+                        <hr class="mt-5 border-gray-200" />
+                    </div>
+
+                </form>
+            </div>
+        </dialog>
+
+    </div>
+    <script src="/assets/app_hyup/common/base.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/base.js') ?>"></script>
+    <script src="/assets/app_hyup/common/cookie.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/cookie.js') ?>"></script>
+    <script src="/assets/app_hyup/common/mask.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/mask.js') ?>"></script>
+    <script src="/assets/app_hyup/common/common.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/common.js') ?>"></script>
+    <script src="/assets/app_hyup/common/pwa.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/pwa.js') ?>"></script>
+    <script src="/assets/app_hyup/common/transition.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/transition.js') ?>"></script>
+    <script src="/assets/app_hyup/common/toast.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/toast.js') ?>"></script>
+    <script src="/assets/app_hyup/common/loading.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/loading.js') ?>"></script>
     <script>
         AOS.init({
             once: true, // ✅ 한 번만 애니메이션 실행
@@ -366,15 +436,46 @@
                 clickable: false,
             },
         });
+
+        function show_my_info_modal(e) {
+            const my_info_modal = document.getElementById('my_info_modal');
+            my_info_modal.showModal();
+        }
+
+        function close_my_info_modal() {
+            const my_info_modal = document.getElementById('my_info_modal');
+            my_info_modal.close();
+        }
+
+        function password_reset(e) {
+
+            start_modal_loading();
+
+            const pw = $('.reset_pw').val();
+            const pw_confirm = $('.reset_pw_confirm').val();
+
+            $.ajax({
+                type: "POST",
+                url: "/sales/change_password",
+                data: {
+                    pw: pw,
+                    pw_confirm: pw_confirm
+                },
+                dataType: "json",
+                success: function(response) {
+                    alert(response.msg);
+
+                    if (response.ok) {
+                        close_my_info_modal();
+                    }
+                },
+                complete: function() {
+                    stop_modal_loading();
+                }
+            });
+
+        }
     </script>
-    <script src="/assets/app_hyup/common/base.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/base.js') ?>"></script>
-    <script src="/assets/app_hyup/common/cookie.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/cookie.js') ?>"></script>
-    <script src="/assets/app_hyup/common/mask.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/mask.js') ?>"></script>
-    <script src="/assets/app_hyup/common/common.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/common.js') ?>"></script>
-    <script src="/assets/app_hyup/common/pwa.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/pwa.js') ?>"></script>
-    <script src="/assets/app_hyup/common/transition.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/transition.js') ?>"></script>
-    <script src="/assets/app_hyup/common/toast.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/toast.js') ?>"></script>
-    <script src="/assets/app_hyup/common/loading.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/loading.js') ?>"></script>
 </body>
 
 </html>

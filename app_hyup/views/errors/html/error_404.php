@@ -27,8 +27,6 @@
 	<meta name="msapplication-TileImage" content="/assets/app_hyup/images/favicon/ms-icon-144x144.png">
 	<meta name="theme-color" content="#2a4c8f">
 
-	<link data-n-head="1" rel="icon" type="image/x-icon" href="/assets/app_hyup/images/favicon.ico">
-
 	<!-- tailwind CSS -->
 	<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 

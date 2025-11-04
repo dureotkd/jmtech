@@ -8,9 +8,9 @@ const isLocal =
 
 const BACKEND_URL = isLocal
   ? "https://jmtech.test/api"
-  : "http://3.35.133.232/api";
+  : "https://www.jmtech.asia/api";
 
-const STATIC_URL = isLocal ? "https://jmtech.test" : "http://3.35.133.232";
+const STATIC_URL = isLocal ? "https://jmtech.test" : "https://www.jmtech.asia";
 
 const base = ky.create({
   prefixUrl: BACKEND_URL,

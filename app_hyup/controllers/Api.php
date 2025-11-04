@@ -23,6 +23,7 @@ class api extends MY_Controller
             "http://127.0.0.1:5173",
             "http://jmtech.test",
             "https://jmtech.test",
+            "https://www.jmtech.asia",
             "https://www.saju.asia",
             "https://saju.asia",
             "https://api.saju.asia",

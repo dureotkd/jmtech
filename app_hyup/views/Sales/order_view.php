@@ -5,35 +5,14 @@
     </h1>
 
     <!-- 필터 영역 -->
-    <div class="flex items-center gap-2 mb-4 !text-sm !my-1">
-        <!-- <button class="px-3 py-1.5 border border-gray-300 rounded hover:bg-gray-100">삭제</button>
-
-        <div class="flex items-center gap-2">
-            <input type="date" class="border rounded px-2 py-1" value="2025-09-25" />
-            <span>~</span>
-            <input type="date" class="border rounded px-2 py-1" value="2025-10-25" />
-            <button class="border rounded px-2 py-1 bg-white hover:bg-gray-100">
-                📅
-            </button>
-        </div>
-
-        <select class="border rounded px-2 py-1">
-            <option>전체 메모</option>
-        </select>
-
-        <select class="border rounded px-2 py-1">
-            <option>거래일 ▼</option>
-        </select> -->
+    <div class="flex items-center gap-2 mb-4 !text-sm">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
-            <div class=""></div>
-            <!-- <input
-                type="text"
-                placeholder="검색어를 입력하세요"
-                class="border px-2 py-1 rounded w-64" />
-            <button class="px-3 py-1.5 bg-gray-200 :bg-gray-300 rounded">상세</button> -->
+            <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+                삭제
+            </button>
             <button
-                onclick="open_popup_default('/sales/estimate_register','수주서 등록',1000,820);"
+                onclick="open_popup_default('<?= REACT_PATH ?>?sub_type=S','수주서 등록',1000,820);"
                 type="button"
                 class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
                 수주서 등록 +
@@ -45,55 +24,202 @@
     <table class="w-full border border-gray-300">
         <thead>
             <tr class="bg-[#788496] text-white">
-                <th class=" w-10"><input type="checkbox" /></th>
+                <th class=" w-10"><input type="checkbox" id="all_check" /></th>
                 <th class="">발행일</th>
                 <th class="">공급받는자상호</th>
                 <th class="">공급가액</th>
                 <th class="">세액</th>
                 <th class="">합계금액</th>
-                <th class=" w-16"></th>
+                <th class="">상태</th>
+                <th class=" w-32"></th>
             </tr>
         </thead>
         <tbody>
-            <tr class="border-b hover:bg-gray-50">
-                <td><input type="checkbox" /></td>
-                <td class="">2025-10-24</td>
-                <td class="">주식회사 지아이베컴</td>
-                <td class="">31,834,400</td>
-                <td class="">3,183,940</td>
-                <td class="">35,023,340</td>
-                <td class="cursor-pointer">
-                    <div class="w-full flex items-center justify-center gap-2">
-                        <!-- Excel Button -->
-                        <a
-                            href="/sales/download_estimate_excel"
-                            class="flex !w-fit gap-2  min-w-[60px] items-center gap-1 !border !border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs">
-                            <img width="16" alt="Logo of Microsoft Excel since 2019" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Microsoft_Office_Excel_%282019%E2%80%932025%29.svg/32px-Microsoft_Office_Excel_%282019%E2%80%932025%29.svg.png?20190925171014">
-                            <span class="font-bold">엑셀</span>
-                        </a>
-                        <a
-                            href="/sales/download_estimate_pdf"
-                            class="flex !w-fit gap-2 min-w-[60px] items-center gap-1 !border !border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs">
-                            <img width="14" alt="Logo of Microsoft Excel since 2019" src="https://media.istockphoto.com/id/1298834280/ko/%EB%B2%A1%ED%84%B0/pdf-%EC%95%84%EC%9D%B4%EC%BD%98-%EC%A3%BC%EC%9A%94-%ED%8C%8C%EC%9D%BC-%ED%98%95%EC%8B%9D-%EB%B2%A1%ED%84%B0-%EC%95%84%EC%9D%B4%EC%BD%98-%EA%B7%B8%EB%A6%BC.jpg?s=612x612&w=0&k=20&c=p1hZH6NRAUA1tToGtDQ5weAxeJhVjtdlkhCD7Tsra0g=">
-                            <span class="font-bold">PDF</span>
-                        </a>
-                    </div>
-                </td>
-            </tr>
+            <?
+            $총공급가액 = 0;
+            $총세액 = 0;
+            $총합계금액 = 0;
+            if (!empty($estimate_all)) :
+                foreach ($estimate_all as $estimate) :
 
-            <tr class="border-b bg-[#e9f1fb] 래">
-                <td></td>
-                <td class=""></td>
-                <td class="!font-bold">총 2건</td>
-                <td class="!font-bold">공급가액 : 34,609,400</td>
-                <td class="!font-bold">세액 : 3,460,940</td>
-                <td class="!font-bold">합계금액 : 38,070,340</td>
-                <td class="cursor-pointer">
+                    $총공급가액 += $estimate['supply_amount'];
+                    $총세액 += $estimate['tax_amount'];
+                    $총합계금액 += $estimate['amount'];
+            ?>
 
-                </td>
-            </tr>
+                    <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $estimate['id'] ?>')" data-estimate-id="<?= $estimate['id'] ?>">
+                        <td><input type="checkbox" estimate-id="<?= $estimate['id'] ?>" onclick="event.stopPropagation();" /></td>
+                        <td class="">
+                            <?= date('Y-m-d', strtotime($estimate['created_at'])) ?>
+                        </td>
+                        <td class="">
+                            <?= $estimate['partner_name'] ?>
+                        </td>
+                        <td class=""><?= number_format($estimate['supply_amount']) ?></td>
+                        <td class=""><?= number_format($estimate['tax_amount']) ?></td>
+                        <td class=""><?= number_format($estimate['amount']) ?></td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <select onclick="handle_select(event);" onchange="change_status(<?= $estimate['id'] ?>, event);" name="estimate_status" id="">
+                                    <?
+                                    $ESTIMATE_STATUS = unserialize(ESTIMATE_STATUS);
+                                    foreach ($ESTIMATE_STATUS as $status_key => $status_val) {
+                                    ?>
+                                        <option <?= $status_key === $estimate['status'] ? 'selected' : '' ?> value="<?= $status_key ?>"><?= $status_val ?></option>
+                                    <?
+                                    }
+
+                                    ?>
+                                </select>
+
+                                <?
+                                if (!empty($estimate['g_estimate_id'])) {
+                                ?>
+                                    <button
+                                        onclick="event.stopPropagation(); open_popup_default(`/sales/estimate_detail?id=<?= $estimate['g_estimate_id'] ?>`, '견적서 상세', 1000, 820);"
+                                        type="button"
+                                        class="sm-btn bg-primary !m-0 text-xs">
+                                        견적서 보기
+                                    </button>
+                                <?
+                                }
+                                ?>
+                            </div>
+
+                        </td>
+                        <td class="cursor-pointer">
+                            <div class="flex items-center gap-1">
+                                <img src="https://ai.serp.co.kr/img/serp/btn/btn_send.png" alt="">
+                                <span class="font-semibold">상세보기</span>
+                            </div>
+                        </td>
+                    </tr>
+                <? endforeach;
+            else : ?>
+                <tr>
+                    <td colspan="9" class="text-center py-4">등록된 수주서가 없습니다.</td>
+                </tr>
+            <? endif; ?>
+
+            <?
+            if (!empty($estimate_all)) {
+            ?>
+                <tr class="border-b bg-[#e9f1fb]">
+                    <td></td>
+                    <td class=""></td>
+                    <td class="!font-bold">총 <?= count($estimate_all) ?>건</td>
+                    <td class="!font-bold">공급가액 : <?= number_format($총공급가액) ?></td>
+                    <td class="!font-bold">세액 : <?= number_format($총세액) ?></td>
+                    <td class="!font-bold">합계금액 : <?= number_format($총합계금액) ?></td>
+                    <td class="!font-bold">
+                    </td>
+                    <td class="cursor-pointer">
+                    </td>
+                </tr>
+
+            <?
+            }
+            ?>
 
         </tbody>
     </table>
-
 </div>
+
+<script>
+    function go_detail(estimate_id) {
+        open_popup_default(`/sales/estimate_detail?id=${estimate_id}`, '견적서 상세', 1000, 820);
+    }
+
+    function handle_select(event) {
+        event.stopPropagation(); // 트리거링 방지
+    }
+
+    function delete_estimate(e) {
+
+        const checked_ids = [];
+        $('tbody input[type="checkbox"]:checked').each(function() {
+            const row = $(this).closest('tr');
+            const estimate_id = row.data('estimate-id');
+            checked_ids.push(estimate_id);
+        });
+
+        if (checked_ids.length === 0) {
+            alert('삭제할 견적서를 선택해주세요.');
+            return;
+        }
+
+        if (!confirm('선택한 견적서를 삭제하시겠습니까?')) {
+            return;
+        }
+
+        start_loading();
+
+        $.ajax({
+            type: "GET",
+            url: "/sales/delete_estimate",
+            data: {
+                id: checked_ids
+            },
+            dataType: "json",
+            success: function(response) {
+
+                alert(response.msg);
+
+                if (response.ok) {
+                    window.location.reload();
+                }
+
+            },
+            error: function(xhr, status, error) {
+                alert("에러가 발생했습니다: " + error);
+            },
+            complete: function() {
+                stop_loading();
+            }
+        });
+    }
+
+    function change_status(estimate_id, e) {
+
+        start_loading();
+
+        const selected_status = e.target.value;
+
+        if (selected_status === '수주전환') {
+            if (!confirm('수주전환 하시겠습니까?')) {
+                return;
+            }
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/sales/change_status",
+            data: {
+                id: estimate_id,
+                status: selected_status,
+                title: '수주서'
+            },
+            dataType: "json",
+            success: function(response) {
+
+                alert(response.msg);
+
+                if (response.ok && selected_status == '수주전환' && response.su_estimate_id) {
+
+                    open_popup_default(`/sales/estimate_detail?id=${response.su_estimate_id}`, '수주서 상세', 1000, 820);
+                }
+
+                if (response.ok) {
+                    window.location.reload();
+                }
+
+            },
+            error: function(xhr, status, error) {
+                alert("에러가 발생했습니다: " + error);
+            },
+            complete: function() {
+                stop_loading();
+            }
+        });
+    }
+</script>

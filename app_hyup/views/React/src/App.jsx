@@ -339,6 +339,15 @@ export default function App() {
         break;
     }
 
+    const 견적서 = cloneSheets[0].data;
+    let newAmount = 0;
+    견적서.forEach((row) => {
+      const 공급가액 = parseFloat(row[4]) || 0;
+      const 세액 = parseFloat(row[5]) || 0;
+      newAmount += 공급가액 + 세액;
+    });
+
+    setAmount(newAmount);
     setForm((prev) => ({ ...prev, vat_type: vatOption }));
     setSheets(cloneSheets);
   };

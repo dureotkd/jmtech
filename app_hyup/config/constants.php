@@ -292,29 +292,22 @@ define('MENU', serialize([
     ],
 
     'setting'    => [
-        'name'    => '공지사항',
+        'name'    => '설정',
         'sub'     =>  [
-            'list'        => [
-                'name'            => '공지사항관리',
-                'path'            => '/notice/notice_list',
-            ],
-            'faq_list'        => [
-                'name'            => 'FAQ관리',
-                'path'            => '/notice/faq_list',
-            ],
-        ],
-    ],
-
-    'contract'    => [
-        'name'    => '공지사항',
-        'sub'     =>  [
-            'list'        => [
-                'name'            => '공지사항관리',
-                'path'            => '/notice/notice_list',
-            ],
-            'faq_list'        => [
-                'name'            => 'FAQ관리',
-                'path'            => '/notice/faq_list',
+            'setting'          => [
+                'name'            => '기초정보',
+                'path'            => '/setting/partner',
+                'auth_level'    => [11],
+                'sub'             => [
+                    'partner'        => [
+                        'name'            => '거래처관리',
+                        'path'            => '/setting/partner',
+                    ],
+                    'item'        => [
+                        'name'            => '품목관리',
+                        'path'            => '/setting/item',
+                    ],
+                ]
             ],
         ],
     ],

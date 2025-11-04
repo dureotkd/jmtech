@@ -61,7 +61,8 @@ class service_model extends MY_Model
             :
             "* , 
             (SELECT company_name FROM jmtech.business_partner bp WHERE bp.id = a.partner_id) AS partner_name ,
-            (SELECT id FROM jmtech.estimate WHERE no = a.no AND sub_type = 'S') AS su_estimate_id";
+            (SELECT id FROM jmtech.estimate WHERE no = a.no AND sub_type = 'S') AS su_estimate_id ,
+            (SELECT id FROM jmtech.estimate WHERE no = a.no AND sub_type = 'G') AS g_estimate_id";
         $sql = sprintf("SELECT {$select} FROM jmtech.estimate a WHERE %s ORDER BY a.created_at DESC", join(" AND ", $where));
         return $this->excute($sql, $type, 'main');
     }

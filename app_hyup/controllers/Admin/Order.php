@@ -1,5 +1,10 @@
 <?php
 
+use Mpdf\Mpdf;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 class order extends MY_Controller
 {
 
@@ -9,363 +14,771 @@ class order extends MY_Controller
 
         $this->load->library([
             "layout",
-            "alarmtalk",
+            "phpspreadsheet",
             "/Service/user_service",
-            "/Service/order_service",
+            "/Service/estimate_service",
+            "file",
         ]);
 
         $this->load->model('/Page/service_model');
     }
 
-    public function index()
+    public function index() {}
+
+    # 매출(거래명세표)
+    public function report()
     {
-        $search_type = $this->input->get('search_type');
-        $search_value = $this->input->get('search_value');
-        $search_order_status = $this->input->get('search_order_status');
-        $excel_yn = $this->input->get('excel_yn') ?? 'N';
-        $page = $this->input->get('page') ?? 1;
-
-        $search_order_status_item = get_search_item_v2([
-            'vo'            => unserialize(ORDER_STATUS),
-            'select'        => $search_order_status,
-            'add' => [
-                'all' => '주문상태 전체'
-            ],
-            'tag'           => 's',
-        ]);
-
-        $search_type_item = get_search_item_v2(array(
-            'vo'            => [
-                'all' => '전체',
-                'id'  => '아이디',
-                'name' => '이름',
-                'phone' => '연락처',
-                'number' => '주문번호',
-            ],
-            'select'        => $search_type,
-            'tag'           => 's',
-        ));
-
-        $where = [1];
-
-        if (!empty($search_order_status) && $search_order_status != 'all') {
-
-            $where[] = "a.status = '{$search_order_status}'";
-        }
-
-        if (!empty($search_type) && !empty($search_value)) {
-
-            if ($search_type == 'all') {
-
-                $where[] =
-                    "(
-                    d.user_id LIKE '%{$search_value}%' 
-                    OR d.name LIKE '%{$search_value}%' 
-                    OR d.phone LIKE '%{$search_value}%'
-                    OR a.number LIKE '%{$search_value}%'
-                    )";
-            } else {
-
-                if ($search_type == 'id') {
-                    $where[] = "d.user_id LIKE '%{$search_value}%'";
-                } else if ($search_type == 'name') {
-                    $where[] = "d.name LIKE '%{$search_value}%'";
-                } else if ($search_type == 'phone') {
-                    $where[] = "d.phone LIKE '%{$search_value}%'";
-                } else if ($search_type == 'number') {
-                    $where[] = "a.number LIKE '%{$search_value}%'";
-                }
-            }
-        }
-
-        $order_items_db = $this->service_model->exec_sql(
-            'all',
-            sprintf("SELECT
-                * ,
-                a.is_multy as is_multy,
-                a.status as order_status,
-                a.id as order_item_id,
-                b.id as order_detail_id,
-                b.zipcode as zipcode,
-                b.address as address,
-                b.address_detail as address_detail,
-                b.memo as order_memo,
-                c.id as product_id,
-                c.name as product_name,
-                d.id as customer_id,
-                d.name as customer_name,
-                d.phone as customer_phone,
-                d.email as customer_email,
-                (SELECT AppCardName FROM mosihealth.smartro_payment_log WHERE id = a.payment_log_id) as app_card_name
-            FROM
-                mosihealth.order_item a
-            LEFT JOIN
-                mosihealth.order_detail b ON a.id = b.order_item_id
-            LEFT JOIN
-                mosihealth.product c ON b.product_id = c.id
-            INNER JOIN
-                mosihealth.user d ON a.user_id = d.id
-            WHERE
-                %s
-            ORDER BY
-                a.ordered_at DESC", join(' AND ', $where))
-        );
-
-        $order_items = [];
-
-        if (!empty($order_items_db)) {
-
-            foreach ($order_items_db as $row) {
-
-                if ($row['is_multy'] == true) {
-
-                    $bundle_items_all = $this->service_model->exec_sql(
-                        'all',
-                        sprintf(
-                            "SELECT 
-                                * , 
-                                a.id as order_item_id,
-                                b.id as order_bundle_item_id,
-                                b.price as bundle_item_price,
-                                b.amount as bundle_item_amount,
-                                b.quantity as bundle_item_quantity,
-                                c.name as product_name
-                            FROM 
-                                mosihealth.order_item a,
-                                mosihealth.order_bundle_items b,
-                                mosihealth.product c
-                            WHERE 
-                                a.id = b.order_item_id
-                            AND 
-                                b.product_id = c.id
-                            AND 
-                                a.id = '%s'
-                            ",
-                            $row['order_item_id']
-                        )
-                    );
-
-                    $bundle_items_cnt = count($bundle_items_all);
-
-                    $row['bundle_items'] = $bundle_items_all;
-                    $row['bundle_items_cnt'] = $bundle_items_cnt;
-
-                    // 액상 스위트린 포함 총 3종 구성
-
-                    if ($bundle_items_cnt == 1) {
-                        // 단일 상품인 경우
-                        $row['product_name'] = $row['product_name'];
-                    } else if ($bundle_items_cnt > 1) {
-                        // 번들 상품인 경우
-                        // 예: 액상 스위트린 등 2종
-                        $row['product_name'] = $row['product_name'] . '등 ' . ($bundle_items_cnt - 1) . '종';
-                    }
-                }
-
-                // if ($row['payment_method'] == '무통장입금') {
-
-                //     $payment_log = $this->service_model->get_payaction_log('row', [
-                //         "id = '{$row['payment_log_id']}'"
-                //     ]);
-                // } else if ($row['payment_method'] == '카드') {
-                //     $payment_log = $this->service_model->get_payaction_log('row', [
-                //         "id = '{$row['payment_log_id']}'"
-                //     ]);
-                // }
-
-                // $row['payment_log'] = $payment_log;
-                $order_items[] = $row;
-            }
-        }
-
-        $layout_data = $this->layout_config($excel_yn == 'Y' ? "layout/blank" : "layout/admin");
 
         $view_data =  [
-
-            'layout_data'           => $layout_data,
-            'order_items'           => $order_items,
-
-            'search_order_status_item' => $search_order_status_item,
-            'search_type_item'      => $search_type_item,
-            'search_order_status' => $search_order_status,
-            'search_type'           => $search_type,
-            'search_value'          => $search_value,
-            'excel_yn'          => $excel_yn,
-            'page' => $page,
+            'layout_data'           => $this->layout_config('report', '매출(거래명세표)'),
         ];
 
-        if ($excel_yn == 'Y') {
+        $this->layout->view('/Order/report_view', $view_data);
+    }
 
-            $this->output->enable_profiler(false);
+    # 견적서
+    public function estimate()
+    {
 
-            $excel_file_name = "주문관리_" . date('Ymd') . ".xls";
+        /**
+         *     [id] => 10
+            [type] => 
+            [no] => 20251102-24B91C
+            [estimate_date] => 2025-11-01
+            [phone_number] => 010-5653-9944
+            [fax_number] => 042-111-1111
+            [title] => 112
+            [amount] => 13237543
+            [amount_in_words] => 
+            [status] => draft
+            [memo] => 
+            [created_at] => 2025-11-02 13:13:13
+            [updated_at] => 2025-11-02 13:13:13
+            [due_at] => 2025-11-01 00:00:00
+            [location] => 11
+            [valid_at] => 2025-11-29 00:00:00
+            [payment_type] => 22
+            [etc_memo] => 22
+            [vat_type] => N
+            [partner_name] => (유)에이지케이특수강
+            [partner_id] => 2
+         */
+        $estimate_all = $this->service_model->get_estimate('all', [
+            "type = 'SELL'",    // SELL:판매, BUY:구매
+            "sub_type = 'G'",   // G:견적서, S:수주서
+        ]);
 
-            // Excel 파일로 다운로드 (header ms excel)
-            header("Content-type: application/vnd.ms-excel");
-            header("Content-Disposition: attachment; filename=" . $excel_file_name . ".xls");
-            header("Content-Transfer-Encoding: binary");
-            header("Pragma: no-cache");
-            header("Expires: 0");
+        $view_data =  [
+            'layout_data'           => $this->layout_config('estimate', '견적서'),
+            'estimate_all'          => $estimate_all,
+        ];
 
-            $this->layout->view('/Admin/Excel/order_excel_view', $view_data);
-        } else {
+        $this->layout->view('/Sales/estimate_view', $view_data);
+    }
 
-            $this->layout->view('/Admin/order_view', $view_data);
+    # 견적서 상세
+    public function estimate_detail()
+    {
+        $id = $this->input->get('id') ?? '';
+
+        if (empty($id)) {
+            show_404();
+            return;
         }
-    }
 
-    public function update_admin_memo()
-    {
-
-        $id = $this->input->post('id');
-        $memo = $this->input->post('memo');
-
-        $res_array = [
-            'ok' => true,
-            'msg' => '',
-        ];
-
-        $this->service_model->update_order_detail(DEBUG, [
-            'admin_memo' => $memo,
-        ], [
-            "order_item_id = '{$id}'"
+        $estimate = $this->service_model->get_estimate('row', [
+            "id = {$id}"
         ]);
 
+        if (empty($estimate)) {
+            show_404();
+            return;
+        }
+
+        $files = $this->service_model->get_file('all', [
+            "ref_table = 'estimate'",
+            "ref_id = {$id}"
+        ]);
+
+        $sheets_json = json_decode($estimate['sheets'], true);
+        $sheets = $sheets_json[0]['data'] ?? [];
+
+        $view_data =  [
+            'id'            => $id,
+            'estimate'      => $estimate,
+            'sheets'        => $sheets,
+            'files'         => $files,
+            'layout_data'   => $this->layout_blank_config('estimate', '견적서'),
+        ];
+
+        $this->layout->view('/Sales/estimate_detail_view', $view_data);
+    }
+
+    # 수주서
+    public function order()
+    {
+        /**
+         * 📑 수주서 (Order Confirmation / Sales Order)
+
+➡️ 구매자의 발주를 판매자가 ‘받았다’는 문서
+
+목적: 견적을 승인받고, 실제 거래가 확정된 후 작성
+
+작성 시점: 발주서(구매요청서)가 들어온 뒤
+
+주요 내용:
+
+견적 내용 + 발주번호 + 계약조건 확정사항
+
+실제 납기, 공급일, 세금계산서 발행일 등
+
+의미: “이 주문을 접수했습니다”라는 계약 확정 문서
+
+📘 예시
+
+거래처 A가 발주서를 보내면, JMTech이 “수주서”를 발행 → ERP에서는 이게 실제 매출 예약 데이터로 잡힘
+         */
+
+        $view_data =  [
+            'faqs'          => '',
+            'layout_data'   => $this->layout_config('order', '수주서'),
+        ];
+
+        $this->layout->view('/Sales/order_view', $view_data);
+    }
+
+    # 견적서 등록 (팝업)
+    /**
+    ['철판', 'SS400', 10, 15000, '=D1*E1', "='내역서'!D1", ''],
+    ['볼트', 'M10', 20, 500, '=D2*E2', '=F2*0.1', ''],
+    ['너트', 'M10', 20, 400, '=D3*E3', '=F3*0.1', ''],
+    ['용접봉', '6013', 5, 10000, '=D4*E4', '=F4*0.1', ''],
+    ['기타', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
+    ['합계', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
+     * @return void
+     */
+    public function estimate_register()
+    {
+        $sheets = [
+            '견적서' => [
+                'name' => '견적서',
+                'data' => [
+                    [], // ^ 데이터
+                    [],
+                    [],
+                ],
+                'columns' => [
+                    [
+                        'title'     => '품목',
+                        'type'      => 'dropdown',
+                        'source'    =>  [   // ^ 드롭다운 샘플 데이터
+                            // ['key' => '1', 'value' => '00000000041 // 너트(스캔) // EA', 'title' => '너트(스캔)11'],
+                            // ['key' => '2', 'value' => '00000000042 // 너트(스캔) // EA', 'title' => '품목'],
+                            // ['key' => '3', 'value' => '00000000043 // 너트(스캔) // EA', 'title' => '품목'],
+                            // ['key' => '3', 'value' => '00000000044 // 너트(스캔) // EA', 'title' => '품목'],
+                            // ['key' => '3', 'value' => '00000000045 // 너트(스캔) // EA', 'title' => '품목'],
+                            // ['key' => '3', 'value' => '00000000046 // 너트(스캔) // EA', 'title' => '품목'],
+                            // ['key' => '3', 'value' => '000000000473 // 너트(스캔) // EA', 'title' => '품목'],
+                        ]
+                    ],
+                    [
+                        'title' => '규격',
+                    ],
+                    [
+                        'title' => '수량',
+                    ],
+                    [
+                        'title' => '단가',
+                    ],
+                    [
+                        'title' => '공급가액',
+                    ],
+                    [
+                        'title' => '세액',
+                    ],
+                    [
+                        'title' => '비고',
+                    ]
+                ],
+                'colWidth' => [278, 100, 80, 100, 120, 100, 150],
+                'height' => 'auto',
+            ],
+            '내역서' => [
+                'name' => '내역서',
+                'data' => [
+                    [],
+                    [],
+                    [],
+                ],
+                'columns' => [
+                    [
+                        'title'     => '품목',
+                    ],
+                    [
+                        'title' => '규격',
+                    ],
+                    [
+                        'title' => '수량',
+                    ],
+                    [
+                        'title' => '단가',
+                    ],
+                    [
+                        'title' => '공급가액',
+                    ],
+                    [
+                        'title' => '세액',
+                    ],
+                    [
+                        'title' => '비고',
+                    ]
+                ],
+                'colWidth' => [278, 100, 80, 100, 120, 100, 150],
+                'height' => 400,
+            ],
+        ];
+
+        $view_data =  [
+            'sheets'                => $sheets,
+            'layout_data'           => $this->layout_blank_config('', '견적서 등록'),
+        ];
+
+        $this->layout->view('/Sales/estimate_register_view', $view_data);
+    }
+
+    # 엑셀 불러오기 
+    public function estimate_excel_load()
+    {
+        $excel_file = $_FILES['excel_file'] ?? null;
+
+        $sheet_name = $this->input->post('sheet_name') ?? '';
+
+        $res_array = [
+            'ok'    => true,
+            'msg'   => '',
+            'data'  => [],
+        ];
+
+        if (empty($excel_file)) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = '엑셀 파일이 첨부되지 않았습니다.';
+            echo json_encode($res_array);
+            return;
+        }
+
+        if (empty($sheet_name)) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = '시트를 선택해주세요.';
+            echo json_encode($res_array);
+            return;
+        }
+
+        if (!$excel_file || $excel_file['error'] !== UPLOAD_ERR_OK) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = '엑셀 파일 업로드 중 오류가 발생했습니다.';
+            echo json_encode($res_array);
+            return;
+        }
+
+        $excel_base_thead = [
+            '견적서'    => [
+                '품목코드',
+                '품목명',
+                '규격',
+                '창고',
+                '수량',
+                '단위',
+                '단가',
+                '공급가',
+                '부가세',
+                '비고'
+            ],
+            '내역서'    => [
+                '품목명',
+                '규격',
+                '수량',
+                '단가',
+                '공급가',
+                '부가세',
+                '비고'
+            ],
+        ];
+
+        // * Excel Upload 후 데이터 파싱
+        try {
+            // 엑셀 로드
+            $spreadsheet = $this->phpspreadsheet->loadExcelFile($excel_file['tmp_name']);
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray(null, true, true, true);
+
+            // 첫 번째 행(헤더) 기준으로 파싱
+            $header = array_shift($rows);
+
+            foreach ($excel_base_thead[$sheet_name] as $index => $expected_header) {
+                $column_letter = chr(65 + $index); // A, B, C, ...
+                if (!isset($header[$column_letter]) || trim($header[$column_letter]) !== $expected_header) {
+                    throw new Exception("엑셀 파일의 헤더가 올바르지 않습니다. 예상 헤더: '{$expected_header}'");
+                }
+            }
+
+            /**
+             *                     ['철판', 'SS400', 10, 15000, '=D1*E1', "='내역서'!D1", ''],
+                    ['볼트', 'M10', 20, 500, '=D2*E2', '=F2*0.1', ''],
+                    ['너트', 'M10', 20, 400, '=D3*E3', '=F3*0.1', ''],
+                    ['용접봉', '6013', 5, 10000, '=D4*E4', '=F4*0.1', ''],
+                    ['기타', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
+                    ['합계', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
+             */
+            foreach ($rows as $row) {
+
+                $품목코드 = trim($row['A']); // 품목코드
+                $품목명   = trim($row['B']); // 품목명
+                $규격     = trim($row['C']); // 규격
+                $창고     = trim($row['D']); // 창고
+                $수량     = (int)trim($row['E']); // 수량
+                $단위     = trim($row['F']); // 단위
+                $단가     = trim($row['G']); // 단가
+                $부가세   = trim($row['I']); // 부가세
+                $비고     = trim($row['J']); // 비고
+
+                $단가 = (int)preg_replace('/[^0-9]/u', '', $단가); // 숫자만 남김
+                $공급가  = !empty($단가) ? (int)$단가 * $수량 : 0; // 공급가 계산
+                $부가세 = !empty($공급가) ? (int)($공급가 * 0.1) : 0; // 부가세 계산
+
+                $res_array['data'][] = [$품목명, $규격, $수량, $단가, $공급가, $부가세, $비고];
+            }
+        } catch (Throwable $e) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = $e->getMessage();
+        }
+
         echo json_encode($res_array);
+    }
+
+    # 엑셀 다운로드 (견적서,수주서,발주서)
+    public function download_estimate_excel()
+    {
+        $id = $this->input->get('id') ?? '';
+
+        if (empty($id)) {
+            show_404();
+            return;
+        }
+
+        $estimate_row = $this->service_model->get_estimate('row', [
+            "id = {$id}"
+        ]);
+
+        if (empty($estimate_row)) {
+            show_404();
+            return;
+        }
+
+        $sub_type = $estimate_row['sub_type'] ?? ''; // G:견적서, S:수주서
+        $SUB_TYPE = unserialize(SUB_TYPE);
+        $title = $SUB_TYPE[$sub_type] ?? '';
+
+        if (empty($title)) {
+            show_404();
+            return;
+        }
+
+        $file_path = $_SERVER['DOCUMENT_ROOT'] . "/assets/app_hyup/excel/{$sub_type}_estimate_excel.xlsx";
+
+        if (!file_exists($file_path)) {
+            show_404();
+            return;
+        }
+
+        $sheets = json_decode($estimate_row['sheets'], true);
+        $items = $sheets[0]['data'] ?? [];
+
+        $spreadsheet = IOFactory::load($file_path);
+        $sheet = $spreadsheet->getSheet(0);
+
+        $count = count($items);
+        $insertAt = 15; // 15행부터 삽입
+        $lastAt = $insertAt + $count - 1;
+
+        // * C+D  merge
+
+        // ✅ 열 너비 설정
+        $sheet->getColumnDimension('C')->setAutoSize(true); // 순번
+        $sheet->getColumnDimension('E')->setAutoSize(true); // 품목
+        $sheet->getColumnDimension('F')->setWidth(10); // 규격
+        $sheet->getColumnDimension('G')->setWidth(10); // 수량
+        $sheet->getColumnDimension('H')->setWidth(15); // 단가
+        $sheet->getColumnDimension('J')->setWidth(15); // 공급가액
+        $sheet->getColumnDimension('L')->setWidth(15); // 세액
+        $sheet->getColumnDimension('P')->setAutoSize(true); // 비고
+
+        // ✅ 기존 행 아래로 밀기
+        $sheet->insertNewRowBefore($insertAt, $count);
+
+
+        foreach ($items as $index => $item) {
+            // ✅ 새로 밀린 만큼 offset
+            $row_num = $insertAt + $index;
+
+            $tmp_index = $count - $index;
+
+            $sheet->setCellValue("C{$row_num}", $tmp_index); // 순번
+            $sheet->mergeCells("C{$row_num}:D{$row_num}"); // C+D 병합
+
+            $sheet->setCellValue("E{$row_num}", $item[0]); // 품목
+
+            $sheet->setCellValue("F{$row_num}", $item[1]); // 규격
+
+            $sheet->setCellValue("G{$row_num}", $item[2]); // 수량
+
+            $sheet->setCellValue("H{$row_num}", !empty($item[3]) ? number_format($item[3]) : ''); // 단가
+            $sheet->mergeCells("H{$row_num}:I{$row_num}"); // H+I 병합
+
+            $sheet->setCellValue("J{$row_num}", !empty($item[4]) ? number_format($item[4]) : ''); // 공급가액
+            $sheet->mergeCells("J{$row_num}:K{$row_num}"); // J+K 병합
+
+            $sheet->setCellValue("L{$row_num}", !empty($item[5]) ? number_format($item[5]) : ''); // 세액
+            $sheet->mergeCells("L{$row_num}:O{$row_num}"); // L+M+N+O 병합
+
+            $sheet->setCellValue("P{$row_num}", $item[6]); // 비고
+            $sheet->mergeCells("P{$row_num}:U{$row_num}"); // P 병합
+        }
+
+        // * 순번 가운데 정렬
+        $sheet->getStyle("D{$insertAt}:D{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 품목 왼쪽 정렬
+        $sheet->getStyle("E{$insertAt}:E{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 규격 가운데 정렬
+        $sheet->getStyle("F{$insertAt}:F{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 수량 오른쪽 정렬
+        $sheet->getStyle("G{$insertAt}:G{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 단가 오른쪽 정렬
+        $sheet->getStyle("H{$insertAt}:I{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 공급가액 오른쪽 정렬
+        $sheet->getStyle("J{$insertAt}:K{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 세액 오른쪽 정렬
+        $sheet->getStyle("L{$insertAt}:O{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // * 비고 왼쪽 정렬
+        $sheet->getStyle("P{$insertAt}:U{$lastAt}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // 2️⃣ 셀 값 입력
+        $sheet->setCellValue('C5', 'No. : 20251024-S0021111111');
+        $sheet->setCellValue('C6', '주식회사 지아이베콤 귀하');
+        $sheet->setCellValue('C9', '수주일자 : 2025-10-24');
+
+        // 3️⃣ 한글 파일명 처리
+        $filename = $title . '_' . date('Ymd_His') . '.xlsx';
+        $encoded_filename = rawurlencode($filename);
+
+        // 4️⃣ 출력 버퍼 비우기 (가장 중요)
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        // 5️⃣ HTTP 헤더 설정
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename*=UTF-8''{$encoded_filename}");
+        header('Cache-Control: max-age=0');
+        header('Pragma: public');
+        header('Expires: 0');
+
+        // 6️⃣ 브라우저로 바로 출력
+        $writer = new Xlsx($spreadsheet);
+        $writer->setPreCalculateFormulas(false); // 수식 미리계산 방지 (속도 + 안전)
+        $writer->save('php://output');
         exit;
     }
 
-    public function update_tracking_number()
+    # PDF 다운로드 (견적서,수주서,발주서)
+    # /sales/download_estimate_pdf
+    public function download_estimate_pdf()
     {
+        $id = $this->input->get('id') ?? '';
 
-        $id = $this->input->post('id');
-        $tracking_number = $this->input->post('tracking_number');
+        if (empty($id)) {
+            throw new Error("견적서 아이디가 올바르지 않습니다.");
+        }
 
-        $res_array = [
-            'ok' => true,
-            'msg' => '',
-        ];
-
-        $this->service_model->update_order_detail(DEBUG, [
-            'tracking_number' => $tracking_number,
-        ], [
-            "order_item_id = '{$id}'"
+        $estimate_row = $this->service_model->get_estimate('row', [
+            "id = {$id}"
         ]);
 
-        echo json_encode($res_array);
-        exit;
+        if (empty($estimate_row)) {
+            show_404();
+            return;
+        }
+
+        $sub_type = $estimate_row['sub_type'] ?? ''; // G:견적서, S:수주서
+        $SUB_TYPE = unserialize(SUB_TYPE);
+        $title = $SUB_TYPE[$sub_type] ?? '';
+
+        $sheets = json_decode($estimate_row['sheets'], true);
+
+        /**
+         * Array
+(
+    [0] => Array
+        (
+            [0] => black matt,bk0005 - 에이치비외 (품목)
+            [1] =>   (규격)
+            [2] => 1 (수량)
+            [3] => 600000 (단가)
+            [4] => 600000 (공급가액)
+            [5] => 60000 (세액)
+            [6] =>  (비고)
+        )
+         */
+        $items = $sheets[0]['data'] ?? [];
+        // $items = [];
+
+        // ✅ 한글 깨짐 방지 폰트 설정
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'default_font' => 'unbatang',
+        ]);
+
+        $total = array_sum(array_column($items, 4));
+        $tax = array_sum(array_column($items, 5));
+        $totalWithTax = $total + $tax;
+
+        // ✅ HTML 구성
+        $estimate_pdf_view = $this->load->view('Pdf/estimate_pdf_view', [
+            'items'         => $items,
+            'total'         => $total,
+            'tax'           => $tax,
+            'estimate'      => $estimate_row,
+            'title'         => $title,
+            'totalWithTax'  => $totalWithTax,
+        ], true);
+
+        //         $mpdf->SetHTMLHeader('
+        //   <div class="firstpage-header" style="width:100%; text-align:left;">
+        //     <img src="http://jmtech.net/theme/mv305/img/logo-color.png"
+        //          style="width:150px; margin-top:27px;">
+        //   </div>
+        // ');
+
+        $mpdf->WriteHTML($estimate_pdf_view);
+
+        $mpdf->Output('수주서.pdf', 'I'); // D: 다운로드, I: 브라우저보기
     }
 
-    public function update_order_status()
+    # 견적서 저장
+    public function save_estimate()
     {
 
-        $id = $this->input->post('id');
-        $order_status = $this->input->post('order_status');
+        $partner_id = $this->input->post('partner_id') ?? '';
+        $estimate_date = $this->input->post('estimate_date') ?? '';
+        $phone_number = $this->input->post('phone_number') ?? '';
+        $fax_number = $this->input->post('fax_number') ?? '';
+        $title = $this->input->post('title') ?? '';
+
+        $due_at = $this->input->post('due_at') ?? '';
+        $location = $this->input->post('location') ?? '';
+        $valid_at = $this->input->post('valid_at') ?? '';
+        $payment_type = $this->input->post('payment_type') ?? '';
+        $etc_memo = $this->input->post('etc_memo') ?? '';
 
         $res_array = [
-            'ok' => true,
-            'msg' => '',
+            'ok'    => true,
+            'msg'   => '견적서가 저장되었습니다.',
+            'data'  => [],
         ];
 
-        $order_detail = $this->service_model->get_order_detail('row', [
-            "order_item_id = '{$id}'"
-        ]);
+        foreach ([1] as $proc) {
 
-        if ($order_status == 'canceled') {
             try {
-                $res = $this->order_service->cancel($order_detail['order_item_id']);
-            } catch (Exception $e) {
 
-                $res_array['ok'] = false;
-                $res_array['msg'] = $e->getMessage();
-                echo json_encode($res_array);
-                exit;
-            }
-        } else if ($order_status == 'completed') {
-            try {
-                $res = $this->order_service->complete($id);
-            } catch (Exception $e) {
+                $insert_estimate_id = $this->estimate_service->create([
+                    'partner_id'        => $partner_id,
+                    'estimate_date'     => $estimate_date,
+                    'phone_number'      => $phone_number,
+                    'fax_number'        => $fax_number,
+                    'title'             => $title,
+                    'location'          => $location,
+                    'due_at'            => $due_at,
+                    'valid_at'          => $valid_at,
+                    'payment_type'      => $payment_type,
+                    'etc_memo'          => $etc_memo,
+                ]);
 
-                $res_array['ok'] = false;
-                $res_array['msg'] = $e->getMessage();
-                echo json_encode($res_array);
-                exit;
-            }
-        } else {
-
-            if ($order_status == 'shipped') {
-
-                $tracking_number = $order_detail['tracking_number'];
-
-                if (empty($tracking_number)) {
-
-                    $res_array['ok'] = false;
-                    $res_array['msg'] = '송장번호를 먼저 입력후 배송처리 해주세요.';
-                    echo json_encode($res_array);
-                    exit;
+                if (empty($insert_estimate_id)) {
+                    throw new Exception('견적서 저장에 실패했습니다.');
                 }
 
-                $target_phone = !empty($order_detail['buyer_phone']) ? $order_detail['buyer_phone'] : $order_detail['receiver_phone'];
-                $buyer_name = $order_detail['buyer_name'] ?? $order_detail['receiver_name'];
+                if (!empty($_FILES)) {
 
-                $product_row = $this->service_model->get_product('row', [
-                    "id = '{$order_detail['product_id']}'"
-                ]);
-
-                $order_item = $this->service_model->get_order_item('row', [
-                    "id = '{$order_detail['order_item_id']}'"
-                ]);
-
-                $bundle_items_cnt = $this->service_model->get_order_bundle_items('one', [
-                    "order_item_id = '{$order_detail['order_item_id']}'"
-                ]);
-
-                $product_name = $product_row['name'] ?? '';
-                $product_name = $bundle_items_cnt == 1 ?
-                    $product_name
-                    : $product_name = $product_name . '등 ' . ($bundle_items_cnt - 1) . '종';
-                $order_number = $order_item['number'];
-
-                $this->alarmtalk->send([
-                    'phone' => str_replace('-', '', $target_phone),
-                    'name' => $buyer_name,
-                    'templateCode' => 'ppur_2025082716051732533947443', // 실제 템플릿 코드로 변경
-                    'type' => 'SHIP',
-                    'changeWord' => [
-                        'var1' => $buyer_name,              // [*1*] → 이름
-                        'var2' => $product_name,            // [*2*] → 상품명
-                        'var3' => $order_number,            // [*3*] → 주문번호
-                        'var4' => $tracking_number,         // [*4*] → 송장번호
-                    ],
-                ]);
+                    $this->estimate_service->uploadFile($insert_estimate_id);
+                }
+            } catch (Exception $e) {
+                $res_array['ok'] = false;
+                $res_array['msg'] = $e->getMessage();
+                break;
             }
-
-            $res = $this->service_model->update_order_item(DEBUG, [
-                'status' => $order_status,
-            ], [
-                "id = '{$order_detail['order_item_id']}'"
-            ]);
-        }
-
-        if (!$res) {
-            $res_array['ok'] = false;
-            $res_array['msg'] = '주문 상태 변경에 실패했습니다.';
         }
 
         echo json_encode($res_array);
+    }
+
+    # 거래처 목록 조회 (AJAX)
+    public function get_partner_list()
+    {
+
+        $business_partners = $this->service_model->get_business_partner('all', [
+            1
+        ]);
+
+        echo json_encode($business_partners);
         exit;
     }
 
-    private function layout_config($layout_name = "layout/admin")
+    # 파일 다운로드
+    public function download_file()
+    {
+        $id = $this->input->get('id') ?? '';
+
+        if (empty($id)) {
+            show_404();
+            return;
+        }
+
+        $file = $this->service_model->get_file('row', [
+            "id = {$id}"
+        ]);
+
+        if (empty($file)) {
+            show_404();
+            return;
+        }
+
+
+        $this->file->download($file['file_path'], $file['file_name']);
+    }
+
+    # 견적서 상태 변경
+    public function change_status()
+    {
+        $id = $this->input->post('id') ?? '';
+        $status = $this->input->post('status') ?? '';
+
+        $res_array = [
+            'ok'                => true,
+            'msg'               => '견적서 상태가 변경되었습니다.',
+            'su_estimate_id'    => '',
+        ];
+
+        try {
+
+            $res = $this->estimate_service->change_status($id, $status);
+
+            $res_array['su_estimate_id'] = $res;
+        } catch (Exception $e) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = $e->getMessage();
+        }
+
+        echo json_encode($res_array);
+    }
+
+    # 견적서 삭제
+    public function delete_estimate()
+    {
+        $id = $this->input->get('id') ?? '';
+
+        if (empty($id)) {
+            show_404();
+            return;
+        }
+
+        if (is_array($id)) {
+            foreach ($id as $estimate_id) {
+                $this->estimate_service->delete($estimate_id);
+
+                echo json_encode([
+                    'ok'    => true,
+                    'msg'   => '견적서가 삭제되었습니다',
+                ]);
+            }
+        } else {
+            $this->estimate_service->delete($id);
+
+            alert_close('견적서가 삭제되었습니다');
+        }
+    }
+
+    # 비밀번호 변경
+    public function change_password()
+    {
+        $pw = $this->input->post('pw') ?? '';
+        $pw_confirm = $this->input->post('pw_confirm') ?? '';
+
+        $res_array = [
+            'ok'    => true,
+            'msg'   => '비밀번호가 변경되었습니다.',
+            'data'  => [],
+        ];
+
+        try {
+
+            $this->user_service->changePassword($pw, $pw_confirm);
+        } catch (Exception $e) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = $e->getMessage();
+        }
+
+        echo json_encode($res_array);
+    }
+
+    private function layout_config($sub_menu_code = '', $title = '')
     {
 
-        $this->layout->setLayout($layout_name);
+        $this->layout->setLayout("layout/template");
+        $this->layout->setTitle($title);
         $this->layout->setCss([]);
         $this->layout->setScript([]);
 
         return [
-            'top_menu_code'    => 'base',
-            'sub_menu_code'    => 'order',
+            'top_menu_code'    => 'sales',
+            'sub_menu_code'    => $sub_menu_code,
+        ];
+    }
+
+    private function layout_blank_config($sub_menu_code = '', $title = '')
+    {
+
+        $this->layout->setPopHeader($title);
+        $this->layout->setLayout("layout/blank");
+        $this->layout->setTitle($title);
+        $this->layout->setCss([]);
+        $this->layout->setScript([]);
+
+        return [
+            'top_menu_code'    => 'sales',
+            'sub_menu_code'    => $sub_menu_code,
         ];
     }
 }

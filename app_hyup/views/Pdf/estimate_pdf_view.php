@@ -1,13 +1,19 @@
 <style>
     body {
         font-family: "NanumGothic";
-        font-size: 9pt;
     }
 
     .table {
         border-collapse: collapse;
         width: 100%;
     }
+
+    table,
+    th,
+    td {
+        font-size: 10pt;
+    }
+
 
     .table th {
         font-weight: 300 !important;
@@ -110,27 +116,6 @@
 
         <!-- 오른쪽 영역 -->
         <td style="width:50%; font-size:9pt; text-align:center; padding:0px !important; border:none !important;">
-            <!-- <table class="table">
-                <tr>
-                    <td class="no-border" rowspan="3" style="width:9%; background:#D9D9D9; ;">공<br />급<br />자</td>
-                    <td style="width:10%;">등록번호</td>
-                    <td style="width:20%;">312-86-30100</td>
-                    <td style="width:15%;">상호</td>
-                    <td style="width:15%;">제이엠테크</td>
-                    <td style="width:15%;">성명</td>
-                    <td>전용훈</td>
-                </tr>
-                <tr>
-                    <td class="title">주소</td>
-                    <td colspan="5" style="text-align:left;">충청남도 천안시 서북구 두정공단1길 149-2 (두정동, 마리플(주)) 제이엠테크</td>
-                </tr>
-                <tr>
-                    <td class="title">업태</td>
-                    <td>제조업</td>
-                    <td class="title">종목</td>
-                    <td colspan="3">산업기계 설계 및 개발</td>
-                </tr>
-            </table> -->
             <table class="supplier-table">
                 <tr>
                     <td class="section" rowspan="3">
@@ -191,16 +176,16 @@ $VAT_TYPE = unserialize(VAT_TYPE);
                 $총세액 += $item[5];
         ?>
                 <tr>
-                    <td>
+                    <td style="font-size:14px !important; width: 50px;">
                         <?= $count - $index ?>
                     </td>
-                    <td style="width:300px; text-align:left;"><?= $item[0] ?></td>
-                    <td data-label="규격"><?= $item[1] ?></td>
-                    <td data-label="수량"><?= $item[2] ?></td>
-                    <td data-label="단가" style="text-align: right;"><?= number_format($item[3]) ?></td>
-                    <td data-label="공급가액" style="text-align: right;"><?= number_format($item[4]) ?></td>
-                    <td data-label="세액" style="text-align: right;"><?= number_format($item[5]) ?></td>
-                    <td><?= $item[6] ?></td>
+                    <td style="font-size:12pt !important; width:500px; text-align:left;"><?= $item[0] ?></td>
+                    <td data-label="규격" style="font-size:12pt !important; width: 100px;"><?= $item[1] ?></td>
+                    <td data-label="수량" style="font-size:12pt !important; width: 50px;"><?= $item[2] ?></td>
+                    <td data-label="단가" style="font-size:12pt !important; width:150px; text-align: right;"><?= !empty($item[3]) ? number_format($item[3]) : '' ?></td>
+                    <td data-label="공급가액" style="font-size:12pt !important; width:150px; text-align: right;"><?= !empty($item[4]) ? number_format($item[4]) : '' ?></td>
+                    <td data-label="세액" style="font-size:12pt !important; width:150px; text-align: right;"><?= !empty($item[5]) ? number_format($item[5]) : '' ?></td>
+                    <td style="font-size:12pt !important; width:200px;"><?= $item[6] ?></td>
                 </tr>
 
             <?

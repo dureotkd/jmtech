@@ -40,29 +40,6 @@ class sales extends MY_Controller
     public function estimate()
     {
 
-        /**
-         *     [id] => 10
-            [type] => 
-            [no] => 20251102-24B91C
-            [estimate_date] => 2025-11-01
-            [phone_number] => 010-5653-9944
-            [fax_number] => 042-111-1111
-            [title] => 112
-            [amount] => 13237543
-            [amount_in_words] => 
-            [status] => draft
-            [memo] => 
-            [created_at] => 2025-11-02 13:13:13
-            [updated_at] => 2025-11-02 13:13:13
-            [due_at] => 2025-11-01 00:00:00
-            [location] => 11
-            [valid_at] => 2025-11-29 00:00:00
-            [payment_type] => 22
-            [etc_memo] => 22
-            [vat_type] => N
-            [partner_name] => (유)에이지케이특수강
-            [partner_id] => 2
-         */
         $estimate_all = $this->service_model->get_estimate('all', [
             "type = 'SELL'",    // SELL:판매, BUY:구매
             "sub_type = 'G'",   // G:견적서, S:수주서
@@ -117,30 +94,13 @@ class sales extends MY_Controller
     # 수주서
     public function order()
     {
-        /**
-         * 📑 수주서 (Order Confirmation / Sales Order)
-
-➡️ 구매자의 발주를 판매자가 ‘받았다’는 문서
-
-목적: 견적을 승인받고, 실제 거래가 확정된 후 작성
-
-작성 시점: 발주서(구매요청서)가 들어온 뒤
-
-주요 내용:
-
-견적 내용 + 발주번호 + 계약조건 확정사항
-
-실제 납기, 공급일, 세금계산서 발행일 등
-
-의미: “이 주문을 접수했습니다”라는 계약 확정 문서
-
-📘 예시
-
-거래처 A가 발주서를 보내면, JMTech이 “수주서”를 발행 → ERP에서는 이게 실제 매출 예약 데이터로 잡힘
-         */
+        $estimate_all = $this->service_model->get_estimate('all', [
+            "type = 'SELL'",    // SELL:판매, BUY:구매
+            "sub_type = 'S'",   // G:견적서, S:수주서
+        ]);
 
         $view_data =  [
-            'faqs'          => '',
+            'estimate_all'  => $estimate_all,
             'layout_data'   => $this->layout_config('order', '수주서'),
         ];
 
@@ -561,6 +521,8 @@ class sales extends MY_Controller
             'default_font' => 'unbatang',
         ]);
 
+
+
         $total = array_sum(array_column($items, 4));
         $tax = array_sum(array_column($items, 5));
         $totalWithTax = $total + $tax;
@@ -583,7 +545,6 @@ class sales extends MY_Controller
         // ');
 
         $mpdf->WriteHTML($estimate_pdf_view);
-
         $mpdf->Output('수주서.pdf', 'I'); // D: 다운로드, I: 브라우저보기
     }
 
@@ -684,10 +645,11 @@ class sales extends MY_Controller
     {
         $id = $this->input->post('id') ?? '';
         $status = $this->input->post('status') ?? '';
+        $title = $this->input->post('title') ?? '견적서';
 
         $res_array = [
             'ok'                => true,
-            'msg'               => '견적서 상태가 변경되었습니다.',
+            'msg'               => "{$title} 상태가 변경되었습니다.",
             'su_estimate_id'    => '',
         ];
 

@@ -259,7 +259,7 @@ $datetime = date('YmdHis');
                 <table class="tg">
                     <thead>
                         <tr>
-                            <td class="tg-dvpl text-center !font-semibold !align-middle" rowspan="2">
+                            <td class="tg-dvpl text-center bg-[#d9d9d9] !font-semibold !align-middle" rowspan="2">
                                 결<br /><br />제
                             </td>
                             <td class="tg-0lax !font-semibold !text-center !align-middle">기안</td>
@@ -459,30 +459,30 @@ $datetime = date('YmdHis');
         <table class="tg !border-t-2 !border-black">
             <thead>
                 <tr>
-                    <th class="tg-0pky !border-t !w-[100px] !text-center !text-black th-bg">납기일자</th>
+                    <th class="tg-0pky !border-t !text-xs !w-[100px] !text-center !text-black th-bg">납기일자</th>
                     <th class="tg-0pky !border-t w-[400px]">
                         <?= $estimate['due_at'] ?>
                     </th>
-                    <th class="tg-0pky !border-t th-bg !w-[100px] !text-center">납품장소</th>
-                    <th class="tg-0pky">
+                    <th class="tg-0pky !text-xs !border-t th-bg !w-[100px] !text-center">납품장소</th>
+                    <th class="tg-0pky !text-xs">
                         <?= $estimate['location'] ?>
                     </th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td class="tg-0pky !border-1 text-center th-bg">유효일자</td>
-                    <td class="tg-0pky !border-1 w-[400px]">
+                    <td class="tg-0pky !text-xs !border-1 text-center th-bg">유효일자</td>
+                    <td class="tg-0pky !text-xs !border-1 w-[400px]">
                         <?= $estimate['valid_at'] ?>
                     </td>
-                    <td class="tg-0pky !border-1 th-bg !w-[100px] !text-center">결제조건</td>
-                    <td class="tg-0pky !border-1">
+                    <td class="tg-0pky !text-xs !border-1 th-bg !w-[100px] !text-center">결제조건</td>
+                    <td class="tg-0pky !text-xs !border-1">
                         <?= $estimate['payment_type'] ?>
                     </td>
                 </tr>
                 <tr>
-                    <td class="tg-0pky text-center th-bg ">비고</td>
-                    <td class="tg-0pky" colspan="3">
+                    <td class="tg-0pky !text-xs text-center th-bg ">비고</td>
+                    <td class="tg-0pky !text-xs" colspan="3">
                         <?= htmlspecialchars($estimate['etc_memo']) ?>
                     </td>
                 </tr>

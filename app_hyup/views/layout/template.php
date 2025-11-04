@@ -245,12 +245,10 @@
         </nav>
 
         <div class="flex flex-col flex-1 min-w-[1120px]">
-
             <header class="!flex items-center justify-between w-full bg-[#558ad9] text-white font-bold h-[62px]">
-
                 <div class="!flex !h-full">
                     <!-- 판매 -->
-                    <div onclick="window.location.href = '/'" class="cursor-pointer flex items-center gap-2 !px-4 py-2 menu-active">
+                    <div onclick="window.location.href = '/'" class="<?= $top_menu_code === 'sales' ? 'menu-active' : '' ?> cursor-pointer flex items-center gap-2 !px-4 py-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
                         </svg>
@@ -258,7 +256,7 @@
                     </div>
 
                     <!-- 구매 -->
-                    <div onclick="window.location.href = '/purchase'" class="cursor-pointer flex items-center gap-2 !px-4 py-2 hover:bg-[#3d7ac0] transition">
+                    <div onclick="window.location.href = '/purchase'" class="<?= $top_menu_code === 'purchase' ? 'menu-active' : '' ?> cursor-pointer flex items-center gap-2 !px-4 py-2 hover:bg-[#3d7ac0] transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart">
                             <circle cx="8" cy="21" r="1" />
                             <circle cx="19" cy="21" r="1" />
@@ -269,7 +267,7 @@
 
                     <div class="w-px bg-white/30 my-2"></div>
 
-                    <div onclick="window.location.href = '/setting'" class="cursor-pointer flex items-center gap-2 !px-4 py-2 hover:bg-[#3d7ac0] transition">
+                    <div onclick="window.location.href = '/setting/partner'" class="<?= $top_menu_code === 'setting' ? 'menu-active' : '' ?> cursor-pointer flex items-center gap-2 !px-4 py-2 hover:bg-[#3d7ac0] transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings">
                             <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
                             <circle cx="12" cy="12" r="3" />
@@ -280,13 +278,6 @@
 
                     <div class="w-px bg-white/30 my-2"></div>
 
-                    <!-- 전자결제 -->
-                    <div onclick="window.location.href = '/contract'" class="cursor-pointer flex items-center gap-2 !px-4 py-2 hover:bg-[#3d7ac0] transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M3 14h18M3 18h18" />
-                        </svg>
-                        <span>전자결제</span>
-                    </div>
                 </div>
 
                 <div class="!mr-4">

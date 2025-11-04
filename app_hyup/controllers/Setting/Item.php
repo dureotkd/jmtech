@@ -1,6 +1,6 @@
 <?php
 
-class purchase extends MY_Controller
+class item extends MY_Controller
 {
 
     public function __construct()
@@ -22,7 +22,7 @@ class purchase extends MY_Controller
             'layout_data'   => $this->layout_config(),
         ];
 
-        $this->layout->view('/purchase_view', $view_data);
+        $this->layout->view('/Setting/item_view', $view_data);
     }
 
     private function layout_config()
@@ -35,8 +35,8 @@ class purchase extends MY_Controller
         $this->layout->setScript([]);
 
         return [
-            'top_menu_code'    => 'purchase',
-            'sub_menu_code'    => 'banner',
+            'top_menu_code'    => 'setting',
+            'sub_menu_code'    => 'item',
         ];
     }
 }

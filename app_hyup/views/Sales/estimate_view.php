@@ -73,7 +73,7 @@
                                 </select>
 
                                 <?
-                                if ($estimate['status'] === '수주전환' && !empty($estimate['su_estimate_id'])) {
+                                if (!empty($estimate['su_estimate_id'])) {
                                 ?>
                                     <button
                                         onclick="event.stopPropagation(); open_popup_default(`/sales/estimate_detail?id=<?= $estimate['su_estimate_id'] ?>`, '수주서 상세', 1000, 820);"
@@ -97,7 +97,7 @@
                 <? endforeach;
             else : ?>
                 <tr>
-                    <td colspan="7" class="text-center py-4">등록된 견적서가 없습니다.</td>
+                    <td colspan="9" class="text-center py-4">등록된 견적서가 없습니다.</td>
                 </tr>
             <? endif; ?>
 

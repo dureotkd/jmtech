@@ -25,22 +25,22 @@ class Estimate_service
         $type = $payloads['type'] ?? ''; // * sell / buy (판매,구매)
         $sub_type = $payloads['sub_type'] ?? ''; // * g / s (견적서,수주서)
 
-        $partner_id = $payloads['partner_id'];
-        $estimate_date = $payloads['estimate_date'];
-        $fax_number = $payloads['fax_number'];
-        $phone_number = $payloads['phone_number'];
-        $title = $payloads['title'];
-        $due_at = $payloads['due_at'];
-        $sheets = $payloads['sheets'];
-        $vat_type = $payloads['vat_type'];
-        $amount = $payloads['amount'];
-        $supply_amount = $payloads['supply_amount'];
-        $tax_amount = $payloads['tax_amount'];
-        $tab = $payloads['tab'];
-        $location = $payloads['location'];
-        $valid_at = $payloads['valid_at'];
-        $payment_type = $payloads['payment_type'];
-        $etc_memo = $payloads['etc_memo'];
+        $partner_id = $payloads['partner_id'] ?? '';
+        $estimate_date = $payloads['estimate_date'] ?? '';
+        $fax_number = $payloads['fax_number'] ?? '';
+        $phone_number = $payloads['phone_number'] ?? '';
+        $title = $payloads['title'] ?? '';
+        $due_at = $payloads['due_at'] ?? '';
+        $sheets = $payloads['sheets'] ?? [];
+        $vat_type = $payloads['vat_type'] ?? '';
+        $amount = $payloads['amount'] ?? 0;
+        $supply_amount = $payloads['supply_amount'] ?? 0;
+        $tax_amount = $payloads['tax_amount'] ?? 0;
+        $tab = $payloads['tab'] ?? '';
+        $location = $payloads['location'] ?? '';
+        $valid_at = $payloads['valid_at'] ?? '';
+        $payment_type = $payloads['payment_type'] ?? '';
+        $etc_memo = $payloads['etc_memo'] ?? '';
 
         $no = $this->makeUniqueNo();
 
@@ -151,32 +151,45 @@ class Estimate_service
                 throw new Exception("해당 견적서를 찾을 수 없습니다.");
             }
 
-            $su_estimate_row = [
-                'type'              => $estimate_row['type'],
-                'no'                => $estimate_row['no'],
-                'estimate_date'     => date('Y-m-d'),
-                'phone_number'      => $estimate_row['phone_number'],
-                'fax_number'        => $estimate_row['fax_number'],
-                'partner_id'        => $estimate_row['partner_id'],
-                'title'             => $estimate_row['title'],
-                'amount'            => $estimate_row['amount'],
-                'memo'              => $estimate_row['memo'],
-                'created_at'        => date('Y-m-d H:i:s'),
-                'updated_at'        => date('Y-m-d H:i:s'),
-                'due_at'            => $estimate_row['due_at'],
-                'valid_at'          => $estimate_row['valid_at'],
-                'payment_type'      => $estimate_row['payment_type'],
-                'etc_memo'          => $estimate_row['etc_memo'],
-                'vat_type'          => $estimate_row['vat_type'],
-                'sheets'            => $estimate_row['sheets'],
-                'sub_type'          => 'S', // 수주서로 생성
-                'status'            => '수주전환',
-            ];
+            // * 견적서의 경우에만 수주전환 가능
+            if ($estimate_row['sub_type'] === 'G') {
 
-            $res = $this->obj->service_model->insert_estimate(DEBUG, $su_estimate_row);
+                $su_estimate_row = $this->obj->service_model->get_estimate('row', [
+                    "sub_type = 'S'",   // 수주서
+                    "no = '{$estimate_row['no']}'" // 견적서 번호 동일
+                ]);
 
-            if (empty($res)) {
-                throw new Exception("수주전환 중 오류가 발생했습니다.");
+                if (!empty($su_estimate_row)) {
+                    throw new Exception("이미 수주전환된 수주서가 존재합니다.");
+                }
+
+                $su_estimate_row = [
+                    'type'              => $estimate_row['type'],
+                    'no'                => $estimate_row['no'],
+                    'estimate_date'     => date('Y-m-d'),
+                    'phone_number'      => $estimate_row['phone_number'],
+                    'fax_number'        => $estimate_row['fax_number'],
+                    'partner_id'        => $estimate_row['partner_id'],
+                    'title'             => $estimate_row['title'],
+                    'amount'            => $estimate_row['amount'],
+                    'memo'              => $estimate_row['memo'],
+                    'created_at'        => date('Y-m-d H:i:s'),
+                    'updated_at'        => date('Y-m-d H:i:s'),
+                    'due_at'            => $estimate_row['due_at'],
+                    'valid_at'          => $estimate_row['valid_at'],
+                    'payment_type'      => $estimate_row['payment_type'],
+                    'etc_memo'          => $estimate_row['etc_memo'],
+                    'vat_type'          => $estimate_row['vat_type'],
+                    'sheets'            => $estimate_row['sheets'],
+                    'sub_type'          => 'S', // 수주서로 생성
+                    'status'            => '수주전환',
+                ];
+
+                $res = $this->obj->service_model->insert_estimate(DEBUG, $su_estimate_row);
+
+                if (empty($res)) {
+                    throw new Exception("수주전환 중 오류가 발생했습니다.");
+                }
             }
         }
 

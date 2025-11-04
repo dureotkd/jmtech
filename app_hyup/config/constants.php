@@ -328,8 +328,21 @@ define('VAT_TYPE', serialize([
 
 // * React 개발 서버 주소 (견적서 작성 및 수정)
 // ^ Handsontable Hot Table때문에 React사용 (Virtual Row Rendering 지원)
-define('REACT_PATH', 'http://localhost:5173');
-// define('REACT_PATH', 'http://jmtech.test/React/estimate');
+
+$domain = $_SERVER['HTTP_HOST'];
+
+// * AWS 서버일 때
+if ($domain === '3.35.133.232') {
+    define('REACT_PATH', 'http://localhost:5173');
+}
+// * 로컬 개발 환경일 때
+elseif ($domain === 'jmtech.test') {
+    define('REACT_PATH', 'http://jmtech.test/React/estimate');
+}
+// * 그 외 기본값
+else {
+    define('REACT_PATH', 'http://localhost:5173');
+}
 
 define('SUB_TYPE', serialize([
     'G' => '견적서',

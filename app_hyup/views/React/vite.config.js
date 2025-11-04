@@ -1,4 +1,5 @@
 import { execSync } from "child_process";
+import react from "@vitejs/plugin-react"; // ✅ 추가됨
 import fs from "fs";
 import path from "path";
 import colors from "picocolors";
@@ -11,6 +12,8 @@ export default {
     outDir: "dist",
   },
   plugins: [
+    // ✅ React JSX 트랜스폼용 플러그인
+    react(),
     {
       name: "move-build-files",
       closeBundle() {

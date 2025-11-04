@@ -337,11 +337,11 @@ if ($domain === '3.35.133.232') {
 }
 // * 로컬 개발 환경일 때
 elseif ($domain === 'jmtech.test') {
-    define('REACT_PATH', 'http://jmtech.test/React/estimate');
+    define('REACT_PATH', 'http://localhost:5173');
 }
 // * 그 외 기본값
 else {
-    define('REACT_PATH', 'http://localhost:5173');
+    define('REACT_PATH', 'http://jmtech.test/React/estimate');
 }
 
 define('SUB_TYPE', serialize([

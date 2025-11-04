@@ -330,7 +330,8 @@ define('VAT_TYPE', serialize([
 // ^ Handsontable Hot Table때문에 React사용 (Virtual Row Rendering 지원)
 
 $domain = $_SERVER['HTTP_HOST'];
-
+echo $domain;
+exit;
 // * AWS 서버일 때
 if ($domain === '3.35.133.232') {
     define('REACT_PATH', 'http://3.35.133.232/React/estimate');

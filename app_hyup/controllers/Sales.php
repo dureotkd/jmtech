@@ -559,13 +559,7 @@ class sales extends MY_Controller
             'mode' => 'utf-8',
             'format' => 'A4',
             'default_font' => 'unbatang',
-            'tempDir' => __DIR__ . '/tmp/mpdf', // 현재 컨트롤러 기준 tmp/mpdf 폴더 사용
         ]);
-
-
-        $mpdf->showImageErrors = true;
-        $mpdf->curlAllowUnsafeSslRequests = true;
-        $mpdf->setBasePath('https://www.jmtech.asia/');
 
         $total = array_sum(array_column($items, 4));
         $tax = array_sum(array_column($items, 5));

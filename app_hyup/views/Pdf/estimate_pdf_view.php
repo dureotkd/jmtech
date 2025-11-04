@@ -87,7 +87,7 @@
 <table style="width:100%; margin-bottom:4px; border-collapse:collapse;">
     <tr>
         <td style="width:150px; vertical-align:middle;">
-            <img src="file:///var/www/html/jmtech/assets/app_hyup/images/logo.png" alt="로고"
+            <img src="https://www.jmtech.asia/assets/app_hyup/images/logo.png" alt="로고"
                 style="width:120px;">
         </td>
         <td style="text-align:left; vertical-align:right; padding-left:155px;">

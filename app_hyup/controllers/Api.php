@@ -208,6 +208,7 @@ class api extends MY_Controller
     {
         $id = $this->input->post('id') ?? '';
 
+        $tab = $this->input->post('tab') ?? ''; // * copay (복사)
         $type = $this->input->post('type') ?? ''; // * sell / buy (판매,구매)
         $sub_type = $this->input->post('sub_type') ?? ''; // * g / s (견적서,수주서)
 
@@ -218,6 +219,8 @@ class api extends MY_Controller
         $title = $this->input->post('title') ?? '';
         $sheets = $this->input->post('sheets') ?? '';
         $amount = $this->input->post('amount') ?? 0;
+        $supply_amount = $this->input->post('supply_amount') ?? 0;
+        $tax_amount = $this->input->post('tax_amount') ?? 0;
         $vat_type = $this->input->post('vat_type') ?? '';
         $due_at = $this->input->post('due_at') ?? '';
         $location = $this->input->post('location') ?? '';
@@ -225,6 +228,7 @@ class api extends MY_Controller
         $payment_type = $this->input->post('payment_type') ?? '';
         $etc_memo = $this->input->post('etc_memo') ?? '';
         $file_ids = $this->input->post('file_ids') ?? '';
+
         $amount = (int)preg_replace('/[^0-9]/u', '', $amount); // 숫자만 남김
 
         $res_array = [
@@ -240,35 +244,87 @@ class api extends MY_Controller
 
                 if (!empty($id)) {
 
-                    $update_result = $this->estimate_service->update([
-                        'partner_id'        => $partner_id,
-                        'estimate_date'     => $estimate_date,
-                        'phone_number'      => $phone_number,
-                        'fax_number'        => $fax_number,
-                        'title'             => $title,
-                        'location'          => $location,
-                        'amount'            => $amount,
-                        'vat_type'          => $vat_type,
-                        'sheets'            => $sheets,
-                        'due_at'            => $due_at,
-                        'valid_at'          => $valid_at,
-                        'payment_type'      => $payment_type,
-                        'etc_memo'          => $etc_memo,
-                        'updated_at'        => date('Y-m-d H:i:s'),
-                    ], $id);
+                    switch ($tab) {
 
-                    if (empty($update_result)) {
-                        throw new Error('견적서 수정에 실패했습니다.');
+                        case 'copy':
+
+                            // * 복사 저장
+                            $insert_estimate_id = $this->estimate_service->create([
+                                'type'              => $type,
+                                'sub_type'          => $sub_type,
+                                'partner_id'        => $partner_id,
+                                'estimate_date'     => $estimate_date,
+                                'phone_number'      => $phone_number,
+                                'fax_number'        => $fax_number,
+                                'title'             => $title,
+                                'location'          => $location,
+                                'supply_amount'     => $supply_amount,
+                                'tax_amount'        => $tax_amount,
+                                'amount'            => $amount,
+                                'vat_type'          => $vat_type,
+                                'sheets'            => $sheets,
+                                'due_at'            => $due_at,
+                                'valid_at'          => $valid_at,
+                                'payment_type'      => $payment_type,
+                                'etc_memo'          => $etc_memo,
+                                'tab'               => 'copy',
+                            ]);
+
+                            if (empty($insert_estimate_id)) {
+                                throw new Error('견적서 복사 저장에 실패했습니다.');
+                            }
+
+                            // * 파일 복사
+                            $this->estimate_service->cloneFile($insert_estimate_id, $file_ids);
+
+                            // * 추가 파일 업로드있을 경우 처리
+                            if (!empty($_FILES)) {
+
+                                $this->estimate_service->uploadFile($insert_estimate_id);
+                            }
+
+                            $res_array['msg'] = '견적서가 복사 저장되었습니다.';
+                            $res_array['redirect_url'] = "/sales/estimate_detail?id={$insert_estimate_id}";
+
+                            break;
+
+                        default:
+
+                            $update_result = $this->estimate_service->update([
+                                'partner_id'        => $partner_id,
+                                'estimate_date'     => $estimate_date,
+                                'phone_number'      => $phone_number,
+                                'fax_number'        => $fax_number,
+                                'title'             => $title,
+                                'location'          => $location,
+                                'amount'            => $amount,
+                                'supply_amount'     => $supply_amount,
+                                'tax_amount'        => $tax_amount,
+                                'vat_type'          => $vat_type,
+                                'sheets'            => $sheets,
+                                'due_at'            => $due_at,
+                                'valid_at'          => $valid_at,
+                                'payment_type'      => $payment_type,
+                                'etc_memo'          => $etc_memo,
+                                'updated_at'        => date('Y-m-d H:i:s'),
+                            ], $id);
+
+                            if (empty($update_result)) {
+                                throw new Error('견적서 수정에 실패했습니다.');
+                            }
+
+                            $this->estimate_service->deleteFile($id, $file_ids);
+
+                            if (!empty($_FILES)) {
+
+                                $this->estimate_service->uploadFile($id);
+                            }
+
+                            $res_array['msg'] = '견적서가 수정되었습니다.';
+                            $res_array['redirect_url'] = "/sales/estimate_detail?id={$id}";
+
+                            break;
                     }
-
-                    $this->estimate_service->deleteFile($id, $file_ids);
-
-                    if (!empty($_FILES)) {
-
-                        $this->estimate_service->uploadFile($id);
-                    }
-
-                    $res_array['redirect_url'] = "/sales/estimate_detail?id={$id}";
                 } else {
 
                     $insert_estimate_id = $this->estimate_service->create([
@@ -281,12 +337,15 @@ class api extends MY_Controller
                         'title'             => $title,
                         'location'          => $location,
                         'amount'            => $amount,
+                        'supply_amount'     => $supply_amount,
+                        'tax_amount'        => $tax_amount,
                         'vat_type'          => $vat_type,
                         'sheets'            => $sheets,
                         'due_at'            => $due_at,
                         'valid_at'          => $valid_at,
                         'payment_type'      => $payment_type,
                         'etc_memo'          => $etc_memo,
+                        'tab'               => 'original',
                     ]);
 
                     if (empty($insert_estimate_id)) {

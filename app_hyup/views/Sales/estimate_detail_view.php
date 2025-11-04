@@ -147,6 +147,43 @@ $datetime = date('YmdHis');
     table.estimate tbody tr:nth-child(even) {
         background-color: #fafafa;
     }
+
+    .tg {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .tg td {
+        border-color: black;
+        border-style: solid;
+        border-width: 1px;
+        font-size: 14px;
+        overflow: hidden;
+        padding: 10px 5px;
+        word-break: normal;
+    }
+
+    .tg th {
+        border-color: black;
+        border-style: solid;
+        border-width: 1px;
+        font-size: 14px;
+        font-weight: normal;
+        overflow: hidden;
+        padding: 10px 5px;
+        word-break: normal;
+    }
+
+    .tg .tg-dvpl {
+        border-color: inherit;
+        text-align: right;
+        vertical-align: top
+    }
+
+    .tg .tg-0lax {
+        text-align: left;
+        vertical-align: top
+    }
 </style>
 <link rel="stylesheet" href="/assets/app_hyup/lib/pqgrid/pqgrid.css" />
 <link rel="stylesheet" href="/assets/app_hyup/lib/pqgrid/pqgrid.min.css" />
@@ -215,7 +252,31 @@ $datetime = date('YmdHis');
             </div>
         </div>
 
-        <div class="w-full relative flex justify-center items-center !mt-4">
+        <div class="flex items-center justify-between w-full !my-2 print-show">
+            <img class="object-cover h-8" src="/assets/app_hyup/images/logo.png" alt="로고">
+
+            <div>
+                <table class="tg">
+                    <thead>
+                        <tr>
+                            <td class="tg-dvpl text-center !font-semibold !align-middle" rowspan="2">
+                                결<br /><br />제
+                            </td>
+                            <td class="tg-0lax !font-semibold !text-center !align-middle">기안</td>
+                            <td class="tg-0lax !font-semibold !text-center">검토</td>
+                            <td class="tg-0lax !font-semibold !text-center">승인</td>
+                        </tr>
+                        <tr>
+                            <td class="tg-0lax w-[60px] h-[60px]"></td>
+                            <td class="tg-0lax w-[60px] h-[60px]"></td>
+                            <td class="tg-0lax w-[60px] h-[60px]"></td>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+        <div class="w-full relative flex justify-center items-center !mt-4 relative">
             <img
                 class="!mb-2 mx-auto"
                 src="/assets/app_hyup/images/<?= $estimate['sub_type'] == 'G' ? '견적서' : '수주서' ?>.png" alt="견적서">
@@ -224,7 +285,6 @@ $datetime = date('YmdHis');
                 거래내역 불러오기
             </div> -->
         </div>
-
 
         <div class="flex !border-x-2 !border-t-2 !border-black">
             <!-- 왼쪽: 견적 정보 -->

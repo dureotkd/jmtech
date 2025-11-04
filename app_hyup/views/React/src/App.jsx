@@ -18,6 +18,8 @@ import { useExcelStore } from "./store/useExcelStore";
 export default function App() {
   // ? & (queryString)
   const queryString = new URLSearchParams(window.location.search);
+
+  const tab = queryString.get("tab") ?? ""; // * copay (복사)
   const id = queryString.get("id") ?? "";
   const type = queryString.get("type") ?? "SELL"; // * SELL / BUY (판매,구매)
   const subType = queryString.get("sub_type") ?? "G"; // * G / S (견적서,수주서)
@@ -173,17 +175,33 @@ export default function App() {
 
     const hots = [hot1, hot2].map((hot) => hot.getData());
 
+    let supplyAmount = 0;
+    let taxAmount = 0;
+
+    if (!empty(hots[0])) {
+      hots[0].forEach((row) => {
+        const 공급가액 = parseFloat(row[4]) || 0;
+        const 세액 = parseFloat(row[5]) || 0;
+        supplyAmount += 공급가액;
+        taxAmount += 세액;
+      });
+    }
+
     const cloneSheets = deepClone(sheets);
+
     cloneSheets[0].data = hots[0];
     cloneSheets[1].data = hots[1];
 
     formData.append("sheets", JSON.stringify(cloneSheets));
     formData.append("file_ids", fileIds);
 
+    formData.append("tab", tab);
     formData.append("type", type);
     formData.append("sub_type", subType);
     formData.append("partner_id", form?.partner_id || "");
     formData.append("amount", amount || 0);
+    formData.append("supply_amount", supplyAmount || 0);
+    formData.append("tax_amount", taxAmount || 0);
     formData.append("id", id || "");
 
     if (files && files.length > 0) {
@@ -329,7 +347,6 @@ export default function App() {
     (async () => {
       try {
         document.title = `${ESTIMATE_SUB_TYPE[subType]} 등록`;
-
         setLoading(true);
 
         if (id) {

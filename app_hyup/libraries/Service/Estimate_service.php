@@ -34,6 +34,9 @@ class Estimate_service
         $sheets = $payloads['sheets'];
         $vat_type = $payloads['vat_type'];
         $amount = $payloads['amount'];
+        $supply_amount = $payloads['supply_amount'];
+        $tax_amount = $payloads['tax_amount'];
+        $tab = $payloads['tab'];
         $location = $payloads['location'];
         $valid_at = $payloads['valid_at'];
         $payment_type = $payloads['payment_type'];
@@ -72,11 +75,16 @@ class Estimate_service
             'sheets'        => $sheets,
             'vat_type'      => $vat_type,
             'amount'        => $amount,
+            'supply_amount' => $supply_amount,
+            'tax_amount'    => $tax_amount,
+            'tab'           => $tab,
             'phone_number'  => $phone_number,
             'due_at'        => $due_at,
             'valid_at'      => $valid_at,
             'payment_type'  => $payment_type,
             'etc_memo'      => $etc_memo,
+            'created_at'    => date('Y-m-d H:i:s'),
+            'updated_at'    => date('Y-m-d H:i:s'),
         ]);
 
         return $res;
@@ -231,6 +239,34 @@ class Estimate_service
                 "ref_table = 'estimate'",
                 "ref_id = {$estimate_id}"
             ]);
+        }
+    }
+
+    public function cloneFile($new_estimate_id, $file_ids)
+    {
+
+        if (!empty($file_ids)) {
+
+            $file_list = $this->obj->service_model->get_file('all', [
+                "ref_table = 'estimate'",
+                "id IN ({$file_ids})"
+            ]);
+
+            if (!empty($file_list)) {
+                foreach ($file_list as $file_row) {
+
+                    $this->obj->service_model->insert_file(DEBUG, [
+                        'ref_table'     => 'estimate',
+                        'ref_id'        => $new_estimate_id,
+                        'file_name'     => $file_row['file_name'],
+                        'file_path'     => $file_row['file_path'],
+                        'file_size'     => $file_row['file_size'],
+                        'file_url'      => $file_row['file_url'],
+                        'created_at'    => date('Y-m-d H:i:s'),
+                        'updated_at'    => date('Y-m-d H:i:s'),
+                    ]);
+                }
+            }
         }
     }
 

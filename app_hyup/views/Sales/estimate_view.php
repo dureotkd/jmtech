@@ -36,17 +36,28 @@
         </thead>
         <tbody>
             <?
+            $총공급가액 = 0;
+            $총세액 = 0;
+            $총합계금액 = 0;
             if (!empty($estimate_all)) :
                 foreach ($estimate_all as $estimate) :
+
+                    $총공급가액 += $estimate['supply_amount'];
+                    $총세액 += $estimate['tax_amount'];
+                    $총합계금액 += $estimate['amount'];
             ?>
 
                     <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $estimate['id'] ?>')" data-estimate-id="<?= $estimate['id'] ?>">
                         <td><input type="checkbox" estimate-id="<?= $estimate['id'] ?>" onclick="event.stopPropagation();" /></td>
-                        <td class="">2025-10-24</td>
-                        <td class="">주식회사 지아이베컴</td>
-                        <td class="">31,834,400</td>
-                        <td class="">3,183,940</td>
-                        <td class="">35,023,340</td>
+                        <td class="">
+                            <?= date('Y-m-d', strtotime($estimate['created_at'])) ?>
+                        </td>
+                        <td class="">
+                            <?= $estimate['partner_name'] ?>
+                        </td>
+                        <td class=""><?= number_format($estimate['supply_amount']) ?></td>
+                        <td class=""><?= number_format($estimate['tax_amount']) ?></td>
+                        <td class=""><?= number_format($estimate['amount']) ?></td>
                         <td>
                             <div class="flex items-center gap-2">
                                 <select onclick="handle_select(event);" onchange="change_status(<?= $estimate['id'] ?>, event);" name="estimate_status" id="">
@@ -90,18 +101,25 @@
                 </tr>
             <? endif; ?>
 
-            <tr class="border-b bg-[#e9f1fb]">
-                <td></td>
-                <td class=""></td>
-                <td class="!font-bold">총 2건</td>
-                <td class="!font-bold">공급가액 : 34,609,400</td>
-                <td class="!font-bold">세액 : 3,460,940</td>
-                <td class="!font-bold">합계금액 : 38,070,340</td>
-                <td class="!font-bold">
-                </td>
-                <td class="cursor-pointer">
-                </td>
-            </tr>
+            <?
+            if (!empty($estimate_all)) {
+            ?>
+                <tr class="border-b bg-[#e9f1fb]">
+                    <td></td>
+                    <td class=""></td>
+                    <td class="!font-bold">총 <?= count($estimate_all) ?>건</td>
+                    <td class="!font-bold">공급가액 : <?= number_format($총공급가액) ?></td>
+                    <td class="!font-bold">세액 : <?= number_format($총세액) ?></td>
+                    <td class="!font-bold">합계금액 : <?= number_format($총합계금액) ?></td>
+                    <td class="!font-bold">
+                    </td>
+                    <td class="cursor-pointer">
+                    </td>
+                </tr>
+
+            <?
+            }
+            ?>
 
         </tbody>
     </table>

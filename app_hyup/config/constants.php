@@ -331,12 +331,9 @@ define('VAT_TYPE', serialize([
 
 $domain = $_SERVER['HTTP_HOST'];
 
-echo $domain;
-exit;
-
 // * AWS 서버일 때
 if ($domain === '3.35.133.232') {
-    define('REACT_PATH', 'http://localhost:5173');
+    define('REACT_PATH', 'http://3.35.133.232/React/estimate');
 }
 // * 로컬 개발 환경일 때
 elseif ($domain === 'jmtech.test') {

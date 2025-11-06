@@ -119,11 +119,14 @@ class Estimate_service
             "id = '{$id}'"
         ]);
 
-        // * 관련된 수주서도 함께 삭제
-        $this->obj->service_model->delete_estimate(DEBUG, [
-            "sub_type = 'S'",   // 수주서
-            "no = '{$estimate_no}'" // 견적서 번호 동일
-        ]);
+        if ($estimate_row['sub_type'] === 'G') {
+
+            // * 관련된 수주서도 함께 삭제
+            $this->obj->service_model->delete_estimate(DEBUG, [
+                "sub_type = 'S'",   // 수주서
+                "no = '{$estimate_no}'" // 견적서 번호 동일
+            ]);
+        }
 
         return $res;
     }

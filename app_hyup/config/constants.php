@@ -313,6 +313,12 @@ define('MENU', serialize([
     ],
 ]));
 
+define('PARTNER_GROUP', serialize([
+    'group_sales' => '매출처',
+    'group_purchase' => '매입처',
+    'group_etc' => '기타거래처',
+]));
+
 define('VAT_TYPE', serialize([
     'Y' => '부가세포함',
     'N' => '부가세별도',
@@ -369,6 +375,7 @@ define('PAY_METHOD_CODE', serialize([
 ]));
 
 define('BANK_CODE', serialize([
+    "003" => "기업은행",
     "090" => "카카오뱅크",
     "011" => "농협은행",
     "012" => "지역농축협",
@@ -377,7 +384,6 @@ define('BANK_CODE', serialize([
     "088" => "신한은행",
     "081" => "하나은행",
     "002" => "산업은행",
-    "003" => "기업은행",
     "023" => "제일은행",
     "027" => "씨티은행",
     "031" => "대구은행",

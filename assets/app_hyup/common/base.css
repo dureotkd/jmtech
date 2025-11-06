@@ -30,6 +30,37 @@
   --color-white: #ffffff;
 }
 
+.page_wrap a.active {
+  background-color: #558ad9 !important;
+  color: #fff;
+}
+
+.page_wrap a {
+  width: 27px;
+  height: 27px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: #f3f4f6;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.page_wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 12px;
+  gap: 8px;
+}
+
+.page_wrap a svg {
+  width: 10px;
+  fill: #aaa;
+}
+
 .sm-btn {
   margin-top: 0.5rem !important; /* !my-2 → 위아래 여백 0.5rem */
   margin-bottom: 0.5rem !important;

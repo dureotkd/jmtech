@@ -2,10 +2,13 @@
 class service_model extends MY_Model
 {
     // ===== business_partner =====
-    public function get_business_partner($type, $where = [1])
+    public function get_business_partner($type, $where = [1], $limit = '')
     {
         $select = $type == 'one' ? "COUNT(*)" : "*";
         $sql = sprintf("SELECT {$select} FROM jmtech.business_partner a WHERE %s", join(" AND ", $where));
+        if (!empty($limit)) {
+            $sql .= " LIMIT {$limit}";
+        }
         return $this->excute($sql, $type, 'main');
     }
     public function insert_business_partner($debug = false, $data = [])
@@ -95,10 +98,11 @@ class service_model extends MY_Model
     }
 
     // ===== item =====
-    public function get_item($type, $where = [1])
+    public function get_item($type, $where = [1], $limit = '')
     {
         $select = $type == 'one' ? "COUNT(*)" : "*";
-        $sql = sprintf("SELECT {$select} FROM jmtech.item a WHERE %s", join(" AND ", $where));
+        $res_limit = !empty($limit) ? "LIMIT {$limit}" : "";
+        $sql = sprintf("SELECT {$select} FROM jmtech.item a WHERE %s {$res_limit}", join(" AND ", $where));
         return $this->excute($sql, $type, 'main');
     }
     public function get_item_custom($type, $where = [1], $order = "")

@@ -7,8 +7,11 @@ class item extends MY_Controller
     {
         parent::__construct();
 
-        $this->load->library("layout");
-        $this->load->library("/Service/user_service");
+        $this->load->library([
+            'layout',
+            'site_pagination',
+            '/Service/user_service'
+        ]);
 
         $this->load->model('/Page/service_model');
     }
@@ -16,9 +19,21 @@ class item extends MY_Controller
     # 고객센터
     public function index()
     {
+        $page                       = !empty($_REQUEST['page']) ? $_REQUEST['page'] : 1;
+        $row_num                    = !empty($_REQUEST['row_num']) ? $_REQUEST['row_num'] : 15;
+        $block_num                  = !empty($_REQUEST['block_num']) ? $_REQUEST['block_num'] : 10;
 
+        $item_count = $this->service_model->get_item('one', [1]);
+        $page_data          = $this->site_pagination->getPageNaviGationData($page, $item_count, $row_num, $block_num);
+        $limit              = $page_data['res_limit'];
+
+        $item_list = $this->service_model->get_item('all', [1], $limit);
 
         $view_data =  [
+            'page' => $page,
+            'item_list'   => $item_list,
+            'page_data'     => $page_data,
+
             'layout_data'   => $this->layout_config(),
         ];
 

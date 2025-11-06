@@ -1188,6 +1188,11 @@ function lastNext(type, range, modifier) {
   }
 }
 
+function go_page(pg) {
+  $("#page").val(pg);
+  $("#searchFrm").submit();
+}
+
 function process(val) {
   var splt = val.split(" "), // Todo: Reconcile this with regex using \s, taking into account browser issues with split and regexes
     type = splt[0],

@@ -90,7 +90,7 @@
         <div id="naver_id_login" class="hidden">
         </div>
 
-        <div class="install-block lg:block hidden !border !border-gray-200 !p-6 text-center flex flex-col !items-center !justify-center !space-y-2">
+        <div class="install-block !border !border-gray-200 !p-6 text-center flex flex-col !items-center !justify-center !space-y-2">
             <p class="text-base font-semibold text-gray-900">더 빠른 접근을 원하시나요?</p>
             <p class="!text-sm text-gray-500">바로가기를 추가하면 ERP를 손쉽게 열 수 있습니다.</p>
             <div class="flex flex-col items-center">

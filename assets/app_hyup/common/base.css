@@ -77,6 +77,14 @@
   cursor: pointer;
 }
 
+.sm-hover {
+  transition: background-color 0.3s ease;
+}
+
+.sm-hover:hover {
+  background-color: #e0e0e0; /* hover:bg-gray-50 */
+}
+
 .sm-btn:hover {
   background-color: #f9fafb; /* hover:bg-gray-50 */
 }

@@ -70,10 +70,12 @@
                             <td>
                                 <div class="flex gap-2">
                                     <button
+                                        type="button"
                                         class="px-3 py-1 text-red-600 border border-red-300 bg-red-50 rounded-full text-[12px] font-medium hover:bg-red-100 transition">
                                         매출
                                     </button>
                                     <button
+                                        type="button"
                                         class="px-3 py-1 text-blue-600 border border-blue-300 bg-blue-50 rounded-full text-[12px] font-medium hover:bg-blue-100 transition">
                                         매입
                                     </button>

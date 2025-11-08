@@ -5,7 +5,7 @@ class service_model extends MY_Model
     public function get_business_partner($type, $where = [1], $limit = '')
     {
         $select = $type == 'one' ? "COUNT(*)" : "*";
-        $sql = sprintf("SELECT {$select} FROM jmtech.business_partner a WHERE %s", join(" AND ", $where));
+        $sql = sprintf("SELECT {$select} FROM jmtech.business_partner a WHERE %s ORDER BY a.created_at DESC", join(" AND ", $where));
         if (!empty($limit)) {
             $sql .= " LIMIT {$limit}";
         }
@@ -23,6 +23,15 @@ class service_model extends MY_Model
     public function update_business_partner($debug = false, $data = [], $where = [])
     {
         $sql = $this->getUpdateQuery('jmtech.order_detail', $data, $where);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+    public function delete_business_partner($debug = false, $where = [])
+    {
+        $sql = $this->getDeleteQuery('jmtech.business_partner', $where);
         if ($debug) {
             echo $sql . "<br/>";
             return 1;
@@ -133,6 +142,16 @@ class service_model extends MY_Model
         }
         return $this->excute($sql, 'exec', 'main');
     }
+    public function delete_item($debug = false, $where = [])
+    {
+        $sql = $this->getDeleteQuery('jmtech.item', $where);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+
 
     // ===== community_event =====
     public function get_community_event($type, $where = [1])

@@ -8,11 +8,11 @@
     <div class="flex items-center gap-2 mb-4 !text-sm">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
-            <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+            <button onclick="delete_partner(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
                 삭제
             </button>
             <button
-                onclick="open_popup_default('/setting/partner/create','거래처 등록',1000,820);"
+                onclick="open_popup_default('/setting/partner/create','거래처 등록',1000,720);"
                 type="button"
                 class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
                 거래처 등록 +
@@ -51,8 +51,8 @@
 
                 ?>
 
-                        <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $partner['id'] ?>')" data-estimate-id="<?= $partner['id'] ?>">
-                            <td><input type="checkbox" estimate-id="<?= $partner['id'] ?>" onclick="event.stopPropagation();" /></td>
+                        <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $partner['id'] ?>')" data-partner-id="<?= $partner['id'] ?>">
+                            <td><input type="checkbox" partner-id="<?= $partner['id'] ?>" onclick="event.stopPropagation();" /></td>
                             <td class="" data-label="거래처명">
                                 <div class="flex items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-building2-icon lucide-building-2">
@@ -158,31 +158,29 @@
         event.stopPropagation(); // 트리거링 방지
     }
 
-    function delete_estimate(e) {
+    function delete_partner(e) {
 
         const checked_ids = [];
         $('tbody input[type="checkbox"]:checked').each(function() {
             const row = $(this).closest('tr');
-            const estimate_id = row.data('estimate-id');
-            checked_ids.push(estimate_id);
+            const partner_id = row.data('partner-id');
+            checked_ids.push(partner_id);
         });
 
         if (checked_ids.length === 0) {
-            alert('삭제할 견적서를 선택해주세요.');
+            alert('삭제할 거래처를 선택해주세요.');
             return;
         }
 
-        if (!confirm('선택한 견적서를 삭제하시겠습니까?')) {
+        if (!confirm('선택한 거래처를 삭제하시겠습니까?')) {
             return;
         }
-
-        console.log(checked_ids)
 
         start_loading();
 
         $.ajax({
             type: "GET",
-            url: "/sales/delete_estimate",
+            url: "/setting/partner/delete_partner",
             data: {
                 id: checked_ids
             },

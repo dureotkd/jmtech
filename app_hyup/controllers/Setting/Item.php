@@ -10,7 +10,8 @@ class item extends MY_Controller
         $this->load->library([
             'layout',
             'site_pagination',
-            '/Service/user_service'
+            '/Service/user_service',
+            '/Service/item_service',
         ]);
 
         $this->load->model('/Page/service_model');
@@ -46,7 +47,7 @@ class item extends MY_Controller
             [updated_at] => 2025-11-03 16:50:24
         )
          */
-        $item_list = $this->service_model->get_item('all', [1], $limit);
+        $item_list = $this->service_model->get_item_custom('all', [1], "ORDER BY a.created_at DESC LIMIT {$limit}");
 
         $view_data =  [
             'page' => $page,
@@ -61,13 +62,95 @@ class item extends MY_Controller
 
     public function create()
     {
-
         $view_data =  [
             'layout_data'   => $this->layout_blank_config('', '품목 추가'),
         ];
 
         $this->layout->view('/Setting/create_item_view', $view_data);
     }
+
+    public function create_item()
+    {
+        $item_name = $this->input->post('item_name');
+        $alias = $this->input->post('alias');
+        $unit = $this->input->post('unit');
+        $purchase_price = $this->input->post('purchase_price');
+        $sales_price = $this->input->post('sales_price');
+        $memo = $this->input->post('memo');
+        $is_active = $this->input->post('is_active');
+
+        $res_array = [
+            'ok' => true,
+            'msg' => '품목이 성공적으로 생성되었습니다.',
+        ];
+
+        try {
+
+            $this->item_service->createItem([
+                'item_name'     => $item_name,
+                'alias'          => $alias,
+                'unit'           => $unit,
+                'purchase_price' => $purchase_price,
+                'sales_price'    => $sales_price,
+                'memo'           => $memo,
+                'is_active'      => $is_active,
+            ]);
+        } catch (Exception $e) {
+
+            $res_array = [
+                'ok' => false,
+                'msg' => $e->getMessage(),
+            ];
+        }
+
+        echo json_encode($res_array);
+    }
+
+    public function create_excel_item()
+    {
+
+        $tmp_name = !empty($_FILES['file1']['tmp_name']) ? $_FILES['file1']['tmp_name'] : '';
+
+        $res_array = [
+            'ok' => true,
+            'msg' => '엑셀 파일이 성공적으로 처리되었습니다.',
+        ];
+
+        try {
+
+            $res_array = $this->item_service->convertExcelToItem($tmp_name);
+        } catch (Exception $e) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = $e->getMessage();
+        }
+
+        echo json_encode($res_array);
+    }
+
+    public function delete_item()
+    {
+
+        $id = $_GET['id'] ?? '';
+
+        $res_array = [
+            'ok' => true,
+            'msg' => '품목이 삭제되었습니다.',
+        ];
+
+        try {
+
+            $this->item_service->deleteItem($id);
+        } catch (Exception $e) {
+
+            $res_array = [
+                'ok' => false,
+                'msg' => $e->getMessage(),
+            ];
+        }
+
+        echo json_encode($res_array);
+    }
+
 
     private function layout_config($sub_menu_code = '', $title = '')
     {

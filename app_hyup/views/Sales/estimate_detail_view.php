@@ -527,7 +527,10 @@ $datetime = date('YmdHis');
     }
 
     const handle_copy = (e) => {
+
+
         window.location.href = `<?= REACT_PATH ?>?tab=copy&id=<?= $estimate['id'] ?>&sub_type=<?= $estimate['sub_type'] ?>`;
+
     }
 
     const handle_print = (e) => {
@@ -535,10 +538,22 @@ $datetime = date('YmdHis');
     }
 
     const handle_pdf = (e) => {
+        start_loading();
+
         window.location.href = '/sales/download_estimate_pdf?id=<?= $estimate['id'] ?>';
+
+        setTimeout(() => {
+            stop_loading();
+        }, 1000);
     }
 
     const handle_excel = (e) => {
+        start_loading();
+
         window.location.href = '/sales/download_estimate_excel?id=<?= $estimate['id'] ?>';
+
+        setTimeout(() => {
+            stop_loading();
+        }, 1000);
     }
 </script>

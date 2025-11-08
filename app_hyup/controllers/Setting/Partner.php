@@ -10,7 +10,8 @@ class partner extends MY_Controller
         $this->load->library([
             'layout',
             'site_pagination',
-            '/Service/user_service'
+            '/Service/user_service',
+            '/Service/partner_service'
         ]);
 
         $this->load->model('/Page/service_model');
@@ -88,6 +89,93 @@ class partner extends MY_Controller
         $this->layout->view('/Setting/create_partner_view', $view_data);
     }
 
+    public function create_partner()
+    {
+
+        $type          = $_POST['type'] ?? '';
+        $company_name  = $_POST['company_name'] ?? '';
+        $company_num   = $_POST['company_num'] ?? '';
+        $ceo_name      = $_POST['ceo_name'] ?? '';
+        $phone_number  = $_POST['phone_number'] ?? '';
+        $fax_number    = $_POST['fax_number'] ?? '';
+        $address       = $_POST['address'] ?? '';
+        $zip_code      = $_POST['zip_code'] ?? '';
+        $business_type = $_POST['business_type'] ?? '';
+        $memo          = $_POST['memo'] ?? '';
+        $bank_code     = $_POST['bank_code'] ?? '';
+
+        // 배열 값 (manager 관련)
+        $manager_name  = $_POST['manager_name'] ?? [];
+        $manager_phone = $_POST['manager_phone'] ?? [];
+        $manager_email = $_POST['manager_email'] ?? [];
+        $manager_note  = $_POST['manager_note'] ?? [];
+
+        $file = $_FILES['file1'] ?? null;
+
+        $res_array = [
+            'ok' => true,
+            'msg' => '거래처가 추가되었습니다.',
+        ];
+
+        try {
+
+            $insert_id = $this->partner_service->create([
+                'type'          => $type,
+                'company_name'  => $company_name,
+                'company_num'   => $company_num,
+                'ceo_name'      => $ceo_name,
+                'phone_number'  => $phone_number,
+                'fax_number'    => $fax_number,
+                'address'       => $address,
+                'zip_code'      => $zip_code,
+                'business_type' => $business_type,
+                'memo'          => $memo,
+                'bank_code'     => $bank_code,
+
+                'manager_name'  => $manager_name,
+                'manager_phone' => $manager_phone,
+                'manager_email' => $manager_email,
+                'manager_note'  => $manager_note,
+            ]);
+
+            if (!empty($file)) {
+
+                $this->partner_service->uploadFile($insert_id);
+            }
+        } catch (Exception $e) {
+
+            $res_array = [
+                'ok' => false,
+                'msg' => $e->getMessage(),
+            ];
+        }
+
+        echo json_encode($res_array);
+    }
+
+    public function delete_partner()
+    {
+
+        $id = $_GET['id'] ?? '';
+
+        $res_array = [
+            'ok' => true,
+            'msg' => '거래처가 삭제되었습니다.',
+        ];
+
+        try {
+
+            $this->partner_service->deletePartner($id);
+        } catch (Exception $e) {
+
+            $res_array = [
+                'ok' => false,
+                'msg' => $e->getMessage(),
+            ];
+        }
+
+        echo json_encode($res_array);
+    }
 
     private function layout_config($sub_menu_code = '', $title = '')
     {

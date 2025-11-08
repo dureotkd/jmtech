@@ -8,7 +8,7 @@
     <div class="flex items-center gap-2 mb-4 !text-sm">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
-            <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+            <button onclick="delete_item(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
                 삭제
             </button>
             <div class="dropdown dropdown-end">
@@ -28,7 +28,7 @@
                     <div class="w-full flex flex-col justify-start !text-xs">
 
                         <!-- 내정보수정 -->
-                        <button onclick="open_popup_default('/setting/item/create','물품 등록',1000,820);"
+                        <button onclick="open_popup_default('/setting/item/create','물품 등록',500,580);"
                             class="!text-left border-b-1 border-gray-300 !p-4 sm-hover" type="button">
                             일괄등록
                         </button>
@@ -69,8 +69,8 @@
 
                 ?>
 
-                        <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $item['id'] ?>')" data-estimate-id="<?= $item['id'] ?>">
-                            <td><input type="checkbox" estimate-id="<?= $item['id'] ?>" onclick="event.stopPropagation();" /></td>
+                        <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $item['id'] ?>')" data-item-id="<?= $item['id'] ?>">
+                            <td><input type="checkbox" item-id="<?= $item['id'] ?>" onclick="event.stopPropagation();" /></td>
                             <td>
                                 <?= $item['item_code'] ?>
                             </td>
@@ -152,12 +152,7 @@
     </form>
 
     <dialog id="excel_upload_modal" class="modal">
-        <div class="modal-box !text-xs !w-[400px] relative">
-            <div class="absolute inset-0 modal-loading hidden">
-                <div class="flex items-center justify-center w-full h-full bg-white/70">
-                    <img class="w-16" src="/assets/app_hyup/images/loading.gif" alt="loading" />
-                </div>
-            </div>
+        <form id="exce_form" onsubmit="handle_excel_form(event);" class="modal-box !text-xs !w-[400px] relative">
 
             <div class="absolute inset-0 modal-loading hidden">
                 <div class="flex items-center justify-center w-full h-full bg-white/70">
@@ -165,7 +160,7 @@
                 </div>
             </div>
 
-            <form id="exce_form" onsubmit="handle_excel_form(event);" class="bg-white w-full border border-gray-300">
+            <div class="bg-white w-full border border-gray-300">
                 <!-- 헤더 -->
                 <div class="flex justify-between items-center !text-base !px-4 !py-2 bg-[#4b5563]">
                     <h2 class="text-white font-semibold">엑셀 업로드</h2>
@@ -176,30 +171,94 @@
 
                 <!-- 본문 -->
                 <div class="w-full !px-2 !text-xs font-sans font-300 !py-6">
-                    <div class="flex items-center gap-4">
+                    <form id="excelForm" class="flex items-center justify-center gap-4">
                         <div class="p-5 space-y-4">
-                            <div class="flex justify-end text-sm text-gray-700 items-center !mb-1"><a href="#" class="flex items-center text-xs hover:underline">품목 양식<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1">
+                            <div class="flex justify-end text-sm text-gray-700 items-center !mb-4"><a href="#" class="flex items-center text-xs hover:underline">품목 양식<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1">
                                         <path d="M12 15V3"></path>
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                         <path d="m7 10 5 5 5-5"></path>
                                     </svg></a></div>
-                            <div class="flex items-center"><label class="block text-sm font-semibold w-[70px] mb-1">파일선택</label>
-                                <div class="flex w-[300px]"><input type="text" placeholder="엑셀 파일을 선택하세요" readonly="" class="flex-1 border border-gray-300 px-2 py-1.5" value=""><input id="excelFileInput" type="file" accept=".xls,.xlsx" class="hidden"><button type="button" class="bg-gray-200 border border-l-0 border-gray-300 px-3 hover:bg-gray-300">파일열기</button></div>
+                            <div class="flex">
+                                <input type="text" placeholder="엑셀 파일을 선택하세요" readonly class="flex-1 border border-gray-300 px-2 py-1.5" id="fileNameInput">
+                                <input id="excelFileInput" name="file1" type="file" accept=".xls,.xlsx" class="hidden">
+                                <button type="button" id="openFileBtn" class="bg-gray-200 border border-l-0 border-gray-300 px-3 hover:bg-gray-300">파일열기</button>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
 
+                <div class="w-full !px-2 !text-[13px] flex justify-center items-center gap-1.5 font-sans font-300 !my-2">
+                    <!-- 저장 -->
+                    <button
+                        class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+                        업로드
+                    </button>
 
-            </form>
-        </div>
+                    <!-- 취소 -->
+                    <button
+                        type="button"
+                        onclick="close_excel_upload_modal();"
+                        class="px-2 py-1 bg-[#fff] text-gray-700 hover:bg-gray-100 border border-gray-300">
+                        취소
+                    </button>
+                </div>
+            </div>
+
+        </form>
     </dialog>
 
 </div>
 
 <script>
-    function go_detail(estimate_id) {
-        // open_popup_default(`/sales/estimate_detail?id=${estimate_id}`, '견적서 상세', 1000, 820);
+    const openBtn = document.getElementById("openFileBtn");
+    const fileInput = document.getElementById("excelFileInput");
+    const fileNameInput = document.getElementById("fileNameInput");
+
+    // 버튼 클릭 시 실제 파일 input 클릭
+    openBtn.addEventListener("click", () => {
+        fileInput.click();
+    });
+
+    // 파일 선택 시 이름 표시
+    fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        fileNameInput.value = file ? file.name : "";
+    });
+
+    async function handle_excel_form(e) {
+        e.preventDefault();
+
+        start_modal_loading();
+        await wait(500);
+
+        const formData = new FormData(e.target);
+
+        // 엑셀 파일 업로드 처리
+        $.ajax({
+            type: "POST",
+            url: "/setting/item/create_excel_item",
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: "json",
+            success: function(response) {
+                stop_modal_loading();
+
+                alert(response.msg);
+
+                if (response.ok) {
+                    window.location.reload();
+                }
+            },
+            error: function(xhr, status, error) {
+                stop_modal_loading();
+                alert("엑셀 양식이 올바르지 않습니다: " + error);
+            },
+        });
+    }
+
+    function go_detail(item_id) {
+        // open_popup_default(`/sales/item_detail?id=${item_id}`, '견적서 상세', 1000, 820);
     }
 
     function handle_select(event) {
@@ -216,21 +275,21 @@
         excel_upload_modal.close();
     }
 
-    function delete_estimate(e) {
+    function delete_item(e) {
 
         const checked_ids = [];
         $('tbody input[type="checkbox"]:checked').each(function() {
             const row = $(this).closest('tr');
-            const estimate_id = row.data('estimate-id');
-            checked_ids.push(estimate_id);
+            const item_id = row.data('item-id');
+            checked_ids.push(item_id);
         });
 
         if (checked_ids.length === 0) {
-            alert('삭제할 견적서를 선택해주세요.');
+            alert('삭제할 품목을 선택해주세요.');
             return;
         }
 
-        if (!confirm('선택한 견적서를 삭제하시겠습니까?')) {
+        if (!confirm('선택한 품목을 삭제하시겠습니까?')) {
             return;
         }
 
@@ -240,7 +299,7 @@
 
         $.ajax({
             type: "GET",
-            url: "/sales/delete_estimate",
+            url: "/setting/item/delete_item",
             data: {
                 id: checked_ids
             },
@@ -263,7 +322,7 @@
         });
     }
 
-    function change_status(estimate_id, e) {
+    function change_status(item_id, e) {
 
         start_loading();
 
@@ -279,7 +338,7 @@
             type: "POST",
             url: "/sales/change_status",
             data: {
-                id: estimate_id,
+                id: item_id,
                 status: selected_status
             },
             dataType: "json",
@@ -287,9 +346,9 @@
 
                 alert(response.msg);
 
-                if (response.ok && selected_status == '수주전환' && response.su_estimate_id) {
+                if (response.ok && selected_status == '수주전환' && response.su_item_id) {
 
-                    open_popup_default(`/sales/estimate_detail?id=${response.su_estimate_id}`, '수주서 상세', 1000, 820);
+                    open_popup_default(`/sales/item_detail?id=${response.su_item_id}`, '수주서 상세', 1000, 820);
                 }
 
                 if (response.ok) {

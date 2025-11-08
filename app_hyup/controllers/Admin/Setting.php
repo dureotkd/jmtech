@@ -27,6 +27,17 @@ class setting extends MY_Controller
         $this->layout->view('/Admin/setting_view', $view_data);
     }
 
+    public function create_partner()
+    {
+
+
+        $view_data =  [
+            'layout_data'           => $this->layout_config(),
+        ];
+
+        $this->layout->view('/Admin/Setting/create_partner_view', $view_data);
+    }
+
     public function save_site_meta()
     {
         $meta_title = $this->input->post('meta_title');

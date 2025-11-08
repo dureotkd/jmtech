@@ -78,15 +78,15 @@
 }
 
 .sm-hover {
-  transition: background-color 0.3s ease;
+  transition: background-color 0.1s ease;
 }
 
 .sm-hover:hover {
-  background-color: #e0e0e0; /* hover:bg-gray-50 */
+  background-color: #f8f8f8; /* hover:bg-gray-50 */
 }
 
 .sm-btn:hover {
-  background-color: #f9fafb; /* hover:bg-gray-50 */
+  background-color: #f5f5f5; /* hover:bg-gray-50 */
 }
 
 body {

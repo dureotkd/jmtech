@@ -38,3 +38,21 @@ $("#all_check").on("change", function () {
   var isChecked = $(this).is(":checked");
   $("input[type='checkbox']").prop("checked", isChecked);
 });
+
+function only_number_input(e) {
+  e.value = e.value.replace(/[^0-9]/g, "");
+}
+
+function open_kakao_post_pop() {
+  new daum.Postcode({
+    oncomplete: function (res) {
+      if (res.address) {
+        $("input[name='address']").val(res.address);
+      }
+
+      if (res.zonecode) {
+        $("input[name='zipcode']").val(res.zonecode);
+      }
+    },
+  }).open();
+}

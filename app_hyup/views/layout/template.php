@@ -118,6 +118,8 @@
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker@2.0.11/dist/css/litepicker.css">
+
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <!-- ✅ CSS -->
@@ -126,6 +128,8 @@
     <!-- ✅ JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/litepicker@2.0.11/dist/litepicker.js"></script>
 
 </head>
 
@@ -399,6 +403,13 @@
         </dialog>
 
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs/plugin/advancedFormat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs/plugin/isoWeek.js"></script>
+    <script>
+        dayjs.extend(dayjs_plugin_advancedFormat);
+        dayjs.extend(dayjs_plugin_isoWeek);
+    </script>
     <script src="/assets/app_hyup/common/base.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/base.js') ?>"></script>
     <script src="/assets/app_hyup/common/cookie.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/cookie.js') ?>"></script>
     <script src="/assets/app_hyup/common/mask.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/mask.js') ?>"></script>

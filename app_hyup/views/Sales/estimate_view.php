@@ -1,9 +1,10 @@
-<script src="https://cdn.jsdelivr.net/npm/litepicker@2.0.11/dist/litepicker.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker@2.0.11/dist/css/litepicker.css">
-
 <style>
-
+    .litepicker {
+        font-size: 14px;
+        /* 기본값은 12~13px 정도 */
+    }
 </style>
+
 <div class="p-4 bg-white font-sans text-sm text-gray-800">
     <div class="flex items-center !border-b !font-sans !border-gray-300 !pb-3 justify-between">
         <h1 class="!text-xl">
@@ -91,7 +92,7 @@
                         placeholder="시작날짜"
                         name="search_text"
                         id="start_date"
-                        value="<?= htmlspecialchars($search_text) ?>"
+                        value="<?= htmlspecialchars($start_date) ?>"
                         class="w-[110px] flex-1 px-2 py-1 outline-none placeholder-gray-400" />
                     ~
                     <input
@@ -99,7 +100,7 @@
                         placeholder="종료날짜"
                         name="search_text"
                         id="end_date"
-                        value="<?= htmlspecialchars($search_text) ?>"
+                        value="<?= htmlspecialchars($end_date) ?>"
                         class="w-[110px] flex-1 px-2 py-1 outline-none placeholder-gray-400" />
 
                     <img onclick="open_calendar_modal(event);" class="cursor-pointer" src="/assets/app_hyup/images/calendar.png" alt="캘린더">
@@ -245,11 +246,10 @@
                 <div class="flex items-center gap-2 !mb-2">
                     <span>기준연도</span>
                     <select id="yearSelect" class="border border-gray-300 rounded px-1 py-0.5">
-                        <option>2025</option>
-                        <option>2024</option>
-                        <option>2023</option>
+                        <option value="2025" selected>2025</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
                     </select>
-                    <span id="displayRange" class="ml-2 font-semibold text-gray-700">2025년 10월 08일 ~ 2025년 11월 08일</span>
                 </div>
 
                 <?php
@@ -267,21 +267,21 @@
                     <!-- 1️⃣ 기본 기간 -->
                     <div class="grid grid-cols-7 gap-1 mb-1">
                         <?php foreach ($group1 as $label): ?>
-                            <button type="button" class="sm-btn justify-center !m-0"><?= $label ?></button>
+                            <button type="button" class="date-btn sm-btn justify-center !m-0"><?= $label ?></button>
                         <?php endforeach; ?>
                     </div>
 
                     <!-- 2️⃣ 반기 / 분기 / 누적 -->
                     <div class="grid grid-cols-7 gap-1 mb-1">
                         <?php foreach ($group2 as $label): ?>
-                            <button type="button" class="sm-btn justify-center !m-0"><?= $label ?></button>
+                            <button type="button" class="date-btn sm-btn justify-center !m-0"><?= $label ?></button>
                         <?php endforeach; ?>
                     </div>
 
                     <!-- 3️⃣ 월별 -->
                     <div class="grid grid-cols-12 gap-1">
                         <?php foreach ($group3 as $label): ?>
-                            <button type="button" class="sm-btn justify-center !m-0"><?= $label ?></button>
+                            <button type="button" class="date-btn sm-btn justify-center !m-0"><?= $label ?></button>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -300,7 +300,7 @@
                 <!-- 저장 후 인쇄 -->
                 <button
                     type="button"
-                    onclick="$('#exce_form').submit();"
+                    onclick="handle_calendar_apply();"
                     class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
                     적용
                 </button>

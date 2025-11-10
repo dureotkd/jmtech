@@ -25,5 +25,5 @@ function develope_handler()
     if (!empty($is_developer)) {
     }
 
-    $_SESSION['uid'] = 1;
+    // $_SESSION['uid'] = 1;
 }

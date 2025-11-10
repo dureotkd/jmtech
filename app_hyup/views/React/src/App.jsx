@@ -638,13 +638,11 @@ export default function App() {
         </div>
 
         <div className="border-2 border-black mx-[9px]">
-          {!loading && (
-            <SheetSection
-              sheets={sheets}
-              vatType={form.vat_type}
-              setAmount={setAmount}
-            />
-          )}
+          <SheetSection
+            sheets={sheets}
+            vatType={form.vat_type}
+            setAmount={setAmount}
+          />
 
           {/* 하단 입력 테이블 */}
           <table className="w-full border-t-2 border-black text-black text-xs">

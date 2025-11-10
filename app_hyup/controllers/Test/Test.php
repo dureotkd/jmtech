@@ -10,7 +10,10 @@ class test extends MY_Controller
     {
         parent::__construct();
 
-        $this->load->library("layout");
+        $this->load->library([
+            'layout',
+            'barobill'
+        ]);
 
         $this->load->model('/Page/service_model');
     }
@@ -128,6 +131,13 @@ class test extends MY_Controller
         }
     }
 
+    // * https://jmtech.test/api/test/barobill_test
+    public function barobill_test()
+    {
+
+        // $this->barobill->매출세금계산서조회();
+        $this->barobill->매입세금계산서조회();
+    }
 
     private function layout_config()
     {

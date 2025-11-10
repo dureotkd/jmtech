@@ -396,7 +396,7 @@ export default function App() {
           <div className="w-full relative flex justify-center items-center">
             <img
               className="mb-2 mx-auto"
-              src={`https://jmtech.test/assets/app_hyup/images/${ESTIMATE_SUB_TYPE[subType]}.png`}
+              src={`https://www.jmtech.asia/assets/app_hyup/images/${ESTIMATE_SUB_TYPE[subType]}.png`}
               alt="견적서"
             />
           </div>
@@ -520,7 +520,7 @@ export default function App() {
                         <span>전용준</span>
                         <img
                           className="w-14 h-14 absolute left-6 -top-4"
-                          src="https://jmtech.test/assets/app_hyup/images/stamp.png"
+                          src="https://www.jmtech.asia/assets/app_hyup/images/stamp.png"
                           alt="stamp"
                         />
                       </div>

@@ -4,7 +4,7 @@ function Loading() {
       <div className="overlay-text">
         <img
           className="w-16"
-          src="https://jmtech.test/assets/app_hyup/images/loading.gif"
+          src="https://www.jmtech.asia/assets/app_hyup/images/loading.gif"
           alt=""
         />
       </div>

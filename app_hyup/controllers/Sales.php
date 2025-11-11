@@ -28,9 +28,38 @@ class sales extends MY_Controller
     # 매출(거래명세표)
     public function report()
     {
+        $title = '매출(거래명세표)';
+
+        $page = $this->input->get('page') ?? 1;
+        $search_text = $this->input->get('search_text') ?? '';
+        $start_date = $this->input->get('start_date') ?? '';
+        $end_date = $this->input->get('end_date') ?? '';
+
+        $where = [
+            "type = 'SELL'",    // SELL:판매, BUY:구매
+            "sub_type = 'G'",   // G:견적서, S:수주서
+        ];
+
+        if (!empty($search_text)) {
+
+            $where[] = "(SELECT COUNT(*) FROM jmtech.business_partner bp WHERE bp.id = a.partner_id AND bp.company_name LIKE '%{$search_text}%') > 0";
+        }
+
+        if (!empty($start_date)) {
+
+            $where[] = "a.estimate_date >= '{$start_date}'";
+        }
+
+        if (!empty($end_date)) {
+
+            $where[] = "a.estimate_date <= '{$end_date}'";
+        }
+
+        $estimate_all = $this->service_model->get_estimate('all', $where);
 
         $view_data =  [
-            'layout_data'           => $this->layout_config('report', '매출(거래명세표)'),
+            'title'         => $title,
+            'layout_data'   => $this->layout_config('report', $title),
         ];
 
         $this->layout->view('/Sales/report_view', $view_data);

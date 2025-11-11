@@ -13,7 +13,7 @@
 
         <div class="flex items-center gap-2 !text-xs">
 
-            <form id="searchForm" action="/sales/purchase" method="GET" class="flex items-center border border-gray-300 gap-2 rounded-sm overflow-hidden w-[330px] !text-xs">
+            <form id="searchForm" action="/sales/transcation_statement" method="GET" class="flex items-center border border-gray-300 gap-2 rounded-sm overflow-hidden w-[330px] !text-xs">
                 <input type="hidden" name="page" value="<?= $page ?>" />
                 <input type="hidden" name="start_date" autocomplete="off" value="<?= $start_date ?>" />
                 <input type="hidden" name="end_date" autocomplete="off" value="<?= $end_date ?>" />
@@ -81,7 +81,7 @@
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
             <div class="flex items-center gap-2">
-                <button onclick="delete_purchase(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+                <button onclick="delete_transcation_statement(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
                     삭제
                 </button>
 
@@ -105,7 +105,7 @@
 
                     <img onclick="open_calendar_modal(event);" class="cursor-pointer" src="/assets/app_hyup/images/calendar.png" alt="캘린더">
 
-                    <button type="button" onclick="window.location.href = '/purchase/report'" class="sm-btn">
+                    <button type="button" onclick="window.location.href = '/transcation_statement/report'" class="sm-btn">
                         초기화
                     </button>
                 </div>
@@ -138,25 +138,25 @@
             $총공급가액 = 0;
             $총세액 = 0;
             $총합계금액 = 0;
-            if (!empty($purchase_all)) :
-                foreach ($purchase_all as $purchase) :
+            if (!empty($transcation_statement_all)) :
+                foreach ($transcation_statement_all as $transcation_statement) :
 
-                    $총공급가액 += $purchase['supply_amount'];
-                    $총세액 += $purchase['tax_amount'];
-                    $총합계금액 += $purchase['amount'];
+                    $총공급가액 += $transcation_statement['supply_amount'];
+                    $총세액 += $transcation_statement['tax_amount'];
+                    $총합계금액 += $transcation_statement['amount'];
             ?>
 
-                    <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $purchase['id'] ?>')" data-purchase-id="<?= $purchase['id'] ?>">
-                        <td><input type="checkbox" purchase-id="<?= $purchase['id'] ?>" onclick="event.stopPropagation();" /></td>
+                    <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $transcation_statement['id'] ?>')" data-transcation_statement-id="<?= $transcation_statement['id'] ?>">
+                        <td><input type="checkbox" transcation_statement-id="<?= $transcation_statement['id'] ?>" onclick="event.stopPropagation();" /></td>
                         <td class="">
-                            <?= date('Y-m-d', strtotime($purchase['created_at'])) ?>
+                            <?= date('Y-m-d', strtotime($transcation_statement['created_at'])) ?>
                         </td>
                         <td class="">
-                            <?= $purchase['partner_name'] ?>
+                            <?= $transcation_statement['partner_name'] ?>
                         </td>
-                        <td class=""><?= number_format($purchase['supply_amount']) ?></td>
-                        <td class=""><?= number_format($purchase['tax_amount']) ?></td>
-                        <td class=""><?= number_format($purchase['amount']) ?></td>
+                        <td class=""><?= number_format($transcation_statement['supply_amount']) ?></td>
+                        <td class=""><?= number_format($transcation_statement['tax_amount']) ?></td>
+                        <td class=""><?= number_format($transcation_statement['amount']) ?></td>
                         <td>
 
                         </td>
@@ -175,12 +175,12 @@
             <? endif; ?>
 
             <?
-            if (!empty($purchase_all)) {
+            if (!empty($transcation_statement_all)) {
             ?>
                 <tr class="border-b bg-[#e9f1fb]">
                     <td></td>
                     <td class=""></td>
-                    <td class="!font-bold">총 <?= count($purchase_all) ?>건</td>
+                    <td class="!font-bold">총 <?= count($transcation_statement_all) ?>건</td>
                     <td class="!font-bold">공급가액 : <?= number_format($총공급가액) ?></td>
                     <td class="!font-bold">세액 : <?= number_format($총세액) ?></td>
                     <td class="!font-bold">합계금액 : <?= number_format($총합계금액) ?></td>
@@ -340,21 +340,21 @@
         modal.close();
     }
 
-    function go_detail(purchase_id) {
-        open_popup_default(`/sales/purchase_detail?id=${purchase_id}`, '<?= $title ?> 상세', 1000, 820);
+    function go_detail(transcation_statement_id) {
+        open_popup_default(`/sales/transcation_statement_detail?id=${transcation_statement_id}`, '<?= $title ?> 상세', 1000, 820);
     }
 
     function handle_select(event) {
         event.stopPropagation(); // 트리거링 방지
     }
 
-    function delete_purchase(e) {
+    function delete_transcation_statement(e) {
 
         const checked_ids = [];
         $('tbody input[type="checkbox"]:checked').each(function() {
             const row = $(this).closest('tr');
-            const purchase_id = row.data('purchase-id');
-            checked_ids.push(purchase_id);
+            const transcation_statement_id = row.data('transcation_statement-id');
+            checked_ids.push(transcation_statement_id);
         });
 
         if (checked_ids.length === 0) {
@@ -372,7 +372,7 @@
 
         $.ajax({
             type: "GET",
-            url: "/sales/delete_purchase",
+            url: "/sales/delete_transcation_statement",
             data: {
                 id: checked_ids
             },
@@ -395,7 +395,7 @@
         });
     }
 
-    function change_status(purchase_id, e) {
+    function change_status(transcation_statement_id, e) {
 
         start_loading();
 
@@ -411,7 +411,7 @@
             type: "POST",
             url: "/sales/change_status",
             data: {
-                id: purchase_id,
+                id: transcation_statement_id,
                 status: selected_status
             },
             dataType: "json",
@@ -419,9 +419,9 @@
 
                 alert(response.msg);
 
-                if (response.ok && selected_status == '수주전환' && response.su_purchase_id) {
+                if (response.ok && selected_status == '수주전환' && response.su_transcation_statement_id) {
 
-                    open_popup_default(`/sales/purchase_detail?id=${response.su_purchase_id}`, '수주서 상세', 1000, 820);
+                    open_popup_default(`/sales/transcation_statement_detail?id=${response.su_transcation_statement_id}`, '수주서 상세', 1000, 820);
                 }
 
                 if (response.ok) {

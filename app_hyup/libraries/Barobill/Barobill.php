@@ -111,15 +111,15 @@ No	변수명	타입	길이	필수	설명
 9	CurrentPage	int		O	조회할 페이지 번호
 Return
       */
-     public function 매입세금계산서기간조회()
+     public function 매입세금계산서기간조회($StartDate, $EndDate) // YYYYMMDD
      {
+          echo $StartDate;
+          exit;
 
           $TaxType = 1;
           $DateType = 1;
           $CountPerPage = 10;
           $CurrentPage = 1;
-          $StartDate = '20251101';
-          $EndDate = '20251110';
 
           $params = [
                'CERTKEY' => $this->CERTKEY,

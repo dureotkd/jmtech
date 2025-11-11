@@ -32,7 +32,7 @@ class order extends MY_Controller
 
         $where = [
             "type = 'SELL'",    // SELL:판매, BUY:구매
-            "sub_type = 'G'",   // G:견적서, S:수주서
+            "sub_type = 'B'",   // G:견적서, S:수주서 , B:발주서
         ];
 
         if (!empty($search_text)) {
@@ -51,7 +51,7 @@ class order extends MY_Controller
         }
 
 
-        $purchase_all = $this->service_model->get_purchase('all', $where);
+        $estimate_all = $this->service_model->get_estimate('all', $where);
         $title = '발주서';
 
         $view_data =  [
@@ -60,8 +60,8 @@ class order extends MY_Controller
             'start_date'           => $start_date,
             'end_date'             => $end_date,
             'title'                => $title,
-            'layout_data'           => $this->layout_config('purchase', $title),
-            'purchase_all'          => $purchase_all,
+            'layout_data'           => $this->layout_config('order', $title),
+            'estimate_all'          => $estimate_all,
         ];
 
         $this->layout->view('/Purchase/order_view', $view_data);

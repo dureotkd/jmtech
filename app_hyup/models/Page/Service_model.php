@@ -106,40 +106,40 @@ class service_model extends MY_Model
         return $this->excute($sql, 'exec', 'main');
     }
 
-    // ===== purchase =====
-    public function get_purchase($type, $where = [1])
+    // ===== transcation_statement =====
+    public function get_transcation_statement($type, $where = [1])
     {
         $select = $type == 'one' ?
             "COUNT(*)"
             :
             "* , 
             (SELECT company_name FROM jmtech.business_partner bp WHERE bp.id = a.partner_id) AS partner_name ,
-            (SELECT id FROM jmtech.purchase WHERE no = a.no AND sub_type = 'S') AS su_purchase_id ,
-            (SELECT id FROM jmtech.purchase WHERE no = a.no AND sub_type = 'G') AS g_purchase_id";
-        $sql = sprintf("SELECT {$select} FROM jmtech.purchase a WHERE %s ORDER BY a.created_at DESC", join(" AND ", $where));
+            (SELECT id FROM jmtech.transcation_statement WHERE no = a.no AND sub_type = 'S') AS su_transcation_statement_id ,
+            (SELECT id FROM jmtech.transcation_statement WHERE no = a.no AND sub_type = 'G') AS g_transcation_statement_id";
+        $sql = sprintf("SELECT {$select} FROM jmtech.transcation_statement a WHERE %s ORDER BY a.created_at DESC", join(" AND ", $where));
         return $this->excute($sql, $type, 'main');
     }
-    public function insert_purchase($debug = false, $data = [])
+    public function insert_transcation_statement($debug = false, $data = [])
     {
-        $sql = $this->getInsertQuery('jmtech.purchase', $data);
+        $sql = $this->getInsertQuery('jmtech.transcation_statement', $data);
         if ($debug) {
             echo $sql . "<br/>";
             return 1;
         }
         return $this->excute($sql, 'exec', 'main');
     }
-    public function update_purchase($debug = false, $data = [], $where = [])
+    public function update_transcation_statement($debug = false, $data = [], $where = [])
     {
-        $sql = $this->getUpdateQuery('jmtech.purchase', $data, $where);
+        $sql = $this->getUpdateQuery('jmtech.transcation_statement', $data, $where);
         if ($debug) {
             echo $sql . "<br/>";
             return 1;
         }
         return $this->excute($sql, 'exec', 'main');
     }
-    public function delete_purchase($debug = false, $where = [])
+    public function delete_transcation_statement($debug = false, $where = [])
     {
-        $sql = $this->getDeleteQuery('jmtech.purchase', $where);
+        $sql = $this->getDeleteQuery('jmtech.transcation_statement', $where);
         if ($debug) {
             echo $sql . "<br/>";
             return 1;

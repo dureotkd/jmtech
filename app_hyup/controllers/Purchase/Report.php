@@ -52,11 +52,11 @@ class report extends MY_Controller
         }
 
 
-        $purchase_all = $this->service_model->get_purchase('all', $where);
+        $transcation_statement_all = $this->service_model->get_transcation_statement('all', $where);
         $title = '매입(거래명세표)';
 
         $view_data =  [
-            'purchase_all'          => $purchase_all,
+            'transcation_statement_all' => $transcation_statement_all,
             'page'                  => $page,
             'search_text'           => $search_text,
             'start_date'            => $start_date,

@@ -7,40 +7,20 @@ class cron extends MY_Controller
     {
         parent::__construct();
 
-        $this->load->library('toss');
-        $this->load->library('log_util');
+        $this->load->library([
+            'barobill'
+        ]);
 
         $this->load->model('/Page/service_model');
     }
 
     /**
-     * 
-     *
-     * @return void
+     * ^ ----------- 홈택스 API (새벽 1시) -----------
+     * * 매입/매출 내역 크롤링
      */
-    public function review()
+    public function test()
     {
-
-        // json 불러와서 
-        $json = file_get_contents("C:\\laragon\\www\\mosihealth\\assets\\app_hyup\\review.json");
-        // json 디코딩
-        $data = json_decode($json, true);
-
-        foreach ($data as $item) {
-
-            $user_login_id = $item['user_id'];
-            $star = $item['star'];
-            $content = $item['content'];
-            $created_at = $item['created_at'];
-
-            $this->service_model->insert_review(DEBUG, [
-                'user_id' => 0,
-                'product_id' => 4,
-                'user_login_id' => $user_login_id,
-                'rating' => $star,
-                'content' => $content,
-                'created_at' => $created_at
-            ]);
-        }
+        $today = date('Ymd');
+        $res = $this->barobill->매입세금계산서기간조회($today, $today);
     }
 }

@@ -59,7 +59,7 @@ class api extends MY_Controller
             foreach ($items as $item) {
                 $source[] = [
                     'key'   => $item['id'],
-                    'value' => "{$item['item_code']}&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;&nbsp;&nbsp;&nbsp;{$item['item_name']}&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;&nbsp;&nbsp;&nbsp;{$item['unit']}",
+                    'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
                     'title' => $item['item_name'],
                 ];
             }
@@ -173,7 +173,7 @@ class api extends MY_Controller
             foreach ($items as $item) {
                 $source[] = [
                     'key'   => $item['id'],
-                    'value' => "{$item['item_code']}&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;&nbsp;&nbsp;&nbsp;{$item['item_name']}&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;&nbsp;&nbsp;&nbsp;{$item['unit']}",
+                    'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
                     'title' => $item['item_name'],
                 ];
             }
@@ -251,8 +251,8 @@ class api extends MY_Controller
                         'title' => '비고',
                     ]
                 ],
-                'colWidths' => [120, 360, 60, 60, 100, 120, 100, 80],
-                'height' => 300,
+                'colWidths' => [110, 250, 60, 60, 100, 120, 100, 80],
+                'height' => 200,
             ],
             [
                 'name' => '내역서',

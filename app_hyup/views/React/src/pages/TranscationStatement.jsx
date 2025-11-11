@@ -84,6 +84,31 @@ function TranscationStatement() {
     },
   ]);
 
+  const { 공급가액합계, 세액합계 } = React.useMemo(() => {
+    let total1 = 0;
+    let total2 = 0;
+
+    const 견적서 = sheets.find((sheet) => sheet.name === "견적서");
+    console.log("🚀 Debug: ~ TranscationStatement ~ 견적서:", 견적서.data);
+
+    if (견적서.data) {
+      견적서.data.forEach((row) => {
+        console.log(row);
+        const 공급가액 = parseFloat(row[5]) || 0;
+        const 세액 = parseFloat(row[6]) || 0; // ✅ 세액 컬럼도 더하기
+        total1 += 공급가액;
+        total2 += 세액;
+      });
+    }
+
+    return {
+      공급가액합계: total1,
+      세액합계: total2,
+    };
+  }, [JSON.stringify(sheets)]);
+
+  console.log(공급가액합계, 세액합계);
+
   // * 기존 견적서 불러오기
   const loadSaveExcelTemplate = async (id) => {
     const res = await purchaseApi.저장된엑셀템플릿({ id, theme: "blue" });
@@ -476,10 +501,6 @@ function TranscationStatement() {
                   />
                 </div>
               </div>
-
-              <p className="absolute bottom-[10px] font-semibold text-[13px]">
-                견적요청에 감사드리며 아래와 같이 견적합니다.
-              </p>
             </div>
 
             {/* 오른쪽 섹션 (공급자 정보)는 JSX table로 그대로 변환) */}
@@ -496,12 +517,6 @@ function TranscationStatement() {
 
                 <thead>
                   <tr>
-                    <td
-                      rowSpan="6"
-                      className="bg-[#edf2f8] text-lg font-semibold font-serif text-center align-middle"
-                    >
-                      공<br />급<br />자
-                    </td>
                     <td className="text-center">등록번호</td>
                     <td colSpan="6" className="border-r-0">
                       <span className="text-black">312-86-30100</span>
@@ -641,6 +656,7 @@ function TranscationStatement() {
         <div className="border-2 border-blue-700 mx-[9px]">
           <SheetSection
             theme="blue"
+            subType={subType}
             sheets={sheets}
             vatType={form.vat_type}
             setAmount={setAmount}
@@ -651,43 +667,31 @@ function TranscationStatement() {
             <thead>
               <tr>
                 <th className="border-t w-[100px] text-center text-black bg-[#edf2f8]">
-                  납기일자
+                  전미수잔액
                 </th>
-                <th className="border-t w-[400px]">
-                  <input
-                    type="date"
-                    name="due_at"
-                    defaultValue={form.due_at}
-                    className="text-black border w-full h-[24px] px-1"
-                  />
+                <th className="border-t w-[400px]"></th>
+                <th className="border-t bg-[#edf2f8] w-[80px] text-center">
+                  합계
                 </th>
-                <th className="border-t bg-[#edf2f8] w-[100px] text-center">
-                  납품장소
-                </th>
-                <th className="border-t">
-                  <input
-                    type="text"
-                    name="location"
-                    defaultValue={form.location}
-                    className="text-black border w-full h-[24px] px-1"
-                  />
+                <th className="border-t" colSpan={6}>
+                  {`(공급가액 ${공급가액합계.toLocaleString()} + 세액 ${세액합계.toLocaleString()}) = 총 합계 ${amount.toLocaleString()} 원`}
                 </th>
               </tr>
             </thead>
 
             <tbody>
               <tr>
-                <td className="border text-center bg-[#edf2f8]">유효일자</td>
-                <td className="border w-[400px]">
+                <td className="border text-center bg-[#edf2f8]">비고</td>
+                <td className="border">
                   <input
-                    type="date"
-                    name="valid_at"
-                    defaultValue={form.valid_at}
+                    type="text"
+                    name="etc_memo"
+                    defaultValue={form.etc_memo}
                     className="text-black border w-full h-[24px] px-1"
                   />
                 </td>
-                <td className="border bg-[#edf2f8] w-[100px] text-center">
-                  결제조건
+                <td className="border bg-[#edf2f8] w-[80px] text-center">
+                  입금액
                 </td>
                 <td className="border">
                   <input
@@ -697,15 +701,27 @@ function TranscationStatement() {
                     className="text-black border w-full h-[24px] px-1"
                   />
                 </td>
-              </tr>
 
-              <tr>
-                <td className="border text-center bg-[#edf2f8]">비고</td>
-                <td className="border" colSpan="3">
+                <td className="border bg-[#edf2f8] w-[80px] text-center">
+                  총미수잔액
+                </td>
+                <td className="border">
                   <input
                     type="text"
-                    name="etc_memo"
-                    defaultValue={form.etc_memo}
+                    name="payment_type"
+                    defaultValue={form.payment_type}
+                    className="text-black border w-full h-[24px] px-1"
+                  />
+                </td>
+
+                <td className="border bg-[#edf2f8] w-[80px] text-center">
+                  인수자
+                </td>
+                <td className="border">
+                  <input
+                    type="text"
+                    name="payment_type"
+                    defaultValue={form.payment_type}
                     className="text-black border w-full h-[24px] px-1"
                   />
                 </td>

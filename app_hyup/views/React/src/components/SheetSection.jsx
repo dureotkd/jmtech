@@ -15,7 +15,13 @@ registerCellType("formula", {
   validator: TextCellType.validator,
 });
 
-const SheetSection = ({ sheets, vatType, setAmount, theme = "light" }) => {
+const SheetSection = ({
+  sheets,
+  vatType,
+  setAmount,
+  theme = "light",
+  subType = "G",
+}) => {
   console.log("Render SheetSection");
   const hotRef = React.useRef(null);
   const {
@@ -119,76 +125,162 @@ const SheetSection = ({ sheets, vatType, setAmount, theme = "light" }) => {
           console.log("beforeChange");
         }}
         afterChange={function (changes, source) {
-          if (source === "edit" && changes) {
-            // * 0번쨰 품목 수정시
-            if (changes[0][3]?.key) {
-              changes.forEach(([row, prop, oldValue, newValue]) => {
-                console.log(oldValue, newValue);
-                if (prop === 0 && oldValue !== newValue.title) {
-                  this.setDataAtCell(row, 0, newValue.title); // * 품목
-                }
-              });
-            }
-
-            changes.forEach(([row, prop, oldValue, newValue]) => {
-              if (prop === 2 || prop === 3) {
-                console.log(row, prop, newValue, vatType);
-
-                let targetValue = "";
-
-                // * 수량
-                if (prop === 2) {
-                  targetValue = parseFloat(this.getDataAtCell(row, 3)) || 0; // * 단가
-                }
-
-                // * 단가
-                if (prop === 3) {
-                  targetValue = parseFloat(this.getDataAtCell(row, 2)) || 0; // * 수량
-                }
-
-                let supply = 0;
-                let tax = 0;
-                const total = newValue * targetValue; // 총금액(부가세 포함)
-
-                switch (vatType) {
-                  case "Y": // 부가세 포함
-                    tax = Math.round(total - total / 1.1);
-                    supply = total - tax;
-                    break;
-
-                  case "N": // 부가세 별도
-                    supply = total;
-                    tax = Math.round(supply * 0.1);
-                    console.log("🚀 Debug: ~ SheetSection ~ tax:", tax);
-                    break;
-
-                  case "X": // 면세
-                  default:
-                    supply = total;
-                    tax = 0;
-                    break;
-                }
-
-                this.setDataAtCell(row, 4, supply, "autoCalc"); // 공급가액(E)
-                this.setDataAtCell(row, 5, tax, "autoCalc"); // 세액(F)
-
-                let amount = 0;
-
-                setTimeout(() => {
-                  const hotData = hotRef.current.hotInstance.getData();
-                  console.log("🚀 Debug: ~ SheetSection ~ hotData:", hotData);
-                  const sumAmount = hotData.reduce((acc, cur) => {
-                    const supplyValue = parseFloat(cur[4]) || 0;
-                    const taxValue = parseFloat(cur[5]) || 0;
-                    return acc + supplyValue + taxValue;
-                  }, 0);
-
-                  setAmount((prev) => {
-                    return sumAmount;
+          switch (subType) {
+            case "G": // 일반
+            case "S": // 수주서
+            case "B": // 발주서
+              if (source === "edit" && changes) {
+                // * 0번쨰 품목 수정시
+                if (changes[0][3]?.key) {
+                  changes.forEach(([row, prop, oldValue, newValue]) => {
+                    console.log(oldValue, newValue);
+                    if (prop === 0 && oldValue !== newValue.title) {
+                      this.setDataAtCell(row, 0, newValue.title); // * 품목
+                    }
                   });
-                }, 500);
+                }
+
+                changes.forEach(([row, prop, oldValue, newValue]) => {
+                  if (prop === 2 || prop === 3) {
+                    console.log(row, prop, newValue, vatType);
+
+                    let targetValue = "";
+
+                    // * 수량
+                    if (prop === 2) {
+                      targetValue = parseFloat(this.getDataAtCell(row, 3)) || 0; // * 단가
+                    }
+
+                    // * 단가
+                    if (prop === 3) {
+                      targetValue = parseFloat(this.getDataAtCell(row, 2)) || 0; // * 수량
+                    }
+
+                    let supply = 0;
+                    let tax = 0;
+                    const total = newValue * targetValue; // 총금액(부가세 포함)
+
+                    switch (vatType) {
+                      case "Y": // 부가세 포함
+                        tax = Math.round(total - total / 1.1);
+                        supply = total - tax;
+                        break;
+
+                      case "N": // 부가세 별도
+                        supply = total;
+                        tax = Math.round(supply * 0.1);
+                        console.log("🚀 Debug: ~ SheetSection ~ tax:", tax);
+                        break;
+
+                      case "X": // 면세
+                      default:
+                        supply = total;
+                        tax = 0;
+                        break;
+                    }
+
+                    this.setDataAtCell(row, 4, supply, "autoCalc"); // 공급가액(E)
+                    this.setDataAtCell(row, 5, tax, "autoCalc"); // 세액(F)
+
+                    let amount = 0;
+
+                    setTimeout(() => {
+                      const hotData = hotRef.current.hotInstance.getData();
+                      console.log(
+                        "🚀 Debug: ~ SheetSection ~ hotData:",
+                        hotData
+                      );
+                      const sumAmount = hotData.reduce((acc, cur) => {
+                        const supplyValue = parseFloat(cur[4]) || 0;
+                        const taxValue = parseFloat(cur[5]) || 0;
+                        return acc + supplyValue + taxValue;
+                      }, 0);
+
+                      setAmount((prev) => {
+                        return sumAmount;
+                      });
+                    }, 500);
+                  }
+                });
               }
-            });
+
+              break;
+
+            case "MI": // 매입 거래명세표
+            case "MC": // 매출 거래명세표
+              if (source === "edit" && changes) {
+                if (changes[0][3]?.key) {
+                  changes.forEach(([row, prop, oldValue, newValue]) => {
+                    if (prop === 1 && oldValue !== newValue.title) {
+                      this.setDataAtCell(row, 1, newValue.title); // * 품목
+                    }
+                  });
+                }
+
+                changes.forEach(([row, prop, oldValue, newValue]) => {
+                  if (prop === 3 || prop === 4) {
+                    console.log(row, prop, newValue, vatType);
+
+                    let targetValue = "";
+
+                    // * 수량
+                    if (prop === 3) {
+                      targetValue = parseFloat(this.getDataAtCell(row, 4)) || 0; // * 단가
+                    }
+
+                    // * 단가
+                    if (prop === 4) {
+                      targetValue = parseFloat(this.getDataAtCell(row, 3)) || 0; // * 수량
+                    }
+
+                    let supply = 0;
+                    let tax = 0;
+                    const total = newValue * targetValue; // 총금액(부가세 포함)
+
+                    switch (vatType) {
+                      case "Y": // 부가세 포함
+                        tax = Math.round(total - total / 1.1);
+                        supply = total - tax;
+                        break;
+
+                      case "N": // 부가세 별도
+                        supply = total;
+                        tax = Math.round(supply * 0.1);
+                        console.log("🚀 Debug: ~ SheetSection ~ tax:", tax);
+                        break;
+
+                      case "X": // 면세
+                      default:
+                        supply = total;
+                        tax = 0;
+                        break;
+                    }
+
+                    this.setDataAtCell(row, 5, supply, "autoCalc"); // 공급가액(E)
+                    this.setDataAtCell(row, 6, tax, "autoCalc"); // 세액(F)
+
+                    let amount = 0;
+
+                    setTimeout(() => {
+                      const hotData = hotRef.current.hotInstance.getData();
+                      console.log(
+                        "🚀 Debug: ~ SheetSection ~ hotData:",
+                        hotData
+                      );
+                      const sumAmount = hotData.reduce((acc, cur) => {
+                        const supplyValue = parseFloat(cur[5]) || 0;
+                        const taxValue = parseFloat(cur[6]) || 0;
+                        return acc + supplyValue + taxValue;
+                      }, 0);
+
+                      setAmount((prev) => {
+                        return sumAmount;
+                      });
+                    }, 500);
+                  }
+                });
+              }
+              break;
           }
         }}
         // ✅ 여기 추가

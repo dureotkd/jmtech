@@ -18,6 +18,10 @@ input {
 
 /* ------------- 기본 테이블 스타일 ------------- */
 
+.pika-table > thead > tr > th {
+  text-align: center !important;
+}
+
 table th {
   color: #000 !important;
   font-weight: 400;

@@ -10,8 +10,8 @@ class Barobill
 
      public function __construct()
      {
-          $BaroService_URL = 'https://testws.baroservice.com/TI.asmx?WSDL';    //테스트베드용
-          //$BaroService_URL = 'https://ws.baroservice.com/TI.asmx?WSDL';		//실서비스용
+          // $BaroService_URL = 'https://testws.baroservice.com/TI.asmx?WSDL';    //테스트베드용
+          $BaroService_URL = 'https://ws.baroservice.com/TI.asmx?WSDL';          //실서비스용
 
           $BaroService_TI = new SoapClient($BaroService_URL, array(
                'trace' => 'true',
@@ -20,7 +20,8 @@ class Barobill
 
           $this->BaroService_TI = $BaroService_TI;
 
-          $this->CERTKEY = '3C2743E7-C822-40C7-A55B-A13857B95678'; //연동인증키(테스트베드용)
+          // $this->CERTKEY = '3C2743E7-C822-40C7-A55B-A13857B95678'; //연동인증키(테스트베드용)
+          $this->CERTKEY = '1F196223-E6F2-4F4E-B59F-E60D246A0F11'; //연동인증키(실서비스용)
           $this->CorpNum = '3128630100'; //사업자번호
           $this->UserID = 'dureotkd123'; //바로빌 회원아이디
      }
@@ -110,7 +111,7 @@ No	변수명	타입	길이	필수	설명
 9	CurrentPage	int		O	조회할 페이지 번호
 Return
       */
-     public function 매입세금계산서조회()
+     public function 매입세금계산서기간조회()
      {
 
           $TaxType = 1;
@@ -157,6 +158,57 @@ Return
                printr($SimpleTaxInvoices);
                exit;
 
+
+               foreach ($SimpleTaxInvoices as $SimpleTaxInvoice) {
+                    // 필드정보는 레퍼런스를 참고해주세요.
+                    echo '<pre>';
+                    print_r($SimpleTaxInvoice);
+                    echo '</pre>';
+               }
+          }
+     }
+
+     public function 매입세금계산서일별조회()
+     {
+          // ---------------------------------------------------------------------------------------------------
+          // API 레퍼런스 : https://dev.barobill.co.kr/docs/references/세금계산서-API#GetDailyTaxInvoiceSalesList
+          // ---------------------------------------------------------------------------------------------------
+          $TaxType = 1;
+          $DateType = 1;
+          $BaseDate = '';
+          $CountPerPage = 10;
+          $CurrentPage = 1;
+
+          $Result = $this->BaroService_TI->GetDailyTaxInvoiceSalesList([
+               'CERTKEY' => $this->CERTKEY,
+               'CorpNum' => $this->CorpNum,
+               'UserID' => $this->UserID,
+               'TaxType' => $TaxType,
+               'DateType' => $DateType,
+               'BaseDate' => $BaseDate,
+               'CountPerPage' => $CountPerPage,
+               'CurrentPage' => $CurrentPage,
+          ])->GetDailyTaxInvoiceSalesListResult;
+
+          if ($Result->CurrentPage < 0) { // 호출 실패
+               echo $Result->CurrentPage;
+          } else { // 호출 성공
+               echo $Result->CurrentPage;
+               echo '<br/>';
+               echo $Result->CountPerPage;
+               echo '<br/>';
+               echo $Result->MaxPageNum;
+               echo '<br/>';
+               echo $Result->MaxIndex;
+               echo '<br/>';
+
+               if (!array_key_exists('SimpleTaxInvoiceEx', $Result->SimpleTaxInvoiceExList)) {
+                    $SimpleTaxInvoices = [];
+               } else if (!is_array($Result->SimpleTaxInvoiceExList->SimpleTaxInvoiceEx)) {
+                    $SimpleTaxInvoices = [$Result->SimpleTaxInvoiceExList->SimpleTaxInvoiceEx];
+               } else {
+                    $SimpleTaxInvoices = $Result->SimpleTaxInvoiceExList->SimpleTaxInvoiceEx;
+               }
 
                foreach ($SimpleTaxInvoices as $SimpleTaxInvoice) {
                     // 필드정보는 레퍼런스를 참고해주세요.

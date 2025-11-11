@@ -131,12 +131,12 @@ class test extends MY_Controller
         }
     }
 
-    // * https://jmtech.test/api/test/barobill_test
+    // * https://jmtech.test/test/test/barobill_test
     public function barobill_test()
     {
 
         // $this->barobill->매출세금계산서조회();
-        $this->barobill->매입세금계산서조회();
+        $this->barobill->매입세금계산서일별조회();
     }
 
     private function layout_config()

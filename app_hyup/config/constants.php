@@ -246,14 +246,21 @@ define('MENU', serialize([
     'purchase'    => [
         'name'    => '구매관리',
         'sub'        => [
-            'report'              => [
-                'name'            => '매입(거래명세표)',
+
+            'purchase'          => [
+                'name'            => '구매관리',
                 'path'            => '/purchase/report',
-            ],
-            'order' => [
-                'name'            => '발주서',
-                'path'            => '/purchase/order',
-                'sub'             => []
+                'sub'             => [
+                    'report'              => [
+                        'name'            => '매입(거래명세표)',
+                        'path'            => '/purchase/report',
+                    ],
+                    'order' => [
+                        'name'            => '발주서',
+                        'path'            => '/purchase/order',
+                    ],
+
+                ]
             ],
 
             'withdraw' => [

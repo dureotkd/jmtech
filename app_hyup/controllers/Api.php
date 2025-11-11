@@ -48,6 +48,7 @@ class api extends MY_Controller
     # Excel 템플릿 Load Init
     public function load_excel_template()
     {
+
         $items = $this->service_model->get_item('all', [
             "is_active = 1"
         ]);
@@ -68,7 +69,7 @@ class api extends MY_Controller
             [
                 'name' => '견적서',
                 'data' => [
-                    ["='내역서'!D2"], // ^ 데이터
+                    [], // ^ 데이터
                     [],
                     [],
                 ],
@@ -119,6 +120,138 @@ class api extends MY_Controller
                     ]
                 ],
                 'colWidths' => [360, 60, 60, 100, 120, 100, 80],
+                'height' => 300,
+            ],
+            [
+                'name' => '내역서',
+                'data' => [
+                    ["='견적서'!D2"],  // ✅ 교차시트 수식
+                    [],
+                    [],
+                ],
+                'columns' => [
+                    ['title' => '품목'],
+                    [
+                        'title' => '규격',
+                    ],
+                    [
+                        'title' => '수량',
+                    ],
+                    [
+                        'title' => '단가',
+                    ],
+                    [
+                        'title' => '공급가액',
+                    ],
+                    [
+                        'title' => '세액',
+                    ],
+                    [
+                        'title' => '비고',
+                    ]
+                ],
+                'colWidths' => [300, 100, 60, 100, 120, 100, 100],
+                'height' => 'auto',
+            ],
+        ];
+
+        echo json_encode($sheets);
+        exit;
+    }
+
+    # Excel 템플릿 Load Init (거래명세표)
+    public function load_excel_template_v2()
+    {
+
+        $items = $this->service_model->get_item('all', [
+            "is_active = 1"
+        ]);
+
+        $source = [];
+
+        if (!empty($items)) {
+            foreach ($items as $item) {
+                $source[] = [
+                    'key'   => $item['id'],
+                    'value' => "{$item['item_code']}&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;&nbsp;&nbsp;&nbsp;{$item['item_name']}&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;&nbsp;&nbsp;&nbsp;{$item['unit']}",
+                    'title' => $item['item_name'],
+                ];
+            }
+        }
+
+        $sheets = [
+            [
+                'name' => '견적서',
+                'data' => [
+                    [], // ^ 데이터
+                    [],
+                    [],
+                ],
+                'columns' => [
+                    [
+                        'title' => '날짜',
+                        'type' => 'date',            // ✅ 날짜 타입 지정
+                        'dateFormat' => 'YYYY-MM-DD', // 표시 포맷
+                        'correctFormat' => true,      // 자동으로 형식 맞춰줌
+                        'allowInvalid' => false,      // 잘못된 형식 입력 시 거부
+                        'defaultDate' => '2025-01-01', // 기본값 설정 (선택사항)
+                        'datePickerConfig' => [
+                            'firstDay' => 0,
+                            'i18n' => [
+                                'previousMonth' => '이전 달',
+                                'nextMonth' => '다음 달',
+                                'months' => ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+                                'weekdays' => ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+                                'weekdaysShort' => ['일', '월', '화', '수', '목', '금', '토']
+                            ],
+                        ]
+                    ],
+                    [
+                        'title'     => '품목',
+                        'type'      => 'dropdown',
+
+                        // ^ 드롭다운 샘플 데이터
+                        'source'    => $source,
+                    ],
+                    [
+                        'title' => '규격',
+                    ],
+                    [
+                        'title' => '수량',
+                        'type' => 'numeric',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '단가',
+                        'type' => 'numeric',
+                        'className' => 'ht-yellow-bg',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '공급가액',
+                        'type' => 'numeric',
+                        'className' => 'ht-red-text',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '세액',
+                        'type' => 'numeric',
+                        'className' => 'ht-red-text',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '비고',
+                    ]
+                ],
+                'colWidths' => [120, 360, 60, 60, 100, 120, 100, 80],
                 'height' => 300,
             ],
             [

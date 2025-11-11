@@ -2,14 +2,6 @@ input {
   padding-left: 6px !important;
 }
 
-table th {
-  color: #000 !important;
-  font-weight: 400;
-  padding: 8px;
-  text-align: left;
-  font-size: 12px;
-}
-
 /* 헤더 행 */
 #example th {
   font-family: "NanumGothicBold", sans-serif;
@@ -24,6 +16,16 @@ table th {
   color: black;
 }
 
+/* ------------- 기본 테이블 스타일 ------------- */
+
+table th {
+  color: #000 !important;
+  font-weight: 400;
+  padding: 8px;
+  text-align: left;
+  font-size: 12px;
+}
+
 table td {
   padding: 8px;
   font-size: 12px;
@@ -31,6 +33,41 @@ table td {
   font-weight: 300;
   border-bottom: 1px solid black;
 }
+
+table th {
+  color: black;
+  font-weight: 400;
+  padding: 8px;
+  text-align: left;
+  font-size: 12px;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+table td {
+  padding: 8px;
+  font-size: 12px;
+  color: black;
+  font-weight: 300;
+  border-bottom: 1px solid black;
+  border-right: 1px solid black;
+}
+
+/* ------------- 기본 테이블 스타일 ------------- */
+
+/* ------------- 블루 테이블 스타일 ------------- */
+
+.blue-table th {
+  border-right: 1px solid blue !important;
+  border-bottom: 1px solid blue !important;
+}
+
+.blue-table td {
+  border-bottom: 1px solid blue !important;
+  border-right: 1px solid blue !important;
+}
+
+/* ------------- 블루 테이블 스타일 ------------- */
 
 .ui-autocomplete {
   max-height: 300px;
@@ -182,25 +219,6 @@ table {
 
 .handsontable td.htInvalid {
   background-color: #fff !important;
-}
-
-table th {
-  color: black;
-  font-weight: 400;
-  padding: 8px;
-  text-align: left;
-  font-size: 12px;
-  border-right: 1px solid black;
-  border-bottom: 1px solid black;
-}
-
-table td {
-  padding: 8px;
-  font-size: 12px;
-  color: black;
-  font-weight: 300;
-  border-bottom: 1px solid black;
-  border-right: 1px solid black;
 }
 
 /* p,

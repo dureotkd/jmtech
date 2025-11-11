@@ -260,7 +260,7 @@
                     </div>
 
                     <!-- 구매 -->
-                    <div onclick="window.location.href = '/purchase'" class="<?= $top_menu_code === 'purchase' ? 'menu-active' : '' ?> cursor-pointer flex items-center gap-2 !px-4 py-2 hover:bg-[#3d7ac0] transition">
+                    <div onclick="window.location.href = '/purchase/report'" class="<?= $top_menu_code === 'purchase' ? 'menu-active' : '' ?> cursor-pointer flex items-center gap-2 !px-4 py-2 hover:bg-[#3d7ac0] transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart">
                             <circle cx="8" cy="21" r="1" />
                             <circle cx="19" cy="21" r="1" />

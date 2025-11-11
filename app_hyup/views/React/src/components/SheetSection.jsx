@@ -6,7 +6,6 @@ import "handsontable/styles/ht-theme-main.css";
 import HyperFormula from "hyperformula";
 import { useExcelStore } from "../store/useExcelStore";
 import { registerCellType, TextCellType } from "handsontable/cellTypes";
-import Loading from "./Loading";
 
 registerAllModules();
 
@@ -16,7 +15,7 @@ registerCellType("formula", {
   validator: TextCellType.validator,
 });
 
-const SheetSection = ({ sheets, vatType, setAmount }) => {
+const SheetSection = ({ sheets, vatType, setAmount, theme = "light" }) => {
   console.log("Render SheetSection");
   const hotRef = React.useRef(null);
   const {
@@ -63,29 +62,50 @@ const SheetSection = ({ sheets, vatType, setAmount }) => {
     }
   );
 
+  const themeStyles = {
+    light: {
+      base: "bg-gray-100 hover:bg-gray-200 text-gray-800",
+      active: "bg-white text-black border-gray-400",
+    },
+    blue: {
+      base: "bg-gray-100 hover:bg-gray-200 text-gray-800",
+      active: "bg-white text-black border-gray-400",
+      // base: "bg-blue-50 hover:bg-blue-100 text-blue-800",
+      // active: "bg-white text-blue-600 border-blue-500",
+    },
+    red: {
+      base: "bg-gray-100 hover:bg-gray-200 text-gray-800",
+      active: "bg-white text-black border-gray-400",
+      // base: "bg-red-50 hover:bg-red-100 text-red-800",
+      // active: "bg-white text-red-600 border-red-500",
+    },
+  };
+
   return (
     <>
       <div className="sheet-tabs flex border-b border-gray-300 bg-gray-100">
-        {sheets.map((sheet) => (
-          <button
-            key={sheet.name}
-            onClick={() => showSheet(sheet.name)}
-            type="button"
-            className={`px-4 py-2 text-sm font-medium border-r border-gray-300 
-              transition-colors focus:outline-none ${
+        {sheets.map((sheet) => {
+          const currentTheme = themeStyles[theme] ?? themeStyles.light;
+          return (
+            <button
+              key={sheet.name}
+              onClick={() => showSheet(sheet.name)}
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border-r border-gray-300 transition-colors ${
                 activeSheet === sheet.name
-                  ? "bg-white text-black"
-                  : "bg-gray-100 hover:bg-gray-200"
+                  ? currentTheme.active
+                  : currentTheme.base
               }`}
-          >
-            {sheet.name}
-          </button>
-        ))}
+            >
+              {sheet.name}
+            </button>
+          );
+        })}
       </div>
-
       <HotTable
         ref={hotRef}
         themeName="ht-theme-main"
+        className={`hot-table-theme-${theme}`}
         columns={columnsWithHeader}
         data={activeSheetOptions.data || []}
         colWidths={activeSheetOptions.colWidths || 100}
@@ -102,8 +122,6 @@ const SheetSection = ({ sheets, vatType, setAmount }) => {
           if (source === "edit" && changes) {
             // * 0번쨰 품목 수정시
             if (changes[0][3]?.key) {
-              console.log("zz");
-
               changes.forEach(([row, prop, oldValue, newValue]) => {
                 console.log(oldValue, newValue);
                 if (prop === 0 && oldValue !== newValue.title) {

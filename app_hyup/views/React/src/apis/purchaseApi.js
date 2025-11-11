@@ -1,0 +1,34 @@
+import request from "../utils/request";
+
+const purchaseApi = {
+  저장된엑셀템플릿: async (params) => {
+    const res = await request.get("load_saved_excel_template", { params });
+
+    return res;
+  },
+
+  엑셀불러오기: async (formData) => {
+    const res = await request.post("estimate_excel_load", formData);
+
+    return res;
+  },
+
+  초기엑셀템플릿: async () => {
+    const res = await request.get("load_excel_template_v2");
+
+    return res;
+  },
+
+  거래처목록: async () => {
+    const res = await request.get("get_partner_list");
+    return res;
+  },
+
+  견적저장: async (formData) => {
+    const res = await request.post("save_estimate", formData);
+
+    return res;
+  },
+};
+
+export default purchaseApi;

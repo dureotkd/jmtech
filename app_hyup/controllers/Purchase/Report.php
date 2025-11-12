@@ -86,6 +86,17 @@ class report extends MY_Controller
             return;
         }
 
+        $table_theme = '';
+        $text_theme = '';
+
+        if ($statement['sub_type'] == 'MI') {
+            $table_theme = 'blue-table';
+            $text_theme = 'blue-text';
+        } elseif ($statement['sub_type'] == 'MC') {
+            $table_theme = 'red-table';
+            $text_theme = 'red-text';
+        }
+
         $files = $this->service_model->get_file('all', [
             "ref_table = 'estimate'",
             "ref_id = {$id}"
@@ -99,6 +110,8 @@ class report extends MY_Controller
             'statement'     => $statement,
             'sheets'        => $sheets,
             'files'         => $files,
+            'table_theme'   => $table_theme,
+            'text_theme'    => $text_theme,
             'layout_data'   => $this->layout_blank_config('statement', '거래명세서'),
         ];
 

@@ -396,6 +396,28 @@ function TranscationStatement() {
     })();
   }, []);
 
+  const tableTheme = React.useMemo(() => {
+    if (subType === "MI") {
+      return {
+        border: "border-blue-700",
+        table: "blue-table",
+        color: "!text-blue-700",
+        backgroundColor: "!bg-[#edf2f8]",
+      };
+    } else if (subType === "MC") {
+      return {
+        border: "border-red-700",
+        table: "red-table",
+        color: "!text-[#E53935]",
+        backgroundColor: "!bg-[#FFEBEE]",
+      };
+    }
+    return {
+      border: "",
+      table: "",
+    };
+  }, [subType]);
+
   return (
     <>
       {loading && <Loading />}
@@ -419,12 +441,16 @@ function TranscationStatement() {
           </div>
 
           {/* 왼쪽 섹션 */}
-          <div className="flex border-x-2 border-t-2 border-blue-700">
-            <div className="relative flex-1 border-b border-blue-700 p-3 pr-14">
+          <div className={`flex border-x-2 border-t-2 ${tableTheme.border}`}>
+            <div
+              className={`relative flex-1 border-b ${tableTheme.border} p-3 pr-14`}
+            >
               <div className="space-y-2">
                 {/* 거래처명 */}
                 <div className="flex items-center">
-                  <label className="w-[75px]">거 래 처 명 :</label>
+                  <label className={`${tableTheme.color} w-[75px]`}>
+                    거 래 처 명 :
+                  </label>
                   <div className="flex items-center">
                     <SimpleAutocomplete
                       defaultValue={form.partner_name}
@@ -450,7 +476,9 @@ function TranscationStatement() {
 
                 {/* 견적일자 */}
                 <div className="flex items-center">
-                  <label className="w-[75px]">견 적 일 자 :</label>
+                  <label className={`${tableTheme.color} w-[75px]`}>
+                    견 적 일 자 :
+                  </label>
                   <input
                     type="date"
                     name="estimate_date"
@@ -461,7 +489,9 @@ function TranscationStatement() {
 
                 {/* 전화번호 */}
                 <div className="flex items-center">
-                  <label className="w-[75px]">전 화 번 호 :</label>
+                  <label className={`${tableTheme.color} w-[75px]`}>
+                    전 화 번 호 :
+                  </label>
                   <input
                     type="text"
                     name="phone_number"
@@ -469,7 +499,9 @@ function TranscationStatement() {
                     value={form.phone_number}
                     onChange={phoneNumberMask}
                   />
-                  <span className="ml-2 w-[75px]">팩 스 번 호 :</span>
+                  <label className={`${tableTheme.color} ml-2 w-[75px]`}>
+                    팩 스 번 호 :
+                  </label>
                   <input
                     type="text"
                     name="fax_number"
@@ -481,7 +513,7 @@ function TranscationStatement() {
 
                 {/* 제목 */}
                 <div className="flex items-center">
-                  <label className="w-[75px]">
+                  <label className={`${tableTheme.color} w-[75px]`}>
                     제&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;목 :
                   </label>
                   <input
@@ -495,8 +527,10 @@ function TranscationStatement() {
             </div>
 
             {/* 오른쪽 섹션 (공급자 정보)는 JSX table로 그대로 변환) */}
-            <div className="w-[580px] border-l border-blue-700">
-              <table className="w-full blue-table border-collapse text-sm">
+            <div className={`w-[580px] border-l ${tableTheme.border}`}>
+              <table
+                className={`w-full ${tableTheme.table} border-collapse text-sm`}
+              >
                 <colgroup>
                   <col style={{ width: "35px" }} />
                   <col style={{ width: "82px" }} />
@@ -508,18 +542,20 @@ function TranscationStatement() {
 
                 <thead>
                   <tr>
-                    <td className="text-center">등록번호</td>
+                    <td className={`text-center ${tableTheme.color}`}>
+                      등록번호
+                    </td>
                     <td colSpan="6" className="border-r-0">
                       <span className="text-black">312-86-30100</span>
                     </td>
                   </tr>
 
                   <tr>
-                    <td className="text-center">
+                    <td className={`text-center ${tableTheme.color}`}>
                       상&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;호
                     </td>
                     <td colSpan="3">제이엠테크</td>
-                    <td className="text-center">
+                    <td className={`text-center ${tableTheme.color}`}>
                       성&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;명
                     </td>
                     <td className="border-r-0">
@@ -535,7 +571,7 @@ function TranscationStatement() {
                   </tr>
 
                   <tr>
-                    <td className="text-center">
+                    <td className={`text-center ${tableTheme.color}`}>
                       주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소
                     </td>
                     <td colSpan="5" className="border-r-0">
@@ -545,20 +581,24 @@ function TranscationStatement() {
                   </tr>
 
                   <tr>
-                    <td className="text-center">
+                    <td className={`text-center ${tableTheme.color}`}>
                       업&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;태
                     </td>
                     <td colSpan="3">제조업</td>
-                    <td className="text-center">
+                    <td className={`text-center ${tableTheme.color}`}>
                       종&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;목
                     </td>
                     <td className="border-r-0">산업기계 설계 및 개발</td>
                   </tr>
 
                   <tr>
-                    <td className="text-center">전화번호</td>
+                    <td className={`text-center ${tableTheme.color}`}>
+                      전 화 번 호
+                    </td>
                     <td colSpan="3">041-483-1111</td>
-                    <td className="text-center">팩스번호</td>
+                    <td className={`text-center ${tableTheme.color}`}>
+                      팩 스 번 호
+                    </td>
                     <td className="border-r-0">041-1111-1111</td>
                   </tr>
                 </thead>
@@ -566,13 +606,14 @@ function TranscationStatement() {
             </div>
           </div>
         </div>
-        <div className="relative flex items-center mx-2 !py-1 px-3 text-xs !border-x-2 !border-b-2 !border-blue-700 justify-start">
-          <span className="font-semibold mr-1">
-            합&nbsp;&nbsp;계&nbsp;&nbsp;금&nbsp;&nbsp;액 : 일금{" "}
+        <div
+          className={`relative flex items-center mx-2 !py-1 px-3 text-xs !border-x-2 !border-b-2 ${tableTheme.border} justify-start`}
+        >
+          <span className={`text-[15px] mr-1 ${tableTheme.color} font-bold`}>
+            합&nbsp;계&nbsp;금&nbsp;액 :
           </span>
 
           <h2 className="font-bold">
-            {numberToKorean(amount)}
             <input
               type="text"
               name="amount"
@@ -644,9 +685,9 @@ function TranscationStatement() {
           </div>
         </div>
 
-        <div className="border-2 border-blue-700 mx-[9px]">
+        <div className={`border-2 ${tableTheme.border} mx-[9px]`}>
           <SheetSection
-            theme="blue"
+            theme={subType === "MI" ? "blue" : "red"}
             subType={subType}
             sheets={sheets}
             vatType={form.vat_type}
@@ -654,14 +695,20 @@ function TranscationStatement() {
           />
 
           {/* 하단 입력 테이블 */}
-          <table className="w-full blue-table border-t-2 border-blue-700 text-black text-xs">
+          <table
+            className={`w-full ${tableTheme.table} border-t-2 ${tableTheme.border} text-black text-xs`}
+          >
             <thead>
               <tr>
-                <th className="border-t w-[100px] text-center text-black bg-[#edf2f8]">
+                <th
+                  className={`border-t w-[100px] text-center ${tableTheme.backgroundColor} ${tableTheme.color}`}
+                >
                   전미수잔액
                 </th>
-                <th className="border-t w-[400px]"></th>
-                <th className="border-t bg-[#edf2f8] w-[80px] text-center">
+                <th className={`border-t w-[400px] ${tableTheme.color}`}></th>
+                <th
+                  className={`border-t ${tableTheme.backgroundColor} w-[80px] text-center ${tableTheme.color}`}
+                >
                   합계
                 </th>
                 <th className="border-t" colSpan={6}>
@@ -672,7 +719,11 @@ function TranscationStatement() {
 
             <tbody>
               <tr>
-                <td className="border text-center bg-[#edf2f8]">비고</td>
+                <td
+                  className={`border text-center ${tableTheme.backgroundColor} ${tableTheme.color}`}
+                >
+                  비고
+                </td>
                 <td className="border">
                   <input
                     type="text"
@@ -681,7 +732,9 @@ function TranscationStatement() {
                     className="text-black border w-full h-[24px] px-1"
                   />
                 </td>
-                <td className="border bg-[#edf2f8] w-[80px] text-center">
+                <td
+                  className={`border ${tableTheme.backgroundColor} w-[80px] text-center ${tableTheme.color}`}
+                >
                   입금액
                 </td>
                 <td className="border">
@@ -693,7 +746,9 @@ function TranscationStatement() {
                   />
                 </td>
 
-                <td className="border bg-[#edf2f8] w-[80px] text-center">
+                <td
+                  className={`border ${tableTheme.backgroundColor} w-[80px] text-center ${tableTheme.color}`}
+                >
                   총미수잔액
                 </td>
                 <td className="border">
@@ -705,7 +760,9 @@ function TranscationStatement() {
                   />
                 </td>
 
-                <td className="border bg-[#edf2f8] w-[80px] text-center">
+                <td
+                  className={`border ${tableTheme.backgroundColor} w-[80px] text-center ${tableTheme.color}`}
+                >
                   인수자
                 </td>
                 <td className="border">

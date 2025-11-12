@@ -73,6 +73,20 @@ table td {
 
 /* ------------- 블루 테이블 스타일 ------------- */
 
+/* ------------- 레드 테이블 스타일 ------------- */
+
+.red-table th {
+  border-right: 1px solid red !important;
+  border-bottom: 1px solid red !important;
+}
+
+.red-table td {
+  border-bottom: 1px solid red !important;
+  border-right: 1px solid red !important;
+}
+
+/* ------------- 레드 테이블 스타일 ------------- */
+
 .ui-autocomplete {
   max-height: 300px;
   /* 보여줄 최대 높이 */

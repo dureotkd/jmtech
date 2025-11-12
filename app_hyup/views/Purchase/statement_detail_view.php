@@ -133,19 +133,12 @@ $datetime = date('YmdHis');
 
     table.statement th,
     table.statement td {
-        border: 1px solid #555;
         padding: 4px 6px;
     }
 
     table.statement thead th {
-        background-color: #d9d9d9;
-        color: #000;
         font-weight: bold;
         text-align: center;
-    }
-
-    table.statement tbody tr:nth-child(even) {
-        background-color: #fafafa;
     }
 
     .tg {
@@ -184,6 +177,77 @@ $datetime = date('YmdHis');
         text-align: left;
         vertical-align: top
     }
+
+    /* ------------- 기본 테이블 스타일 ------------- */
+
+    /* ------------- 블루 테이블 스타일 ------------- */
+
+    .blue-table th {
+        border-right: 1px solid blue !important;
+        border-bottom: 1px solid blue !important;
+    }
+
+    .blue-table td {
+        border-bottom: 1px solid blue !important;
+        border-right: 1px solid blue !important;
+    }
+
+    .blue-table .tg-0pky {
+        color: blue !important;
+    }
+
+    .blue-text {
+        color: blue !important;
+    }
+
+    /* ------------- 블루 테이블 스타일 ------------- */
+
+    /* ------------- 레드 테이블 스타일 ------------- */
+
+    .item-red-table {
+        border: 2px solid red !important;
+    }
+
+    .item-red-table thead th {
+        border: 1px solid red !important;
+        background-color: #ffe5e5 !important;
+        color: #ff0000 !important;
+    }
+
+    .item-red-table tbody td {
+        border: 1px solid red !important;
+    }
+
+    .red-table {
+        border: 2px solid red !important;
+    }
+
+    .red-table th {
+        border: 1px solid red !important;
+    }
+
+    .red-table td {
+        border: 1px solid red !important;
+    }
+
+    .red-table .tg-0pky {
+        color: red !important;
+    }
+
+    .th-bg {
+        background-color: #ffe5e5 !important;
+        color: red !important;
+    }
+
+    .red-text {
+        color: red !important;
+    }
+
+    /* ------------- 레드 테이블 스타일 ------------- */
+    /* .blue-table .tg-0pky {
+        border-right: 1px solid red;
+        border-left: 1px solid red;
+    } */
 </style>
 <link rel="stylesheet" href="/assets/app_hyup/lib/pqgrid/pqgrid.css" />
 <link rel="stylesheet" href="/assets/app_hyup/lib/pqgrid/pqgrid.min.css" />
@@ -286,24 +350,74 @@ $datetime = date('YmdHis');
             </div> -->
         </div>
 
-        <div class="flex !border-x-2 !border-t-2 !border-black">
+        <div class="flex">
             <!-- 왼쪽: 견적 정보 -->
-            <div class="w-[42%] relative flex-1 border-r !border-b border-black !p-3">
+            <div class="w-[42%] relative flex-1 !pr-3">
                 <div class="!space-y-2 relative">
-                    <h2 class="!text-lg font-semibold font-mono !border-b border-black pb-1 mb-1 text-center">
-                        <?= $statement['partner_name'] ?>
-
-                    </h2>
-                    <span class="absolute right-4 top-[7px]">
-                        귀하
-                    </span>
                 </div>
 
-                <div class="!gap-4 !mt-3">
-                    <span>
-                        견&nbsp;&nbsp;적&nbsp;&nbsp;일&nbsp;&nbsp;자 : <?= $statement['estimate_date'] ?>
-                    </span>
-                    <br>
+                <div class="!gap-4">
+                    <div class="flex flex-col gap-3 !mt-2">
+                        <div class="flex">
+                            <div class="flex">
+                                <label class="<?= $text_theme ?>">
+                                    일&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;자 :
+                                </label>
+                                <p class="!ml-6">
+                                    <?= $statement['estimate_date'] ?>
+                                </p>
+                            </div>
+                            <div class="flex !ml-12">
+                                <label class="<?= $text_theme ?>">
+                                    등&nbsp;록&nbsp;번&nbsp;호 :
+                                </label>
+                                <p class="!ml-6">
+                                    <?= $statement['estimate_date'] ?>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <label class="<?= $text_theme ?>">
+                                거&nbsp;&nbsp;&nbsp;래&nbsp;&nbsp;&nbsp;처 :
+                            </label>
+                            <p class="!ml-6">
+                                <?= $statement['partner_name'] ?>
+                            </p>
+                        </div>
+                        <div class="flex">
+                            <label class="<?= $text_theme ?>">
+                                주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소 :
+                            </label>
+                            <p class="!ml-6">
+                                <?= $statement['partner_name'] ?>
+                            </p>
+                        </div>
+                        <div class="flex">
+                            <div class="flex">
+                                <label class="<?= $text_theme ?>">
+                                    전&nbsp;화&nbsp;번&nbsp;호 :
+                                </label>
+                                <p class="!ml-6">
+                                    <?= $statement['estimate_date'] ?>
+                                </p>
+                            </div>
+                            <div class="flex !ml-12">
+                                <label class="<?= $text_theme ?>">
+                                    팩&nbsp;스&nbsp;번&nbsp;호 :
+                                </label>
+                                <p class="!ml-6">
+                                    <?= $statement['estimate_date'] ?>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center !mt-[17px] <?= $table_theme ?> !px-2 !py-1.5 !text-[15px] font-semibold">
+                            <h2 class=" <?= $text_theme ?>">합계금액 : </h2>
+                            <h2>
+                                454,970
+                            </h2>
+                        </div>
+                    </div>
 
                     <div class="!space-x-1 !mt-2">
                         <?
@@ -330,8 +444,8 @@ $datetime = date('YmdHis');
             </div>
 
             <!-- 오른쪽: 공급자 정보 -->
-            <div class="w-[58%] !border-l border-black">
-                <table class="w-full border-collapse text-sm border-l border-black">
+            <div class="w-[58%]">
+                <table class="w-full border-collapse text-sm <?= $table_theme ?>">
                     <col style="width: 35px">
                     <col style="width: 82px">
                     <col style="width: 25px">
@@ -364,13 +478,13 @@ $datetime = date('YmdHis');
                         </tr>
                         <tr>
                             <td class="tg-0pky !text-center">업&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;태</td>
-                            <td class="tg-0pky" colspan="3">제조업</td>
+                            <td class="" colspan="3">제조업</td>
                             <td class="tg-0pky !text-center">종&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;목</td>
                             <td class="tg-0lax">산업기계 설계 및 개발</td>
                         </tr>
                         <tr>
                             <td class="tg-0pky !text-center">전화번호</td>
-                            <td class="tg-0pky" colspan="3">041-483-1111</td>
+                            <td class="" colspan="3">041-483-1111</td>
                             <td class="tg-0pky !text-center">팩스번호</td>
                             <td class="tg-0lax">041-1111-1111</td>
                         </tr>
@@ -381,22 +495,10 @@ $datetime = date('YmdHis');
 
         </div>
 
-        <div class="flex items-center mt-2 !px-4 !py-1 !border-x-2 !border-b-2 !border-black justify-start">
-            <span class="font-semibold mr-2">합&nbsp;&nbsp;계&nbsp;&nbsp;금&nbsp;&nbsp;액 : 일금 </span>
-            <h2 class="!text-sm font-bold !ml-4">
-                <?= number_to_korean($statement['amount']) ?>
-                (<?= number_format($statement['amount']) ?>)
-                <?
-                $VAT_TYPE = unserialize(VAT_TYPE);
-                echo $VAT_TYPE[$statement['vat_type']];
-                ?>
-            </h2>
-        </div>
-
     </div>
 
-    <div class="!border-2 !border-black !mx-[9px] !my-3">
-        <table class="statement">
+    <div class="!mx-[9px] !my-1">
+        <table class="statement item-<?= $table_theme ?> w-full">
             <thead>
                 <tr>
                     <th>순번</th>
@@ -449,38 +551,67 @@ $datetime = date('YmdHis');
                 ?>
             </tbody>
         </table>
-        <table class="tg !border-t-2 !border-black">
+
+
+        <table class="w-full border-collapse border tg !mt-2 w-full <?= $table_theme ?>">
             <thead>
                 <tr>
-                    <th class="tg-0pky !border-t !text-xs !w-[100px] !text-center !text-black th-bg">납기일자</th>
-                    <th class="tg-0pky !border-t w-[400px]">
-                        <?= $statement['due_at'] ?>
+                    <th class="!border-t !text-xs !w-[100px] !text-center th-bg">전미수잔액</th>
+                    <th class="!border-t !text-xs w-[400px]">
+                        <input
+                            type="text"
+                            name="prev_balance"
+                            value=""
+                            class="text-black border w-full h-[24px] px-1" />
                     </th>
-                    <th class="tg-0pky !text-xs !border-t th-bg !w-[100px] !text-center">납품장소</th>
-                    <th class="tg-0pky !text-xs">
-                        <?= $statement['location'] ?>
+                    <th class="!border-t !text-xs th-bg !w-[80px] !text-center">합계</th>
+                    <th class="!border-t !text-xs" colspan="6">
+                        (공급가액 0 + 세액 0) = 총 합계 0 원
                     </th>
                 </tr>
             </thead>
+
             <tbody>
                 <tr>
-                    <td class="tg-0pky !text-xs !border-1 text-center th-bg">유효일자</td>
-                    <td class="tg-0pky !text-xs !border-1 w-[400px]">
-                        <?= $statement['valid_at'] ?>
+                    <td class="!text-xs !border-1 text-center th-bg">비고</td>
+                    <td class="!text-xs !border-1">
+                        <input
+                            type="text"
+                            name="etc_memo"
+                            value=""
+                            class="text-black border w-full h-[24px] px-1" />
                     </td>
-                    <td class="tg-0pky !text-xs !border-1 th-bg !w-[100px] !text-center">결제조건</td>
-                    <td class="tg-0pky !text-xs !border-1">
-                        <?= $statement['payment_type'] ?>
+
+                    <td class="!text-xs !border-1 th-bg !w-[80px] text-center">입금액</td>
+                    <td class="!text-xs !border-1">
+                        <input
+                            type="text"
+                            name="payment_type"
+                            value=""
+                            class="text-black border w-full h-[24px] px-1" />
                     </td>
-                </tr>
-                <tr>
-                    <td class="tg-0pky !text-xs text-center th-bg ">비고</td>
-                    <td class="tg-0pky !text-xs" colspan="3">
-                        <?= htmlspecialchars($statement['etc_memo']) ?>
+
+                    <td class="!text-xs !border-1 th-bg !w-[80px] text-center">총미수잔액</td>
+                    <td class="!text-xs !border-1">
+                        <input
+                            type="text"
+                            name="uncollected_amount"
+                            value=""
+                            class="text-black border w-full h-[24px] px-1" />
+                    </td>
+
+                    <td class="!text-xs !border-1 th-bg !w-[80px] text-center">인수자</td>
+                    <td class="!text-xs !border-1">
+                        <input
+                            type="text"
+                            name="receiver"
+                            value=""
+                            class="text-black border w-full h-[24px] px-1" />
                     </td>
                 </tr>
             </tbody>
         </table>
+
 
     </div>
 

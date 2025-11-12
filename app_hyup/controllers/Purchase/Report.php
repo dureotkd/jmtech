@@ -33,7 +33,7 @@ class report extends MY_Controller
 
         $where = [
             "type = 'BUY'",    // SELL:판매, BUY:구매
-            "sub_type = 'M'",   // M:매입,B:발주서
+            "sub_type = 'MI'",   // MI:매입,MO:매출
         ];
 
         if (!empty($search_text)) {
@@ -51,7 +51,6 @@ class report extends MY_Controller
             $where[] = "a.estimate_date <= '{$end_date}'";
         }
 
-
         $transcation_statement_all = $this->service_model->get_transcation_statement('all', $where);
         $title = '매입(거래명세표)';
 
@@ -66,6 +65,59 @@ class report extends MY_Controller
         ];
 
         $this->layout->view('/Purchase/report_view', $view_data);
+    }
+
+    # 견적서 상세
+    public function statement_detail()
+    {
+        $id = $this->input->get('id') ?? '';
+
+        if (empty($id)) {
+            show_404();
+            return;
+        }
+
+        $statement = $this->service_model->get_transcation_statement('row', [
+            "id = {$id}"
+        ]);
+
+        if (empty($statement)) {
+            show_404();
+            return;
+        }
+
+        $files = $this->service_model->get_file('all', [
+            "ref_table = 'estimate'",
+            "ref_id = {$id}"
+        ]);
+
+        $sheets_json = json_decode($statement['sheets'], true);
+        $sheets = $sheets_json[0]['data'] ?? [];
+
+        $view_data =  [
+            'id'            => $id,
+            'statement'     => $statement,
+            'sheets'        => $sheets,
+            'files'         => $files,
+            'layout_data'   => $this->layout_blank_config('statement', '거래명세서'),
+        ];
+
+        $this->layout->view('/Purchase/statement_detail_view', $view_data);
+    }
+
+    private function layout_blank_config($sub_menu_code = '', $title = '')
+    {
+
+        $this->layout->setPopHeader($title);
+        $this->layout->setLayout("layout/blank");
+        $this->layout->setTitle($title);
+        $this->layout->setCss([]);
+        $this->layout->setScript([]);
+
+        return [
+            'top_menu_code'    => 'purchase',
+            'sub_menu_code'    => $sub_menu_code,
+        ];
     }
 
     private function layout_config($sub_menu_code = '', $title = '')

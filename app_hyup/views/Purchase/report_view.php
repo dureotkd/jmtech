@@ -13,7 +13,7 @@
 
         <div class="flex items-center gap-2 !text-xs">
 
-            <form id="searchForm" action="/sales/transcation_statement" method="GET" class="flex items-center border border-gray-300 gap-2 rounded-sm overflow-hidden w-[330px] !text-xs">
+            <form id="searchForm" action="/purchase/report" method="GET" class="flex items-center border border-gray-300 gap-2 rounded-sm overflow-hidden w-[330px] !text-xs">
                 <input type="hidden" name="page" value="<?= $page ?>" />
                 <input type="hidden" name="start_date" autocomplete="off" value="<?= $start_date ?>" />
                 <input type="hidden" name="end_date" autocomplete="off" value="<?= $end_date ?>" />
@@ -341,7 +341,7 @@
     }
 
     function go_detail(transcation_statement_id) {
-        open_popup_default(`/sales/transcation_statement_detail?id=${transcation_statement_id}`, '<?= $title ?> 상세', 1000, 820);
+        open_popup_default(`/purchase/report/statement_detail?id=${transcation_statement_id}`, '<?= $title ?> 상세', 1000, 820);
     }
 
     function handle_select(event) {
@@ -372,7 +372,7 @@
 
         $.ajax({
             type: "GET",
-            url: "/sales/delete_transcation_statement",
+            url: "/purchase/report/delete_transcation_statement",
             data: {
                 id: checked_ids
             },
@@ -421,7 +421,7 @@
 
                 if (response.ok && selected_status == '수주전환' && response.su_transcation_statement_id) {
 
-                    open_popup_default(`/sales/transcation_statement_detail?id=${response.su_transcation_statement_id}`, '수주서 상세', 1000, 820);
+                    open_popup_default(`/purchase/report/statement_detail?id=${response.su_transcation_statement_id}`, '수주서 상세', 1000, 820);
                 }
 
                 if (response.ok) {

@@ -13,6 +13,7 @@ class api extends MY_Controller
             "member",
             "/Service/user_service",
             "/Service/estimate_service",
+            "/Service/purchase_service",
         ]);
 
         $this->load->model('/Page/service_model');
@@ -70,6 +71,9 @@ class api extends MY_Controller
                 'name' => '견적서',
                 'data' => [
                     [], // ^ 데이터
+                    [],
+                    [],
+                    [],
                     [],
                     [],
                 ],
@@ -186,6 +190,9 @@ class api extends MY_Controller
                     [], // ^ 데이터
                     [],
                     [],
+                    [],
+                    [],
+                    [],
                 ],
                 'columns' => [
                     [
@@ -252,7 +259,7 @@ class api extends MY_Controller
                     ]
                 ],
                 'colWidths' => [110, 250, 60, 60, 100, 120, 100, 80],
-                'height' => 200,
+                'height' => 'auto',
             ],
             [
                 'name' => '내역서',
@@ -492,6 +499,172 @@ class api extends MY_Controller
                     }
 
                     $res_array['redirect_url'] = "/sales/estimate_detail?id={$insert_estimate_id}";
+                }
+            } catch (Exception $e) {
+                $res_array['ok'] = false;
+                $res_array['msg'] = $e->getMessage();
+                break;
+            }
+        }
+
+        echo json_encode($res_array);
+    }
+
+    # 명세표 저장
+    public function save_statement()
+    {
+        $id = $this->input->post('id') ?? '';
+
+        $tab = $this->input->post('tab') ?? ''; // * copay (복사)
+        $type = $this->input->post('type') ?? ''; // * sell / buy (판매,구매)
+        $sub_type = $this->input->post('sub_type') ?? ''; // * g / s (견적서,수주서)
+
+        $partner_id = $this->input->post('partner_id') ?? '';
+        $estimate_date = $this->input->post('estimate_date') ?? '';
+        $phone_number = $this->input->post('phone_number') ?? '';
+        $fax_number = $this->input->post('fax_number') ?? '';
+        $title = $this->input->post('title') ?? '';
+        $sheets = $this->input->post('sheets') ?? '';
+        $amount = $this->input->post('amount') ?? 0;
+        $supply_amount = $this->input->post('supply_amount') ?? 0;
+        $tax_amount = $this->input->post('tax_amount') ?? 0;
+        $vat_type = $this->input->post('vat_type') ?? '';
+        $due_at = $this->input->post('due_at') ?? '';
+        $location = $this->input->post('location') ?? '';
+        $valid_at = $this->input->post('valid_at') ?? '';
+        $payment_type = $this->input->post('payment_type') ?? '';
+        $etc_memo = $this->input->post('etc_memo') ?? '';
+        $file_ids = $this->input->post('file_ids') ?? '';
+
+        $amount = (int)preg_replace('/[^0-9]/u', '', $amount); // 숫자만 남김
+
+        $res_array = [
+            'ok'    => true,
+            'msg'   => '견적서가 저장되었습니다.',
+            'data'  => [],
+            'redirect_url' => ''
+        ];
+
+        foreach ([1] as $proc) {
+
+            try {
+
+                if (!empty($id)) {
+
+                    switch ($tab) {
+
+                        case 'copy':
+
+                            // * 복사 저장
+                            $insert_statement_id = $this->purchase_service->create([
+                                'type'              => $type,
+                                'sub_type'          => $sub_type,
+                                'partner_id'        => $partner_id,
+                                'estimate_date'     => $estimate_date,
+                                'phone_number'      => $phone_number,
+                                'fax_number'        => $fax_number,
+                                'title'             => $title,
+                                'location'          => $location,
+                                'supply_amount'     => $supply_amount,
+                                'tax_amount'        => $tax_amount,
+                                'amount'            => $amount,
+                                'vat_type'          => $vat_type,
+                                'sheets'            => $sheets,
+                                'due_at'            => $due_at,
+                                'valid_at'          => $valid_at,
+                                'payment_type'      => $payment_type,
+                                'etc_memo'          => $etc_memo,
+                                'tab'               => 'copy',
+                            ]);
+
+                            if (empty($insert_statement_id)) {
+                                throw new Error('명세표 복사 저장에 실패했습니다.');
+                            }
+
+                            // * 파일 복사
+                            $this->purchase_service->cloneFile($insert_statement_id, $file_ids);
+
+                            // * 추가 파일 업로드있을 경우 처리
+                            if (!empty($_FILES)) {
+
+                                $this->purchase_service->uploadFile($insert_statement_id);
+                            }
+
+                            $res_array['msg'] = '명세표가 복사 저장되었습니다.';
+                            $res_array['redirect_url'] = "/purchase/report/statement_detail?id={$insert_statement_id}";
+
+                            break;
+
+                        default:
+
+                            $update_result = $this->purchase_service->update([
+                                'partner_id'        => $partner_id,
+                                'estimate_date'     => $estimate_date,
+                                'phone_number'      => $phone_number,
+                                'fax_number'        => $fax_number,
+                                'title'             => $title,
+                                'location'          => $location,
+                                'amount'            => $amount,
+                                'supply_amount'     => $supply_amount,
+                                'tax_amount'        => $tax_amount,
+                                'vat_type'          => $vat_type,
+                                'sheets'            => $sheets,
+                                'due_at'            => $due_at,
+                                'valid_at'          => $valid_at,
+                                'payment_type'      => $payment_type,
+                                'etc_memo'          => $etc_memo,
+                                'updated_at'        => date('Y-m-d H:i:s'),
+                            ], $id);
+
+                            if (empty($update_result)) {
+                                throw new Error('명세표 수정에 실패했습니다.');
+                            }
+
+                            $this->purchase_service->deleteFile($id, $file_ids);
+
+                            if (!empty($_FILES)) {
+
+                                $this->purchase_service->uploadFile($id);
+                            }
+
+                            $res_array['msg'] = '명세표가 수정되었습니다.';
+                            $res_array['redirect_url'] = "/purchase/report/statement_detail?id={$id}";
+
+                            break;
+                    }
+                } else {
+
+                    $insert_statment_id = $this->purchase_service->create([
+                        'type'              => $type,
+                        'sub_type'          => $sub_type,
+                        'partner_id'        => $partner_id,
+                        'estimate_date'     => $estimate_date,
+                        'phone_number'      => $phone_number,
+                        'fax_number'        => $fax_number,
+                        'title'             => $title,
+                        'location'          => $location,
+                        'amount'            => $amount,
+                        'supply_amount'     => $supply_amount,
+                        'tax_amount'        => $tax_amount,
+                        'vat_type'          => $vat_type,
+                        'sheets'            => $sheets,
+                        'due_at'            => $due_at,
+                        'valid_at'          => $valid_at,
+                        'payment_type'      => $payment_type,
+                        'etc_memo'          => $etc_memo,
+                        'tab'               => 'original',
+                    ]);
+
+                    if (empty($insert_statment_id)) {
+                        throw new Error('명세표 저장에 실패했습니다.');
+                    }
+
+                    if (!empty($_FILES)) {
+
+                        $this->purchase_service->uploadFile($insert_statment_id);
+                    }
+
+                    $res_array['redirect_url'] = "/purchase/report/statement_detail?id={$insert_statment_id}";
                 }
             } catch (Exception $e) {
                 $res_array['ok'] = false;

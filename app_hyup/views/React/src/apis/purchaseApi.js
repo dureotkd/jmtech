@@ -24,8 +24,8 @@ const purchaseApi = {
     return res;
   },
 
-  견적저장: async (formData) => {
-    const res = await request.post("save_estimate", formData);
+  명세표저장: async (formData) => {
+    const res = await request.post("save_statement", formData);
 
     return res;
   },

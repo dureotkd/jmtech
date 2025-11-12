@@ -340,6 +340,44 @@ class service_model extends MY_Model
         return $this->excute($sql, 'exec', 'main');
     }
 
+    // ===== barobill_tax_invoice =====
+    public function get_barobill_tax_invoice($type, $where = [1], $limit = '')
+    {
+        $select = $type == 'one' ? "COUNT(*)" : "*";
+        $sql = sprintf("SELECT {$select} FROM jmtech.barobill_tax_invoice a WHERE %s ORDER BY a.created_at DESC", join(" AND ", $where));
+        if (!empty($limit)) {
+            $sql .= " LIMIT {$limit}";
+        }
+        return $this->excute($sql, $type, 'main');
+    }
+    public function insert_barobill_tax_invoice($debug = false, $data = [])
+    {
+        $sql = $this->getInsertQuery('jmtech.barobill_tax_invoice', $data);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+    public function update_barobill_tax_invoice($debug = false, $data = [], $where = [])
+    {
+        $sql = $this->getUpdateQuery('jmtech.order_detail', $data, $where);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+    public function delete_barobill_tax_invoice($debug = false, $where = [])
+    {
+        $sql = $this->getDeleteQuery('jmtech.barobill_tax_invoice', $where);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+
     // ===== smartro_payment_log =====
     public function get_smartro_payment_log($type, $where = [1])
     {

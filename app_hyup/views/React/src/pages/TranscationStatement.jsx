@@ -23,8 +23,8 @@ function TranscationStatement() {
 
   const tab = queryString.get("tab") ?? ""; // * copay (복사)
   const id = queryString.get("id") ?? "";
-  const type = queryString.get("type") ?? "SELL"; // * SELL / BUY (판매,구매)
-  const subType = queryString.get("sub_type") ?? "G"; // * G / S (견적서,수주서)
+  const type = queryString.get("type") ?? "BUY"; // * SELL / BUY (판매,구매)
+  const subType = queryString.get("sub_type") ?? "MI"; // * MI / MO (매입,매출)
 
   // * title 설정
   const { hotRefs, getActiveHotRef, setActiveSheet } = useExcelStore(
@@ -201,17 +201,8 @@ function TranscationStatement() {
 
     const hots = [hot1, hot2].map((hot) => hot.getData());
 
-    let supplyAmount = 0;
-    let taxAmount = 0;
-
-    if (!empty(hots[0])) {
-      hots[0].forEach((row) => {
-        const 공급가액 = parseFloat(row[4]) || 0;
-        const 세액 = parseFloat(row[5]) || 0;
-        supplyAmount += 공급가액;
-        taxAmount += 세액;
-      });
-    }
+    let supplyAmount = 공급가액합계;
+    let taxAmount = 세액합계;
 
     const cloneSheets = deepClone(sheets);
 
@@ -237,14 +228,14 @@ function TranscationStatement() {
     }
 
     try {
-      const res = await request.post("save_estimate", formData);
+      const res = await purchaseApi.명세표저장(formData);
 
       if (!res?.ok) {
-        alert(res?.msg || "견적서 저장에 실패했습니다.");
+        alert(res?.msg || "명세표 저장에 실패했습니다.");
         return;
       }
 
-      alert("견적서가 성공적으로 저장되었습니다.");
+      alert("명세표가 성공적으로 저장되었습니다.");
 
       if (res?.redirect_url) {
         window.location.href = `${STATIC_URL}${res.redirect_url}`;

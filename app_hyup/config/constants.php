@@ -226,21 +226,6 @@ define('MENU', serialize([
                 ]
             ],
         ],
-        // 'sub'     =>  [
-        //     'report'    => [
-        //         'name'            => '매출(거래명세표)',
-        //         'path'            => '/sales/report',
-
-        //     ],
-        //     'estimate'        => [
-        //         'name'            => '견적서',
-        //         'path'            => '/sales/estimate',
-        //     ],
-        //     'order'        => [
-        //         'name'            => '수주서',
-        //         'path'            => '/sales/order',
-        //     ],
-        // ],
         'auth_level'    => [11, 10, 2, 3]
     ],
     'purchase'    => [

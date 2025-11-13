@@ -36,7 +36,8 @@ class sales extends MY_Controller
         $end_date = $this->input->get('end_date') ?? '';
 
         $where = [
-            1
+            "type = 'BUY'",    // SELL:판매, BUY:구매
+            "sub_type = 'MC'",   // MI:매입,MC:매출
         ];
 
         if (!empty($search_text)) {
@@ -54,7 +55,7 @@ class sales extends MY_Controller
             $where[] = "a.estimate_date <= '{$end_date}'";
         }
 
-        $barobill_tax_invoice_all = $this->service_model->get_barobill_tax_invoice('all', $where);
+        $statement_all = $this->service_model->get_transcation_statement('all', $where);
 
         $view_data =  [
             'title'         => $title,
@@ -63,7 +64,7 @@ class sales extends MY_Controller
             'start_date'    => $start_date,
             'end_date'      => $end_date,
 
-            'barobill_tax_invoice_all'  => $barobill_tax_invoice_all,
+            'statement_all'  => $statement_all,
             'layout_data'   => $this->layout_config('report', $title),
         ];
 

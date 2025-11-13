@@ -303,6 +303,7 @@ class api extends MY_Controller
     {
 
         $id = $this->input->get('id') ?? '';
+        $sub_type = $this->input->get('sub_type') ?? '';
 
         $res_array = [
             'ok'    => true,
@@ -316,26 +317,62 @@ class api extends MY_Controller
                 throw new Exception('견적서 ID가 누락되었습니다.');
             }
 
-            $estimate = $this->service_model->get_estimate('row', [
-                "id = '{$id}'"
-            ]);
+            switch ($sub_type) {
 
-            if (empty($estimate)) {
-                throw new Exception('존재하지 않는 견적서입니다.');
+                case 'MI':
+                case 'MC':
+
+                    $statement = $this->service_model->get_transcation_statement('row', [
+                        "id = '{$id}'",
+                        "sub_type = '{$sub_type}'"
+                    ]);
+
+                    if (empty($statement)) {
+                        throw new Exception('존재하지 않는 명세서입니다.');
+                    }
+
+                    $sheets = !empty($statement['sheets']) ? json_decode($statement['sheets'], true) : [];
+
+                    $files = $this->service_model->get_file('all', [
+                        "ref_table = 'statement'",
+                        "ref_id = '{$id}'"
+                    ]);
+
+                    $statement['sheets'] = $sheets;
+                    $res_array['data'] = [
+                        'statement' => $statement,
+                        'files'    => $files,
+                    ];
+
+                    break;
+
+                case 'B':
+                case 'S':
+                case 'G':
+
+                    $estimate = $this->service_model->get_estimate('row', [
+                        "id = '{$id}'"
+                    ]);
+
+                    if (empty($estimate)) {
+                        throw new Exception('존재하지 않는 견적서입니다.');
+                    }
+
+                    $sheets = !empty($estimate['sheets']) ? json_decode($estimate['sheets'], true) : [];
+
+                    $files = $this->service_model->get_file('all', [
+                        "ref_table = 'estimate'",
+                        "ref_id = '{$id}'"
+                    ]);
+
+                    $estimate['sheets'] = $sheets;
+                    $res_array['data'] = [
+                        'estimate' => $estimate,
+                        'files'    => $files,
+                    ];
+
+                    break;
             }
-
-            $sheets = !empty($estimate['sheets']) ? json_decode($estimate['sheets'], true) : [];
-
-            $files = $this->service_model->get_file('all', [
-                "ref_table = 'estimate'",
-                "ref_id = '{$id}'"
-            ]);
-
-            $estimate['sheets'] = $sheets;
-            $res_array['data'] = [
-                'estimate' => $estimate,
-                'files'    => $files,
-            ];
         } catch (Exception $e) {
             $res_array['ok'] = false;
             $res_array['msg'] = $e->getMessage();

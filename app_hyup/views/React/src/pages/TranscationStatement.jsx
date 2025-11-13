@@ -111,35 +111,38 @@ function TranscationStatement() {
 
   // * 기존 견적서 불러오기
   const loadSaveExcelTemplate = async (id) => {
-    const res = await purchaseApi.저장된엑셀템플릿({ id, theme: "blue" });
+    const res = await purchaseApi.저장된엑셀템플릿({
+      id,
+      theme: "blue",
+      sub_type: subType,
+    });
 
     if (!res?.ok && empty(res?.data)) {
       alert(res?.msg || "저장된 엑셀 템플릿 로드에 실패했습니다.");
-      await loadExcelTemplate();
+      history.back();
       return;
     }
 
-    const estimate = res.data.estimate || {};
+    const statement = res.data.statement || {};
     const files = res.data.files || [];
     const fileIds = files.map((f) => f.id) || [];
     const cloneForm = { ...form };
-    cloneForm.partner_id = estimate.partner_id || "";
-    cloneForm.estimate_date = estimate.estimate_date || "";
-    cloneForm.phone_number = estimate.phone_number || "";
-    cloneForm.fax_number = estimate.fax_number || "";
-    cloneForm.title = estimate.title || "";
-    cloneForm.due_at = estimate.due_at || "";
-    cloneForm.location = estimate.location || "";
-    cloneForm.valid_at = estimate.valid_at || "";
-    cloneForm.payment_type = estimate.payment_type || "";
-    cloneForm.etc_memo = estimate.etc_memo || "";
-    cloneForm.partner_name = estimate.partner_name || "";
-
+    cloneForm.partner_id = statement.partner_id || "";
+    cloneForm.estimate_date = statement.estimate_date || "";
+    cloneForm.phone_number = statement.phone_number || "";
+    cloneForm.fax_number = statement.fax_number || "";
+    cloneForm.title = statement.title || "";
+    cloneForm.due_at = statement.due_at || "";
+    cloneForm.location = statement.location || "";
+    cloneForm.valid_at = statement.valid_at || "";
+    cloneForm.payment_type = statement.payment_type || "";
+    cloneForm.etc_memo = statement.etc_memo || "";
+    cloneForm.partner_name = statement.partner_name || "";
     setForm(cloneForm);
     setFiles(files);
     setFileIds(fileIds);
-    setAmount(estimate.amount || 0);
-    setSheets(estimate.sheets || []);
+    setAmount(statement.amount || 0);
+    setSheets(statement.sheets || []);
   };
 
   // * 초기 엑셀 템플릿 로드
@@ -389,7 +392,7 @@ function TranscationStatement() {
         // * 시트 이벤트 등록 (한바퀴 돌아야 Formula 적용 가능)
         await registerSheetEvents();
       } catch (error) {
-        alert("엑셀 템플릿 로드 중 오류가 발생했습니다.");
+        console.log("zz");
       } finally {
         setLoading(false);
       }

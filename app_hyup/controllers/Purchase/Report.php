@@ -33,7 +33,7 @@ class report extends MY_Controller
 
         $where = [
             "type = 'BUY'",    // SELL:판매, BUY:구매
-            "sub_type = 'MI'",   // MI:매입,MO:매출
+            "sub_type = 'MI'",   // MI:매입,MC:매출
         ];
 
         if (!empty($search_text)) {

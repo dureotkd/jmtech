@@ -81,7 +81,7 @@
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
             <div class="flex items-center gap-2">
-                <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+                <button onclick="delete_statement(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
                     삭제
                 </button>
 
@@ -138,25 +138,25 @@
             $총공급가액 = 0;
             $총세액 = 0;
             $총합계금액 = 0;
-            if (!empty($estimate_all)) :
-                foreach ($estimate_all as $estimate) :
+            if (!empty($statement_all)) :
+                foreach ($statement_all as $statement) :
 
-                    $총공급가액 += $estimate['supply_amount'];
-                    $총세액 += $estimate['tax_amount'];
-                    $총합계금액 += $estimate['amount'];
+                    $총공급가액 += $statement['supply_amount'];
+                    $총세액 += $statement['tax_amount'];
+                    $총합계금액 += $statement['amount'];
             ?>
 
-                    <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $estimate['id'] ?>')" data-estimate-id="<?= $estimate['id'] ?>">
-                        <td><input type="checkbox" estimate-id="<?= $estimate['id'] ?>" onclick="event.stopPropagation();" /></td>
+                    <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $statement['id'] ?>')" data-statement-id="<?= $statement['id'] ?>">
+                        <td><input type="checkbox" statement-id="<?= $statement['id'] ?>" onclick="event.stopPropagation();" /></td>
                         <td class="">
-                            <?= date('Y-m-d', strtotime($estimate['created_at'])) ?>
+                            <?= date('Y-m-d', strtotime($statement['created_at'])) ?>
                         </td>
                         <td class="">
-                            <?= $estimate['partner_name'] ?>
+                            <?= $statement['partner_name'] ?>
                         </td>
-                        <td class=""><?= number_format($estimate['supply_amount']) ?></td>
-                        <td class=""><?= number_format($estimate['tax_amount']) ?></td>
-                        <td class=""><?= number_format($estimate['amount']) ?></td>
+                        <td class=""><?= number_format($statement['supply_amount']) ?></td>
+                        <td class=""><?= number_format($statement['tax_amount']) ?></td>
+                        <td class=""><?= number_format($statement['amount']) ?></td>
                         <td>
 
                         </td>
@@ -170,17 +170,17 @@
                 <? endforeach;
             else : ?>
                 <tr>
-                    <td colspan="9" class="text-center py-4">등록된 가 없습니다.</td>
+                    <td colspan="9" class="text-center py-4">등록된 <?= $title ?> 데이터가 없습니다.</td>
                 </tr>
             <? endif; ?>
 
             <?
-            if (!empty($estimate_all)) {
+            if (!empty($statement_all)) {
             ?>
                 <tr class="border-b bg-[#e9f1fb]">
                     <td></td>
                     <td class=""></td>
-                    <td class="!font-bold">총 <?= count($estimate_all) ?>건</td>
+                    <td class="!font-bold">총 <?= count($statement_all) ?>건</td>
                     <td class="!font-bold">공급가액 : <?= number_format($총공급가액) ?></td>
                     <td class="!font-bold">세액 : <?= number_format($총세액) ?></td>
                     <td class="!font-bold">합계금액 : <?= number_format($총합계금액) ?></td>
@@ -231,5 +231,9 @@
                 $('#calendar').html(response);
             }
         });
+    }
+
+    function go_detail(statement_id) {
+        open_popup_default(`/purchase/report/statement_detail?id=${statement_id}`, '<?= $title ?> 상세', 1000, 820);
     }
 </script>

@@ -88,11 +88,11 @@ export default function CommonDocument() {
 
   // * 기존 견적서 불러오기
   const loadSaveExcelTemplate = async (id) => {
-    const res = await estimateApi.저장된엑셀템플릿({ id });
+    const res = await estimateApi.저장된엑셀템플릿({ id, sub_type: subType });
 
     if (!res?.ok && empty(res?.data)) {
       alert(res?.msg || "저장된 엑셀 템플릿 로드에 실패했습니다.");
-      await loadExcelTemplate();
+      history.back();
       return;
     }
 

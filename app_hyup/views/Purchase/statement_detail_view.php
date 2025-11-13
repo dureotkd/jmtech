@@ -617,7 +617,7 @@ $datetime = date('YmdHis');
 
     <div class="w-full !px-2 !text-xs font-sans font-300 print-hide !mb-4">
 
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-2 flex-wrap !my-3">
             <?
             if (!empty($files)) {
                 foreach ($files as $file) {
@@ -645,16 +645,13 @@ $datetime = date('YmdHis');
 
 <script>
     const handle_delete = (e) => {
-        if (confirm('정말로 삭제하시겠습니까? \n삭제된 견적서는 복구할 수 없습니다.\n(관련된 수주서도 함께 삭제됩니다.)')) {
-            window.location.href = '/sales/delete_statement?id=<?= $statement['id'] ?>';
+        if (confirm('정말로 삭제하시겠습니까? \n삭제된 명세표는 복구할 수 없습니다.')) {
+            window.location.href = '/purchase/report/delete_statement?id=<?= $statement['id'] ?>';
         }
     }
 
     const handle_copy = (e) => {
-
-
         window.location.href = `<?= REACT_PATH ?>?tab=copy&id=<?= $statement['id'] ?>&sub_type=<?= $statement['sub_type'] ?>`;
-
     }
 
     const handle_print = (e) => {

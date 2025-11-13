@@ -17,6 +17,7 @@ class report extends MY_Controller
             "phpspreadsheet",
             "/Service/user_service",
             "/Service/estimate_service",
+            "/Service/purchase_service",
             "file",
         ]);
 
@@ -67,7 +68,7 @@ class report extends MY_Controller
         $this->layout->view('/Purchase/report_view', $view_data);
     }
 
-    # 견적서 상세
+    # 명세표 상세
     public function statement_detail()
     {
         $id = $this->input->get('id') ?? '';
@@ -98,7 +99,7 @@ class report extends MY_Controller
         }
 
         $files = $this->service_model->get_file('all', [
-            "ref_table = 'estimate'",
+            "ref_table = 'statement'",
             "ref_id = {$id}"
         ]);
 
@@ -116,6 +117,32 @@ class report extends MY_Controller
         ];
 
         $this->layout->view('/Purchase/statement_detail_view', $view_data);
+    }
+
+    # 명세표 삭제
+    public function delete_statement()
+    {
+        $id = $this->input->get('id') ?? '';
+
+        if (empty($id)) {
+            show_404();
+            return;
+        }
+
+        if (is_array($id)) {
+            foreach ($id as $statement_id) {
+                $this->purchase_service->delete($statement_id);
+
+                echo json_encode([
+                    'ok'    => true,
+                    'msg'   => '명세표가 삭제되었습니다',
+                ]);
+            }
+        } else {
+            $this->purchase_service->delete($id);
+
+            alert_close('명세표가 삭제되었습니다');
+        }
     }
 
     private function layout_blank_config($sub_menu_code = '', $title = '')

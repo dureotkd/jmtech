@@ -619,7 +619,7 @@ class api extends MY_Controller
                             }
 
                             // * 파일 복사
-                            $this->purchase_service->cloneFile($insert_statement_id, $file_ids);
+                            // $this->purchase_service->cloneFile($insert_statement_id, $file_ids);
 
                             // * 추가 파일 업로드있을 경우 처리
                             if (!empty($_FILES)) {

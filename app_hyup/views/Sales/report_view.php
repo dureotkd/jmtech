@@ -129,8 +129,8 @@
                 <th class="">공급가액</th>
                 <th class="">세액</th>
                 <th class="">합계금액</th>
-                <th class="">상태</th>
-                <th class=" w-32"></th>
+                <th class=""></th>
+                <th class="w-32"></th>
             </tr>
         </thead>
         <tbody>
@@ -146,25 +146,25 @@
                     $총합계금액 += $statement['amount'];
             ?>
 
-                    <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $statement['id'] ?>')" data-statement-id="<?= $statement['id'] ?>">
+                    <tr class="border-b hover:bg-gray-50" data-statement-id="<?= $statement['id'] ?>">
                         <td><input type="checkbox" statement-id="<?= $statement['id'] ?>" onclick="event.stopPropagation();" /></td>
                         <td class="">
                             <?= date('Y-m-d', strtotime($statement['created_at'])) ?>
                         </td>
                         <td class="">
-                            <?= $statement['partner_name'] ?>
+                            <span onclick="go_detail(<?= $statement['id'] ?>);" class="underline cursor-pointer">
+                                <?= $statement['partner_name'] ?>
+                            </span>
                         </td>
                         <td class=""><?= number_format($statement['supply_amount']) ?></td>
                         <td class=""><?= number_format($statement['tax_amount']) ?></td>
                         <td class=""><?= number_format($statement['amount']) ?></td>
                         <td>
-
+                            <span class="underline cursor-pointer">
+                                [세금계산서발행]
+                            </span>
                         </td>
                         <td class="cursor-pointer">
-                            <div class="flex items-center gap-1">
-                                <img src="https://ai.serp.co.kr/img/serp/btn/btn_send.png" alt="">
-                                <span class="font-semibold">상세보기</span>
-                            </div>
                         </td>
                     </tr>
                 <? endforeach;
@@ -235,5 +235,50 @@
 
     function go_detail(statement_id) {
         open_popup_default(`/purchase/report/statement_detail?id=${statement_id}`, '<?= $title ?> 상세', 1000, 820);
+    }
+
+    function delete_statement(e) {
+
+        const checked_ids = [];
+        $('tbody input[type="checkbox"]:checked').each(function() {
+            const row = $(this).closest('tr');
+            const statement_id = row.data('statement-id');
+            checked_ids.push(statement_id);
+        });
+
+        if (checked_ids.length === 0) {
+            alert('삭제할 <?= $title ?>를 선택해주세요.');
+            return;
+        }
+
+        if (!confirm('선택한 <?= $title ?>를 삭제하시겠습니까?')) {
+            return;
+        }
+
+        start_loading();
+
+        $.ajax({
+            type: "GET",
+            url: "/purchase/report/delete_statement",
+            data: {
+                id: checked_ids
+            },
+            dataType: "json",
+            success: function(response) {
+
+                alert(response.msg);
+
+                if (response.ok) {
+                    window.location.reload();
+                }
+
+            },
+            error: function(xhr, status, error) {
+                alert("에러가 발생했습니다: " + error);
+            },
+            complete: function() {
+                stop_loading();
+            }
+        });
     }
 </script>

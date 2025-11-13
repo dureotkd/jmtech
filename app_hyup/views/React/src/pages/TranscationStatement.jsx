@@ -225,9 +225,13 @@ function TranscationStatement() {
     formData.append("id", id || "");
 
     if (files && files.length > 0) {
-      files.forEach((file, i) => {
-        formData.append(`files[${i}]`, file);
+      const filePromises = files.map(async (fileObj, i) => {
+        const realFile = await convertToFileIfNeeded(fileObj);
+        formData.append(`files[${i}]`, realFile);
       });
+
+      // 모든 파일 변환 끝날 때까지 기다림
+      await Promise.all(filePromises);
     }
 
     try {
@@ -251,6 +255,24 @@ function TranscationStatement() {
       setLoading(false);
     }
   };
+
+  async function convertToFileIfNeeded(fileObj) {
+    // 1) 이미 File 이면 그대로 반환
+    if (fileObj instanceof File) {
+      return fileObj;
+    }
+
+    // 2) 기존 저장된 객체라면 File로 변환
+    // fileObj = { name, type, url(or file_path) ... }
+    const url = fileObj.file_url;
+
+    const res = await fetch(url);
+    const blob = await res.blob();
+
+    return new File([blob], fileObj.file_name, {
+      type: fileObj.type || blob.type,
+    });
+  }
 
   // * 전화번호 마스킹
   const phoneNumberMask = (e) => {

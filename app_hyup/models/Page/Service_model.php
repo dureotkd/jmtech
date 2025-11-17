@@ -114,6 +114,10 @@ class service_model extends MY_Model
             :
             "* , 
             (SELECT company_name FROM jmtech.business_partner bp WHERE bp.id = a.partner_id) AS partner_name ,
+            (SELECT company_num FROM jmtech.business_partner bp WHERE bp.id = a.partner_id) AS partner_company_num ,
+            (SELECT address FROM jmtech.business_partner bp WHERE bp.id = a.partner_id) AS partner_address ,
+            (SELECT phone_number FROM jmtech.business_partner bp WHERE bp.id = a.partner_id) AS partner_phone_number ,
+            (SELECT fax_number FROM jmtech.business_partner bp WHERE bp.id = a.partner_id) AS partner_fax_number ,
             (SELECT id FROM jmtech.transcation_statement WHERE no = a.no AND sub_type = 'S') AS su_transcation_statement_id ,
             (SELECT id FROM jmtech.transcation_statement WHERE no = a.no AND sub_type = 'G') AS g_transcation_statement_id";
         $sql = sprintf("SELECT {$select} FROM jmtech.transcation_statement a WHERE %s ORDER BY a.created_at DESC", join(" AND ", $where));

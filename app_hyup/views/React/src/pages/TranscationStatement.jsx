@@ -762,42 +762,21 @@ function TranscationStatement() {
                 >
                   입금액
                 </td>
-                <td className="border">
-                  <input
-                    type="text"
-                    name="payment_type"
-                    defaultValue={form.payment_type}
-                    className="text-black border w-full h-[24px] px-1"
-                  />
-                </td>
+                <td className="border"></td>
 
                 <td
                   className={`border ${tableTheme.backgroundColor} w-[80px] text-center ${tableTheme.color}`}
                 >
                   총미수잔액
                 </td>
-                <td className="border">
-                  <input
-                    type="text"
-                    name="payment_type"
-                    defaultValue={form.payment_type}
-                    className="text-black border w-full h-[24px] px-1"
-                  />
-                </td>
+                <td className="border"></td>
 
                 <td
                   className={`border ${tableTheme.backgroundColor} w-[80px] text-center ${tableTheme.color}`}
                 >
                   인수자
                 </td>
-                <td className="border">
-                  <input
-                    type="text"
-                    name="payment_type"
-                    defaultValue={form.payment_type}
-                    className="text-black border w-full h-[24px] px-1"
-                  />
-                </td>
+                <td className="border"></td>
               </tr>
             </tbody>
           </table>

@@ -132,6 +132,8 @@ span {
   background-color: #2b609c;
 }
 
+/* ------------------- 프린트 설정 ------------------- */
+
 @media (min-width: 1024px) {
   .my-element {
     height: calc(100vh - 482px);
@@ -145,9 +147,12 @@ span {
 @media print {
   @page {
     margin: 0;
+    size: A4 landscape;
   }
   body {
     margin: 1cm;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .print-hide {
@@ -167,6 +172,8 @@ span {
     }
   }
 }
+
+/* ------------------- 프린트 설정 ------------------- */
 
 .modal-box {
   border-radius: 0px !important;

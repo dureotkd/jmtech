@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@handsontable/react-wrapper": "^16.1.1",
+    "@react-pdf/renderer": "^4.3.1",
     "fs-extra": "^11.3.2",
     "handsontable": "^16.1.1",
     "jquery": "^3.7.1",

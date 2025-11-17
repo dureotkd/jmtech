@@ -90,12 +90,22 @@ class report extends MY_Controller
         $table_theme = '';
         $text_theme = '';
 
+        $reverse_table_theme = '';
+        $reverse_text_theme = '';
+
+
         if ($statement['sub_type'] == 'MI') {
             $table_theme = 'blue-table';
             $text_theme = 'blue-text';
+
+            $reverse_table_theme = 'red-table';
+            $reverse_text_theme = 'red-text';
         } elseif ($statement['sub_type'] == 'MC') {
             $table_theme = 'red-table';
             $text_theme = 'red-text';
+
+            $reverse_table_theme = 'blue-table';
+            $reverse_text_theme = 'blue-text';
         }
 
         $files = $this->service_model->get_file('all', [
@@ -111,8 +121,12 @@ class report extends MY_Controller
             'statement'     => $statement,
             'sheets'        => $sheets,
             'files'         => $files,
+
             'table_theme'   => $table_theme,
             'text_theme'    => $text_theme,
+            'reverse_table_theme' => $reverse_table_theme,
+            'reverse_text_theme'  => $reverse_text_theme,
+
             'layout_data'   => $this->layout_blank_config('statement', '거래명세서'),
         ];
 
@@ -143,6 +157,88 @@ class report extends MY_Controller
 
             alert_close('명세표가 삭제되었습니다');
         }
+    }
+
+    # 명세표 PDF 다운로드
+    public function download_statement_pdf()
+    {
+
+        $id = $this->input->get('id') ?? ''; // * statement id
+        $type = $this->input->get('type') ?? ''; // * reverse type ()
+
+        if (empty($id)) {
+            throw new Error("명세서 아이디가 올바르지 않습니다.");
+        }
+
+        $statement = $this->service_model->get_transcation_statement('row', [
+            "id = {$id}"
+        ]);
+
+        if (empty($statement)) {
+            show_404();
+            return;
+        }
+
+        $sub_type   = $statement['sub_type'] ?? ''; // MI, MC
+        $SUB_TYPE   = unserialize(SUB_TYPE);
+        $title      = $SUB_TYPE[$sub_type] ?? '';
+
+        $sheets     = json_decode($statement['sheets'], true);
+        $items      = $sheets[0]['data'] ?? [];
+
+        // ✅ 한글 깨짐 방지 폰트 설정
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'default_font' => 'unbatang',
+        ]);
+
+        $table_theme = '';
+        $text_theme = '';
+
+        $reverse_table_theme = '';
+        $reverse_text_theme = '';
+
+
+        if ($statement['sub_type'] == 'MI') {
+            $table_theme = 'blue-table';
+            $text_theme = 'blue-text';
+
+            $reverse_table_theme = 'red-table';
+            $reverse_text_theme = 'red-text';
+        } elseif ($statement['sub_type'] == 'MC') {
+            $table_theme = 'red-table';
+            $text_theme = 'red-text';
+
+            $reverse_table_theme = 'blue-table';
+            $reverse_text_theme = 'blue-text';
+        }
+
+        if ($type == 'reverse') {
+            // * 공급자
+            $table_theme = $reverse_table_theme;
+            $text_theme = $reverse_text_theme;
+        }
+
+        $total = array_sum(array_column($items, 4));
+        $tax = array_sum(array_column($items, 5));
+        $totalWithTax = $total + $tax;
+
+        // ✅ HTML 구성
+        $statement_pdf_view = $this->load->view('Pdf/statement_pdf_view', [
+            'items'         => $items,
+            'total'         => $total,
+            'tax'           => $tax,
+            'statement'     => $statement,
+            'title'         => $title,
+            'totalWithTax'  => $totalWithTax,
+            'title'        => $title,
+            'table_theme'   => $table_theme,
+            'text_theme'    => $text_theme,
+        ], true);
+
+        $mpdf->WriteHTML($statement_pdf_view);
+        $mpdf->Output('명세서.pdf', 'I'); // D: 다운로드, I: 브라우저보기
     }
 
     private function layout_blank_config($sub_menu_code = '', $title = '')

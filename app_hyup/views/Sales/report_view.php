@@ -14,6 +14,7 @@
         <div class="flex items-center gap-2 !text-xs">
 
             <form id="searchForm" action="/sales/report" method="GET" class="flex items-center border border-gray-300 gap-2 rounded-sm overflow-hidden w-[330px] !text-xs">
+                <input type="hidden" name="excel_yn" value="<?= $excel_yn ?>" />
                 <input type="hidden" name="page" value="<?= $page ?>" />
                 <input type="hidden" name="start_date" autocomplete="off" value="<?= $start_date ?>" />
                 <input type="hidden" name="end_date" autocomplete="off" value="<?= $end_date ?>" />
@@ -43,7 +44,7 @@
 
                     <div class="w-full flex flex-col justify-start !text-xs">
 
-                        <button onclick="open_popup_default('/setting/item/create','물품 등록',500,580);"
+                        <button onclick="download_excel();"
                             class="!text-left flex items-center gap-2 border-b-1 border-gray-300 !p-4 sm-hover" type="button">
 
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download">
@@ -57,16 +58,31 @@
                             </span>
                         </button>
 
-                        <button class="flex items-center gap-2 !text-left !p-4 sm-hover" onclick="show_excel_upload_modal();" type="button">
+                        <button class="flex items-center !border-b-1 !border-gray-300 gap-2 !text-left !p-4 sm-hover" onclick="download_pdfs1();" type="button">
 
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer-icon lucide-printer">
-                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                                <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" />
-                                <rect x="6" y="14" width="12" height="8" rx="1" />
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text-icon lucide-file-text">
+                                <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+                                <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+                                <path d="M10 9H8" />
+                                <path d="M16 13H8" />
+                                <path d="M16 17H8" />
                             </svg>
-
                             <span>
-                                <?= $title ?> 인쇄
+                                공급받는자 보관용 PDF
+                            </span>
+                        </button>
+
+                        <button class="flex items-center gap-2 !text-left !p-4 sm-hover" onclick="download_pdfs2();" type="button">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text-icon lucide-file-text">
+                                <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+                                <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+                                <path d="M10 9H8" />
+                                <path d="M16 13H8" />
+                                <path d="M16 17H8" />
+                            </svg>
+                            <span>
+                                공급자 보관용 PDF
                             </span>
                         </button>
                     </div>
@@ -77,11 +93,11 @@
     </div>
 
     <!-- 필터 영역 -->
-    <div class="flex items-center gap-2 mb-4 !text-sm">
+    <div class="flex items-center gap-2 mb-4 !text-xs">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
             <div class="flex items-center gap-2">
-                <button onclick="delete_statement(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+                <button onclick="delete_statement(event);" type="button" class="!my-2 !text-xs flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
                     삭제
                 </button>
 
@@ -110,12 +126,28 @@
                     </button>
                 </div>
             </div>
-            <button
-                onclick="open_popup_default('<?= REACT_PATH ?>?sub_type=MC','<?= $title ?>',1000,820);"
-                type="button"
-                class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
-                <?= $title ?> 등록+
-            </button>
+
+            <div class="flex items-center gap-2 h-full px-2 py-1">
+                <button
+                    onclick="open_popup_default('<?= REACT_PATH ?>?sub_type=MC','<?= $title ?>',1000,820);"
+                    type="button"
+                    style="height: 1.75rem;"
+                    class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0] rounded-sm">
+                    <?= $title ?> 등록+
+                </button>
+                <button
+                    onclick="handle_tax_invoice_issue();"
+                    type="button"
+                    class="px-2 py-1 sm-btn">
+                    세금계산서 발행
+                </button>
+                <button
+                    onclick="handle_sales_statement_issue_check();"
+                    type="button"
+                    class="px-2 py-1 sm-btn">
+                    매출증빙 발행확인
+                </button>
+            </div>
         </div>
     </div>
 
@@ -233,6 +265,55 @@
         });
     }
 
+    function print_screen() {
+        start_loading();
+        setTimeout(() => {
+            stop_loading();
+            window.print();
+        }, 500);
+    }
+
+    function download_excel() {
+
+        $("input[name='excel_yn']").val('Y')
+        $("#searchForm").submit();
+        $("input[name='excel_yn']").val('N')
+    }
+
+    function download_pdfs1() {
+
+        const checked_ids = [];
+        $('tbody input[type="checkbox"]:checked').each(function() {
+            const row = $(this).closest('tr');
+            const statement_id = row.data('statement-id');
+            checked_ids.push(statement_id);
+        });
+
+        if (checked_ids.length === 0) {
+            alert('PDF 대상 <?= $title ?>를 선택해주세요.');
+            return;
+        }
+
+        open_popup_default('<?= REACT_PATH ?>?main_type=pdf&sub_type=MI&id=' + checked_ids.join(','), '<?= $title ?>', 1000, 820);
+    }
+
+    function download_pdfs2() {
+
+        const checked_ids = [];
+        $('tbody input[type="checkbox"]:checked').each(function() {
+            const row = $(this).closest('tr');
+            const statement_id = row.data('statement-id');
+            checked_ids.push(statement_id);
+        });
+
+        if (checked_ids.length === 0) {
+            alert('PDF 대상 <?= $title ?>를 선택해주세요.');
+            return;
+        }
+
+        open_popup_default('<?= REACT_PATH ?>?main_type=pdf&sub_type=MC&id=' + checked_ids.join(','), '<?= $title ?>', 1000, 820);
+    }
+
     function go_detail(statement_id) {
         open_popup_default(`/purchase/report/statement_detail?id=${statement_id}`, '<?= $title ?> 상세', 1000, 820);
     }
@@ -278,6 +359,41 @@
             },
             complete: function() {
                 stop_loading();
+            }
+        });
+    }
+
+    // * 매출증빙 발행확인 처리
+    function handle_sales_statement_issue_check(e) {
+
+    }
+
+    // * 세금계산서 발행 처리
+    function handle_tax_invoice_issue(e) {
+
+        const checked_ids = [];
+        $('tbody input[type="checkbox"]:checked').each(function() {
+            const row = $(this).closest('tr');
+            const statement_id = row.data('statement-id');
+            checked_ids.push(statement_id);
+        });
+
+        if (checked_ids.length === 0) {
+            alert('전자세금계산서를 발행할 데이터를 선택해 주세요.');
+            return;
+        }
+
+        start_loading();
+
+        $.ajax({
+            type: "POST",
+            url: "/sales/report/issue_tax_invoice",
+            data: {
+                ids: checked_ids
+            },
+            dataType: "json",
+            success: function(response) {
+
             }
         });
     }

@@ -146,13 +146,15 @@
                     $총합계금액 += $estimate['amount'];
             ?>
 
-                    <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $estimate['id'] ?>')" data-estimate-id="<?= $estimate['id'] ?>">
+                    <tr class="border-b hover:bg-gray-50" data-estimate-id="<?= $estimate['id'] ?>">
                         <td><input type="checkbox" estimate-id="<?= $estimate['id'] ?>" onclick="event.stopPropagation();" /></td>
                         <td class="">
                             <?= date('Y-m-d', strtotime($estimate['created_at'])) ?>
                         </td>
                         <td class="">
-                            <?= $estimate['partner_name'] ?>
+                            <span onclick="go_detail(<?= $estimate['id'] ?>);" class="underline cursor-pointer">
+                                <?= $estimate['partner_name'] ?>
+                            </span>
                         </td>
                         <td class=""><?= number_format($estimate['supply_amount']) ?></td>
                         <td class=""><?= number_format($estimate['tax_amount']) ?></td>
@@ -187,10 +189,6 @@
 
                         </td>
                         <td class="cursor-pointer">
-                            <div class="flex items-center gap-1">
-                                <img src="https://ai.serp.co.kr/img/serp/btn/btn_send.png" alt="">
-                                <span class="font-semibold">상세보기</span>
-                            </div>
                         </td>
                     </tr>
                 <? endforeach;

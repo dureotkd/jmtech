@@ -34,6 +34,7 @@ class sales extends MY_Controller
         $search_text = $this->input->get('search_text') ?? '';
         $start_date = $this->input->get('start_date') ?? '';
         $end_date = $this->input->get('end_date') ?? '';
+        $excel_yn = $this->input->get('excel_yn') ?? 'N';
 
         $where = [
             "type = 'BUY'",    // SELL:판매, BUY:구매
@@ -63,12 +64,28 @@ class sales extends MY_Controller
             'search_text'   => $search_text,
             'start_date'    => $start_date,
             'end_date'      => $end_date,
-
+            'excel_yn'      => $excel_yn,
             'statement_all'  => $statement_all,
-            'layout_data'   => $this->layout_config('report', $title),
+            'layout_data'   => $excel_yn == 'Y' ? $this->layout_none_config() : $this->layout_config('report', $title),
         ];
 
-        $this->layout->view('/Sales/report_view', $view_data);
+        if ($excel_yn == 'Y') {
+
+            $filename = $title . '_' . date('Ymd_His') . '.xls';
+
+            // * excel view
+            header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+            header("Content-Disposition: attachment; filename=\"{$filename}\"");
+            header("Content-Description: PHP Generated Data");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+
+            // 엑셀은 UTF-8 BOM 넣어주면 한글 깨짐 방지됨
+            $this->layout->view('/Sales/report_excel_view', $view_data);
+        } else {
+
+            $this->layout->view('/Sales/report_view', $view_data);
+        }
     }
 
     # 견적서
@@ -796,6 +813,20 @@ class sales extends MY_Controller
 
         $this->layout->setPopHeader($title);
         $this->layout->setLayout("layout/blank");
+        $this->layout->setTitle($title);
+        $this->layout->setCss([]);
+        $this->layout->setScript([]);
+
+        return [
+            'top_menu_code'    => 'sales',
+            'sub_menu_code'    => $sub_menu_code,
+        ];
+    }
+
+    private function layout_none_config($sub_menu_code = '', $title = '')
+    {
+
+        $this->layout->setLayout("layout/none");
         $this->layout->setTitle($title);
         $this->layout->setCss([]);
         $this->layout->setScript([]);

@@ -8,22 +8,31 @@ class cron extends MY_Controller
         parent::__construct();
 
         $this->load->library([
-            'barobill'
+            'barobill',
+            'teamroom'
         ]);
 
         $this->load->model('/Page/service_model');
     }
 
     /**
-     * & 
+     * & 0 1 * * * root /usr/bin/php /var/www/html/jmtech/index.php Cron collection_tax_invoice
      * ^ ----------- 홈택스 API (새벽 1시) -----------
      * * 매입 내역 크롤링
      * * barobill_tax_invoice 테이블에 저장
      */
     public function collection_tax_invoice()
     {
-        $start_date = '20250901';
-        $end_date = date('Ymd');
+        date_default_timezone_set('Asia/Seoul'); // 한국시간 설정
+
+        $start_date = date('Ymd', strtotime('-1 day')); // 하루 전
+        $end_date = date('Ymd'); // 오늘
+
+        $this->teamroom->send('개발자', join("\n", [
+            "[홈택스 API - 매입 세금계산서 크롤링 시작]",
+            "시작일: {$start_date}",
+            "종료일: {$end_date}",
+        ]));
 
         $res = $this->barobill->매입세금계산서기간조회($start_date, $end_date);
 
@@ -161,16 +170,25 @@ class cron extends MY_Controller
     }
 
     /**
-     * & 
-     * ^ ----------- 홈택스 API (새벽 1시) -----------
+     * & 30 1 * * * root /usr/bin/php /var/www/html/jmtech/index.php Cron collection_tax_invoice2 
+     * ^ ----------- 홈택스 API (새벽 1시 30분) -----------
      * * 매출 내역 크롤링
      * * barobill_tax_invoice 테이블에 저장
      */
     public function collection_tax_invoice2()
     {
 
-        $start_date = '20250901';
-        $end_date = date('Ymd');
+        date_default_timezone_set('Asia/Seoul'); // 한국시간 설정
+
+        $start_date = date('Ymd', strtotime('-1 day')); // 하루 전
+        $end_date = date('Ymd'); // 오늘
+
+
+        $this->teamroom->send('개발자', join("\n", [
+            "[홈택스 API - 매출 세금계산서 크롤링 시작]",
+            "시작일: {$start_date}",
+            "종료일: {$end_date}",
+        ]));
 
         $res = $this->barobill->매출세금계산서조회($start_date, $end_date);
 

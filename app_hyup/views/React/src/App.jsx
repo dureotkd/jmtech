@@ -5,6 +5,10 @@ import "./App.css";
 import Loading from "./components/Loading";
 import PdfDocument from "./pages/PdfDocument";
 
+// lazy 제거 → 모든 컴포넌트 일반 import
+import CommonDocument from "./pages/CommonDocument";
+import TranscationStatement from "./pages/TranscationStatement";
+
 function App() {
   const queryString = new URLSearchParams(window.location.search);
   const subType = queryString.get("sub_type") ?? "G"; // * G:견적서 / S:수주서 / B:발주서 / MI:매입 거래명세표 / MC:매출 거래명세표
@@ -21,11 +25,11 @@ function App() {
 
   // 매핑 객체
   const components = {
-    G: React.lazy(() => import("./pages/CommonDocument")),
-    S: React.lazy(() => import("./pages/CommonDocument")),
-    B: React.lazy(() => import("./pages/CommonDocument")),
-    MI: React.lazy(() => import("./pages/TranscationStatement")),
-    MC: React.lazy(() => import("./pages/TranscationStatement")),
+    G: CommonDocument,
+    S: CommonDocument,
+    B: CommonDocument,
+    MI: TranscationStatement,
+    MC: TranscationStatement,
   };
 
   // 컴포넌트 선택

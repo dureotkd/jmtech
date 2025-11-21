@@ -334,7 +334,7 @@ else if ($domain === 'jmtech.test') {
     define('REACT_PATH', 'http://localhost:5173');
 }
 // * 그 외 기본값
-else if ($domain === 'www.jmtech.asia') {
+else if (strstr($domain, 'jmtech.asia') !== false) {
     define('REACT_PATH', 'http://www.jmtech.asia/React/estimate');
 } else {
     define('REACT_PATH', 'http://localhost:5173');

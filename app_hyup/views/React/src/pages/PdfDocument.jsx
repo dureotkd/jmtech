@@ -9,15 +9,14 @@ import {
   Font,
   Image,
 } from "@react-pdf/renderer";
-import { ESTIMATE_SUB_TYPE } from "../../constants";
 import request from "../utils/request";
 
 // 폰트 등록
 Font.register({
   family: "NotoSansKR",
   fonts: [
-    { src: "/fonts/NotoSansKR-Regular.ttf" },
-    { src: "/fonts/NotoSansKR-Bold.ttf", fontWeight: "bold" },
+    { src: "/assets/app_hyup/fonts/NotoSansKR-Regular.ttf" },
+    { src: "/assets/app_hyup/fonts/NotoSansKR-Bold.ttf", fontWeight: "bold" },
   ],
 });
 
@@ -212,11 +211,11 @@ const PdfPage = ({ subType, data }) => {
       <View style={styles.titleWrap}>
         <Image
           style={{ width: 100 }}
-          src="http://jmtech.test/assets/app_hyup/images/logo.png"
+          src="https://www.jmtech.asia/assets/app_hyup/images/logo.png"
         />
         <Image
           style={{ width: 120 }}
-          src={`http://jmtech.test/assets/app_hyup/images/${
+          src={`https://www.jmtech.asia/assets/app_hyup/images/${
             subType === "MC" ? "매출" : "매입"
           } 거래명세표.png`}
         />

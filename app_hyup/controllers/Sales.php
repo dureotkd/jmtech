@@ -36,6 +36,8 @@ class sales extends MY_Controller
         $end_date = $this->input->get('end_date') ?? '';
         $excel_yn = $this->input->get('excel_yn') ?? 'N';
 
+        $search_date2 = $this->input->get('search_date2') ?? '';
+
         $where = [
             "type = 'BUY'",    // SELL:판매, BUY:구매
             "sub_type = 'MC'",   // MI:매입,MC:매출
@@ -58,6 +60,68 @@ class sales extends MY_Controller
 
         $statement_all = $this->service_model->get_transcation_statement('all', $where);
 
+        /**
+         * [1] => Array
+        (
+            [id] => 2
+            [NTSSendKey] => 2025110441000026erp3i8gr
+            [NTSSendDT] => 20251104000000
+            [IssueDT] => 20251104113739
+            [WriteDate] => 20251104
+            [ModifyCode] => 0
+            [TaxType] => 2
+            [PurposeType] => 2
+            [InvoicerCorpNum] => 3128630100
+            [InvoicerTaxRegID] => 
+            [InvoicerCorpName] => 제이엠테크
+            [InvoicerCEOName] => 전용문
+            [InvoicerAddr] => 충청남도 천안시 서북구 두정공단1길 149-2 (두정동, 미라클(주)) 제이엠테크
+            [InvoicerBizType] => 제조업
+            [InvoicerBizClass] => 산업기계 설계 및 개발
+            [InvoicerContactName] => 
+            [InvoicerEmail] => jmlaser@empas.com
+            [InvoiceeCorpNum] => 8608800642
+            [InvoiceeTaxRegID] => 
+            [InvoiceeCorpName] => 주식회사 플렉시고
+            [InvoiceeCEOName] => 이기용
+            [InvoiceeAddr] => 천안시 동남구 목천읍 충절로 1065 3동
+            [InvoiceeBizType] => 제조
+            [InvoiceeBizClass] => 디스플레이, 반도체, 소프트웨어
+            [InvoiceeContactName] => 
+            [InvoiceeEmail] => flexigo@flexigo.co.kr
+            [BrokerCorpNum] => 
+            [BrokerTaxRegID] => 
+            [BrokerCorpName] => 
+            [BrokerCEOName] => 
+            [BrokerAddr] => 
+            [BrokerBizType] => 
+            [BrokerBizClass] => 
+            [BrokerContactName] => 
+            [BrokerEmail] => 
+            [AmountTotal] => 44500
+            [TaxTotal] => 0
+            [TotalAmount] => 44500
+            [Cash] => 0
+            [ChkBill] => 0
+            [Note] => 0
+            [Credit] => 0
+            [Remark1] => 기업은행 489-023136-01-017
+            [Remark2] => 
+            [Remark3] => 
+            [ItemName] => DUP-FE01
+            [CorpNum] => 8608800642
+            [TaxRegID] => 
+            [CorpName] => 주식회사 플렉시고
+            [CEOName] => 이기용
+            [created_at] => 2025-11-21 14:05:21
+            [updated_at] => 2025-11-21 14:05:21
+            [type] => sales
+        )
+         */
+        $barobill_tax_invoice_all = $this->service_model->get_barobill_tax_invoice('all', [
+            "type = 'sales'",
+        ]);
+
         $view_data =  [
             'title'         => $title,
             'page'          => $page,
@@ -66,6 +130,7 @@ class sales extends MY_Controller
             'end_date'      => $end_date,
             'excel_yn'      => $excel_yn,
             'statement_all'  => $statement_all,
+            'barobill_tax_invoice_all' => $barobill_tax_invoice_all,
             'layout_data'   => $excel_yn == 'Y' ? $this->layout_none_config() : $this->layout_config('report', $title),
         ];
 
@@ -95,6 +160,7 @@ class sales extends MY_Controller
         $search_text = $this->input->get('search_text') ?? '';
         $start_date = $this->input->get('start_date') ?? '';
         $end_date = $this->input->get('end_date') ?? '';
+        $excel_yn = $this->input->get('excel_yn') ?? 'N';
 
         $where = [
             "type = 'SELL'",    // SELL:판매, BUY:구매
@@ -116,20 +182,35 @@ class sales extends MY_Controller
             $where[] = "a.estimate_date <= '{$end_date}'";
         }
 
-
         $estimate_all = $this->service_model->get_estimate('all', $where);
 
         $view_data =  [
-            'page'                 => $page,
-            'search_text'          => $search_text,
-            'start_date'           => $start_date,
-            'end_date'             => $end_date,
-
-            'layout_data'           => $this->layout_config('estimate', '견적서'),
-            'estimate_all'          => $estimate_all,
+            'page'          => $page,
+            'search_text'   => $search_text,
+            'start_date'    => $start_date,
+            'end_date'      => $end_date,
+            'excel_yn'      => $excel_yn,
+            'layout_data'   => $excel_yn == 'Y' ? $this->layout_none_config() : $this->layout_config('estimate', '견적서'),
+            'estimate_all'  => $estimate_all,
         ];
 
-        $this->layout->view('/Sales/estimate_view', $view_data);
+        if ($excel_yn == 'Y') {
+
+            $filename = '견적서' . '_' . date('Ymd_His') . '.xls';
+
+            // * excel view
+            header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+            header("Content-Disposition: attachment; filename=\"{$filename}\"");
+            header("Content-Description: PHP Generated Data");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+
+            // 엑셀은 UTF-8 BOM 넣어주면 한글 깨짐 방지됨
+            $this->layout->view('/Sales/estimate_excel_view', $view_data);
+        } else {
+
+            $this->layout->view('/Sales/estimate_view', $view_data);
+        }
     }
 
     # 견적서 상세
@@ -173,17 +254,62 @@ class sales extends MY_Controller
     # 수주서
     public function order()
     {
-        $estimate_all = $this->service_model->get_estimate('all', [
+        $page = $this->input->get('page') ?? 1;
+        $search_text = $this->input->get('search_text') ?? '';
+        $start_date = $this->input->get('start_date') ?? '';
+        $end_date = $this->input->get('end_date') ?? '';
+        $excel_yn = $this->input->get('excel_yn') ?? 'N';
+
+        $where = [
             "type = 'SELL'",    // SELL:판매, BUY:구매
             "sub_type = 'S'",   // G:견적서, S:수주서
-        ]);
-
-        $view_data =  [
-            'estimate_all'  => $estimate_all,
-            'layout_data'   => $this->layout_config('order', '수주서'),
         ];
 
-        $this->layout->view('/Sales/order_view', $view_data);
+        if (!empty($search_text)) {
+
+            $where[] = "(SELECT COUNT(*) FROM jmtech.business_partner bp WHERE bp.id = a.partner_id AND bp.company_name LIKE '%{$search_text}%') > 0";
+        }
+
+        if (!empty($start_date)) {
+
+            $where[] = "a.estimate_date >= '{$start_date}'";
+        }
+
+        if (!empty($end_date)) {
+
+            $where[] = "a.estimate_date <= '{$end_date}'";
+        }
+
+        $estimate_all = $this->service_model->get_estimate('all', $where);
+
+        $view_data =  [
+            'page'          => $page,
+            'search_text'   => $search_text,
+            'start_date'    => $start_date,
+            'end_date'      => $end_date,
+            'excel_yn'      => $excel_yn,
+
+            'estimate_all'  => $estimate_all,
+            'layout_data'   => $excel_yn == 'Y' ? $this->layout_none_config() : $this->layout_config('order', '수주서'),
+        ];
+
+        if ($excel_yn == 'Y') {
+
+            $filename = '수주서' . '_' . date('Ymd_His') . '.xls';
+
+            // * excel view
+            header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+            header("Content-Disposition: attachment; filename=\"{$filename}\"");
+            header("Content-Description: PHP Generated Data");
+            header("Pragma: no-cache");
+            header("Expires: 0");
+
+            // 엑셀은 UTF-8 BOM 넣어주면 한글 깨짐 방지됨
+            $this->layout->view('/Sales/order_excel_view', $view_data);
+        } else {
+
+            $this->layout->view('/Sales/order_view', $view_data);
+        }
     }
 
     # 견적서 등록 (팝업)

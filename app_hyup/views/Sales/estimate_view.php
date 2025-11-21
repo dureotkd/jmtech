@@ -14,6 +14,7 @@
         <div class="flex items-center gap-2 !text-xs">
 
             <form id="searchForm" action="/sales/estimate" method="GET" class="flex items-center border border-gray-300 gap-2 rounded-sm overflow-hidden w-[330px] !text-xs">
+                <input type="hidden" name="excel_yn" value="<?= $excel_yn ?>" />
                 <input type="hidden" name="page" value="<?= $page ?>" />
                 <input type="hidden" name="start_date" autocomplete="off" value="<?= $start_date ?>" />
                 <input type="hidden" name="end_date" autocomplete="off" value="<?= $end_date ?>" />
@@ -43,7 +44,7 @@
 
                     <div class="w-full flex flex-col justify-start !text-xs">
 
-                        <button onclick="open_popup_default('/setting/item/create','물품 등록',500,580);"
+                        <button onclick="download_excel();"
                             class="!text-left flex items-center gap-2 border-b-1 border-gray-300 !p-4 sm-hover" type="button">
 
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download">
@@ -57,7 +58,7 @@
                             </span>
                         </button>
 
-                        <button class="flex items-center gap-2 !text-left !p-4 sm-hover" onclick="show_excel_upload_modal();" type="button">
+                        <button class="flex items-center gap-2 !text-left !p-4 sm-hover" onclick="show_prints();" type="button">
 
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer-icon lucide-printer">
                                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
@@ -133,7 +134,7 @@
                 <th class=" w-32"></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="item-tbody">
             <?
             $총공급가액 = 0;
             $총세액 = 0;
@@ -222,99 +223,7 @@
     </table>
 </div>
 
-<dialog id="calendar_modal" class="modal">
-    <div class="modal-box !text-xs relative max-w-3xl">
-
-        <div class="absolute inset-0 modal-loading hidden">
-            <div class="flex items-center justify-center w-full h-full bg-white/70">
-                <img class="w-16" src="/assets/app_hyup/images/loading.gif" alt="loading" />
-            </div>
-        </div>
-
-        <form id="calendar_form" class="bg-white w-full border border-gray-300">
-            <!-- 헤더 -->
-            <div class="flex justify-between items-center !text-base !px-4 !py-2 bg-[#4b5563]">
-                <h2 class="text-white font-semibold">일자조회</h2>
-                <button type="button" class="text-gray-200" onclick="close_calendar_modal();">
-                    ✕
-                </button>
-            </div>
-
-            <div class="border border-gray-300 !p-4 w-full !text-xs bg-white rounded text-sm">
-                <div class="flex items-center gap-2 !mb-2">
-                    <span>기준연도</span>
-                    <select id="yearSelect" class="border border-gray-300 rounded px-1 py-0.5">
-                        <option value="2025" selected>2025</option>
-                        <option value="2024">2024</option>
-                        <option value="2023">2023</option>
-                    </select>
-                </div>
-
-                <?php
-                // 1️⃣ 기본 기간
-                $group1 = ['오늘', '전일', '주간', '전주', '당월', '전월', '올해'];
-
-                // 2️⃣ 반기 / 분기 / 누적
-                $group2 = ['상반기', '하반기', '1/4분기', '2/4분기', '3/4분기', '4/4분기', '오늘까지'];
-
-                // 3️⃣ 월별
-                $group3 = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-                ?>
-
-                <div class="!space-y-1 !mb-4">
-                    <!-- 1️⃣ 기본 기간 -->
-                    <div class="grid grid-cols-7 gap-1 mb-1">
-                        <?php foreach ($group1 as $label): ?>
-                            <button type="button" class="date-btn sm-btn justify-center !m-0"><?= $label ?></button>
-                        <?php endforeach; ?>
-                    </div>
-
-                    <!-- 2️⃣ 반기 / 분기 / 누적 -->
-                    <div class="grid grid-cols-7 gap-1 mb-1">
-                        <?php foreach ($group2 as $label): ?>
-                            <button type="button" class="date-btn sm-btn justify-center !m-0"><?= $label ?></button>
-                        <?php endforeach; ?>
-                    </div>
-
-                    <!-- 3️⃣ 월별 -->
-                    <div class="grid grid-cols-12 gap-1">
-                        <?php foreach ($group3 as $label): ?>
-                            <button type="button" class="date-btn sm-btn justify-center !m-0"><?= $label ?></button>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
-
-                <!-- 달력 2개 -->
-                <div class="flex justify-between items-center mb-3">
-                    <input type="hidden" id="temp_start_date" class="border border-gray-300 rounded px-2 py-1 w-[150px]" placeholder="시작일">
-                    <input type="hidden" id="temp_end_date" class="border border-gray-300 rounded px-2 py-1 w-[150px]" placeholder="종료일">
-                </div>
-
-            </div>
-
-            <!-- 하단 버튼 -->
-            <div class="w-full !px-2 !text-[13px] flex justify-center items-center gap-1.5 font-sans font-300 !my-2">
-                <!-- 저장 후 인쇄 -->
-                <button
-                    type="button"
-                    onclick="handle_calendar_apply();"
-                    class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
-                    적용
-                </button>
-
-                <!-- 취소 -->
-                <button
-                    type="button"
-                    onclick="close_calendar_modal();"
-                    class="px-2 py-1 bg-[#fff] text-gray-700 hover:bg-gray-100 border border-gray-300">
-                    취소
-                </button>
-            </div>
-        </form>
-    </div>
-</dialog>
-
+<div id="calendar"></div>
 
 <script>
     const picker = new Litepicker({
@@ -332,31 +241,50 @@
         },
     });
 
-    // 시작일 달력
-    const startPicker = new Litepicker({
-        element: document.getElementById('temp_start_date'),
-        inlineMode: true, // ✅ 항상 표시
-        singleMode: true,
-        format: 'YYYY-MM-DD',
-        lang: 'ko',
-    });
-
-    // 종료일 달력
-    const endPicker = new Litepicker({
-        element: document.getElementById('temp_end_date'),
-        inlineMode: true, // ✅ 항상 표시
-        singleMode: true,
-        format: 'YYYY-MM-DD',
-        lang: 'ko',
-    });
-
-
     function open_calendar_modal(e) {
-
         e.stopPropagation();
 
-        const modal = document.getElementById('calendar_modal');
-        modal.showModal();
+        const target = $(e.currentTarget);
+        /**
+         * iframe
+         */
+        $.ajax({
+            type: "GET",
+            url: "/iframe/search_calendar",
+            dataType: "html",
+            success: function(response) {
+                $('#calendar').html(response);
+            }
+        });
+    }
+
+    function show_prints() {
+
+        const checked_ids = [];
+        $('#item-tbody input[type="checkbox"]:checked').each(function() {
+            const row = $(this).closest('tr');
+            const estimate_id = row.data('estimate-id');
+            checked_ids.push(estimate_id);
+        });
+
+        if (checked_ids.length === 0) {
+            alert('프린터 대상을 선택해주세요.');
+            return;
+        }
+
+        open_popup_default('<?= REACT_PATH ?>?main_type=pdf&sub_type=G&id=' + checked_ids.join(','), '견적서 프린터', 1000, 820);
+    }
+
+    function download_excel() {
+        start_loading();
+
+        $("input[name='excel_yn']").val('Y')
+        $("#searchForm").submit();
+        $("input[name='excel_yn']").val('N')
+
+        setTimeout(() => {
+            stop_loading();
+        }, 1000);
     }
 
     function close_calendar_modal() {

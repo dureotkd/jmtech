@@ -127,7 +127,7 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 h-full px-2 py-1">
+            <div class="flex items-center gap-2 h-full px-2 py-1 relative">
                 <button
                     onclick="open_popup_default('<?= REACT_PATH ?>?sub_type=MC','<?= $title ?>',1000,820);"
                     type="button"
@@ -147,6 +147,92 @@
                     class="px-2 py-1 sm-btn">
                     매출증빙 발행확인
                 </button>
+
+                <div id="recipe_iframe" class="hidden absolute top-full w-[650px] left-[-250px] z-10 bg-white !border !border-gray-900">
+
+                    <!-- Header -->
+                    <div class="flex items-center bg-[#fafafa] justify-between !px-5 !py-3 border-b">
+                        <h2 class="!text-[15px]">매입증빙 수취확인</h2>
+                        <button onclick="close_recipe();" type="button" class="text-gray-400 hover:text-gray-600 !text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- 탭 메뉴 -->
+                    <div class="border-b !px-5 !my-3 flex gap-6 text-sm font-medium">
+                        <button class="py-1 text-blue-600 border-b-2 border-blue-600">세금계산서</button>
+                    </div>
+
+                    <!-- 상단 버튼 + 기간 선택 -->
+                    <div class="!px-5 !py-3 flex justify-between items-center">
+                        <div class=""></div>
+                        <select class="border px-3 py-2 !text-xs">
+                            <option>최근 3개월</option>
+                            <option>최근 6개월</option>
+                            <option>최근 1년</option>
+                        </select>
+                    </div>
+
+                    <!-- 테이블 -->
+                    <div class="max-h-[400px] overflow-y-auto border !text-xs border-gray-300 relative">
+
+                        <table class="w-full !px-5 text-sm border-collapse">
+                            <thead class="bg-[#788496] text-white sticky top-0 z-10">
+                                <tr>
+                                    <th class="py-2 w-12 bgcolor"><input type="checkbox"></th>
+                                    <th class="py-2 w-24">작성일</th>
+                                    <th class="py-2 w-52">공급받는자상호</th>
+                                    <th class="py-2">내용</th>
+                                    <th class="py-2 w-28 text-right">금액</th>
+                                </tr>
+                            </thead>
+
+                            <tbody class="divide-y">
+                                <?
+                                if (!empty($barobill_tax_invoice_all)) {
+
+                                    foreach ($barobill_tax_invoice_all as $invoice) {
+                                ?>
+                                        <tr class="hover:bg-gray-50">
+                                            <td><input type="checkbox"></td>
+                                            <td>
+                                                <?= date('Y-m-d', strtotime($invoice['WriteDate'])) ?>
+                                            </td>
+                                            <td>
+                                                <?= $invoice['CorpName'] ?>
+                                            </td>
+                                            <td>
+                                                <?= $invoice['ItemName'] ?>
+                                            </td>
+                                            <td class="text-right">
+                                                <?= number_format($invoice['TotalAmount']) ?>
+                                            </td>
+                                        </tr>
+                                    <?
+                                    }
+                                    ?>
+                                <?
+                                } else {
+                                ?>
+                                    <tr class="hover:bg-gray-50">
+                                        <td colspan="5">
+                                            <div class="py-4 text-center text-gray-500">
+                                                등록된 세금계산서 데이터가 없습니다.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
@@ -165,7 +251,7 @@
                 <th class="w-32"></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="item-tbody">
             <?
             $총공급가액 = 0;
             $총세액 = 0;
@@ -192,7 +278,7 @@
                         <td class=""><?= number_format($statement['tax_amount']) ?></td>
                         <td class=""><?= number_format($statement['amount']) ?></td>
                         <td>
-                            <span class="underline cursor-pointer">
+                            <span onclick="alert('준비중입니다')" class="underline cursor-pointer">
                                 [세금계산서발행]
                             </span>
                         </td>
@@ -273,17 +359,26 @@
         }, 500);
     }
 
+    function close_recipe() {
+        $("#recipe_iframe").addClass("hidden");
+    }
+
     function download_excel() {
+        start_loading();
 
         $("input[name='excel_yn']").val('Y')
         $("#searchForm").submit();
         $("input[name='excel_yn']").val('N')
+
+        setTimeout(() => {
+            stop_loading();
+        }, 1000);
     }
 
     function download_pdfs1() {
 
         const checked_ids = [];
-        $('tbody input[type="checkbox"]:checked').each(function() {
+        $('#item-tbody input[type="checkbox"]:checked').each(function() {
             const row = $(this).closest('tr');
             const statement_id = row.data('statement-id');
             checked_ids.push(statement_id);
@@ -300,7 +395,7 @@
     function download_pdfs2() {
 
         const checked_ids = [];
-        $('tbody input[type="checkbox"]:checked').each(function() {
+        $('#item-tbody input[type="checkbox"]:checked').each(function() {
             const row = $(this).closest('tr');
             const statement_id = row.data('statement-id');
             checked_ids.push(statement_id);
@@ -321,7 +416,7 @@
     function delete_statement(e) {
 
         const checked_ids = [];
-        $('tbody input[type="checkbox"]:checked').each(function() {
+        $('#item-tbody input[type="checkbox"]:checked').each(function() {
             const row = $(this).closest('tr');
             const statement_id = row.data('statement-id');
             checked_ids.push(statement_id);
@@ -366,13 +461,14 @@
     // * 매출증빙 발행확인 처리
     function handle_sales_statement_issue_check(e) {
 
+        $("#recipe_iframe").toggleClass("hidden");
     }
 
     // * 세금계산서 발행 처리
     function handle_tax_invoice_issue(e) {
 
         const checked_ids = [];
-        $('tbody input[type="checkbox"]:checked').each(function() {
+        $('#item-tbody input[type="checkbox"]:checked').each(function() {
             const row = $(this).closest('tr');
             const statement_id = row.data('statement-id');
             checked_ids.push(statement_id);
@@ -383,18 +479,20 @@
             return;
         }
 
-        start_loading();
+        alert('준비중입니다.');
 
-        $.ajax({
-            type: "POST",
-            url: "/sales/report/issue_tax_invoice",
-            data: {
-                ids: checked_ids
-            },
-            dataType: "json",
-            success: function(response) {
+        // start_loading();
 
-            }
-        });
+        // $.ajax({
+        //     type: "POST",
+        //     url: "/sales/report/issue_tax_invoice",
+        //     data: {
+        //         ids: checked_ids
+        //     },
+        //     dataType: "json",
+        //     success: function(response) {
+
+        //     }
+        // });
     }
 </script>

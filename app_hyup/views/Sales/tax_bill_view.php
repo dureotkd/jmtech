@@ -110,12 +110,22 @@
                     </button>
                 </div>
             </div>
-            <button
-                onclick="open_popup_default('<?= REACT_PATH ?>?sub_type=MI','<?= $title ?>',1000,820);"
-                type="button"
-                class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
-                <?= $title ?> 등록+
-            </button>
+
+            <div class="flex items-center gap-2">
+                <button
+                    type="button"
+                    onclick="collect_hometax(event);"
+                    class="flex h-[28px] items-center gap-1 bg-[#2ea3eb] text-white px-4">
+                    <img src="/assets/app_hyup/images/hometax.png" alt="hometax" class="w-12" />
+                    홈택스 자료수집
+                </button>
+                <button
+                    onclick="open_popup_default('<?= REACT_PATH ?>?sub_type=MI','<?= $title ?>',1000,820);"
+                    type="button"
+                    class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+                    <?= $title ?> 등록+
+                </button>
+            </div>
         </div>
     </div>
 
@@ -123,54 +133,52 @@
     <table class="w-full border border-gray-300">
         <thead>
             <tr class="bg-[#788496] text-white">
-                <th class=" w-10"><input type="checkbox" id="all_check" /></th>
                 <th class="">매출일자</th>
                 <th class="">공급받는자상호</th>
-                <th class="">증빙</th>
-                <th class="">매출금액</th>
-                <th class="">용도</th>
+                <th class="!text-center">증빙</th>
+                <th class="!text-right w-[250px]">매출금액</th>
+                <th class="w-[150px]">용도</th>
                 <th class="">내용</th>
-                <th class=" w-32">비고</th>
+                <th class="">비고</th>
             </tr>
         </thead>
         <tbody>
             <?
-            $총공급가액 = 0;
-            $총세액 = 0;
-            $총합계금액 = 0;
-            if (!empty($transcation_statement_all)) :
-                foreach ($transcation_statement_all as $transcation_statement) :
+            if (!empty($barobill_tax_invoice)) :
+                foreach ($barobill_tax_invoice as $tax_invoice) :
 
-                    $총공급가액 += $transcation_statement['supply_amount'];
-                    $총세액 += $transcation_statement['tax_amount'];
-                    $총합계금액 += $transcation_statement['amount'];
             ?>
-
-                    <tr class="border-b hover:bg-gray-50" onclick="go_detail('<?= $transcation_statement['id'] ?>')" data-transcation_statement-id="<?= $transcation_statement['id'] ?>">
-                        <td><input type="checkbox" transcation_statement-id="<?= $transcation_statement['id'] ?>" onclick="event.stopPropagation();" /></td>
-                        <td class="">
-                            <?= date('Y-m-d', strtotime($transcation_statement['created_at'])) ?>
+                    <tr class="border-b hover:bg-gray-50">
+                        <td data-label="매출일자">
+                            <?= date('Y-m-d', strtotime($tax_invoice['WriteDate'])) ?>
                         </td>
-                        <td class="">
-                            <?= $transcation_statement['partner_name'] ?>
+                        <td data-label="공급받는자상호">
+                            <?= $tax_invoice['CorpName'] ?>
                         </td>
-                        <td class=""><?= number_format($transcation_statement['supply_amount']) ?></td>
-                        <td class=""><?= number_format($transcation_statement['tax_amount']) ?></td>
-                        <td class=""><?= number_format($transcation_statement['amount']) ?></td>
-                        <td>
-
+                        <td data-label="증빙" class="text-center">
+                            <button
+                                type="button"
+                                class="px-3 py-[1px] text-red-600 border border-red-300 bg-red-50 rounded-full !text-xs font-medium hover:bg-red-100 transition">
+                                세계
+                            </button>
                         </td>
-                        <td class="cursor-pointer">
-                            <div class="flex items-center gap-1">
-                                <img src="https://ai.serp.co.kr/img/serp/btn/btn_send.png" alt="">
-                                <span class="font-semibold">상세보기</span>
-                            </div>
+                        <td class="text-right" data-label="매출금액">
+                            <?= number_format($tax_invoice['TotalAmount']) ?>
+                        </td>
+                        <td data-label="용도" class="bg-[#fdedeb]">
+                            매출
+                        </td>
+                        <td data-label="내용" class="bg-[#fdedeb]">
+                            <?= $tax_invoice['ItemName'] ?>
+                        </td>
+                        <td data-label="비고" class="bg-[#fdedeb]">
+                            <?= $tax_invoice['Remark1'] ?>
                         </td>
                     </tr>
                 <? endforeach;
             else : ?>
                 <tr>
-                    <td colspan="9" class="text-center py-4">등록된 가 없습니다.</td>
+                    <td colspan=" 9" class="text-center py-4">등록된 <?= $title ?>가 없습니다.</td>
                 </tr>
             <? endif; ?>
 
@@ -326,6 +334,32 @@
 
     function handle_select(event) {
         event.stopPropagation(); // 트리거링 방지
+    }
+
+    function collect_hometax() {
+
+        start_loading();
+
+        $.ajax({
+            type: "GET",
+            url: "/sales/collect_hometax_sales_tax_invoice",
+            dataType: "json",
+            success: function(response) {
+
+                alert(response.msg);
+
+                if (response.ok) {
+                    window.location.reload();
+                }
+
+            },
+            error: function(xhr, status, error) {
+                alert("에러가 발생했습니다: " + error);
+            },
+            complete: function() {
+                stop_loading();
+            }
+        });
     }
 
     function delete_transcation_statement(e) {

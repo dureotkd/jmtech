@@ -219,12 +219,54 @@ No	변수명	타입	길이	필수	설명
 8	CountPerPage	int		O	페이지 당 조회 건수 (최대 100건)
 9	CurrentPage	int		O	조회할 페이지 번호
       */
-     public function 매출세금계산서조회()
+     public function 매출세금계산서조회($StartDate, $EndDate) // YYYYMMDD
      {
 
           // code...
           // ...
           // ...
+          $TaxType = 1;
+          $DateType = 1;
+          $CountPerPage = 100;
+          $CurrentPage = 1; // 1~3페이지 까지있음
+
+          $params = [
+               'CERTKEY' => $this->CERTKEY,
+               'CorpNum' => $this->CorpNum,
+               'UserID' => $this->UserID,
+               'TaxType' => $TaxType,
+               'DateType' => $DateType,
+               'StartDate' => $StartDate,
+               'EndDate' => $EndDate,
+               'CountPerPage' => $CountPerPage,
+               'CurrentPage' => $CurrentPage,
+          ];
+
+          $Result = $this->BaroService_TI->GetPeriodTaxInvoiceSalesList($params)->GetPeriodTaxInvoiceSalesListResult;
+
+          if ($Result->CurrentPage < 0) { // 호출 실패
+
+               return [];
+          } else { // 호출 성공
+               echo $Result->CurrentPage;
+               echo '<br/>';
+               echo $Result->CountPerPage;
+               echo '<br/>';
+               echo $Result->MaxPageNum;
+               echo '<br/>';
+               echo $Result->MaxIndex;
+               echo '<br/>';
+
+               if (!array_key_exists('SimpleTaxInvoiceEx', $Result->SimpleTaxInvoiceExList)) {
+                    $SimpleTaxInvoices = [];
+               } else if (!is_array($Result->SimpleTaxInvoiceExList->SimpleTaxInvoiceEx)) {
+                    $SimpleTaxInvoices = [$Result->SimpleTaxInvoiceExList->SimpleTaxInvoiceEx];
+               } else {
+                    $SimpleTaxInvoices = $Result->SimpleTaxInvoiceExList->SimpleTaxInvoiceEx;
+               }
+          }
+
+          return $SimpleTaxInvoices;
      }
 
      /**
@@ -243,6 +285,28 @@ No	변수명	타입	길이	필수	설명
 8	CountPerPage	int		O	페이지 당 조회 건수 (최대 100건)
 9	CurrentPage	int		O	조회할 페이지 번호
 Return
+
+10000
+알 수 없는 오류 발생.
+API 호출 중 서버오류가 발생한 경우입니다. 바로빌로 문의바랍니다.
+-10003
+연동서비스가 점검 중입니다.
+-10004
+해당 기능은 더 이상 사용되지 않습니다.
+-10007
+해당 기능을 사용할 수 없습니다.
+-10005
+최대 100건까지만 사용하실 수 있습니다.
+-10006
+최대 1000건까지만 사용하실 수 있습니다.
+-10008
+날짜형식이 잘못되었습니다.
+-10148
+조회 기간이 잘못되었습니다.
+-40001
+파일을 찾을 수 없습니다.
+-40002
+빈 파일입니다(0byte
       */
      public function 매입세금계산서기간조회($StartDate, $EndDate) // YYYYMMDD
      {
@@ -250,7 +314,7 @@ Return
           $TaxType = 1;
           $DateType = 1;
           $CountPerPage = 100;
-          $CurrentPage = 3; // 1~3페이지 까지있음
+          $CurrentPage = 2; // 1~3페이지 까지있음
 
           $params = [
                'CERTKEY' => $this->CERTKEY,

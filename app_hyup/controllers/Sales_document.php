@@ -53,33 +53,37 @@ class sales_document extends MY_Controller
             $where[] = "a.estimate_date <= '{$end_date}'";
         }
 
+        $title = '매출세금계산서(현영/기타)';
+
         /**
-         *             [id] => 209
-            [NTSSendKey] => 202510311025103123392057
-            [NTSSendDT] => 20251031000000
-            [IssueDT] => 20251031163406
-            [WriteDate] => 20251031
-            [ModifyCode] => 0
-            [TaxType] => 1
+         *     [0] => Array
+        (
+            [id] => 1
+            [NTSSendKey] => 2025110441000026erp3i8sb
+            [NTSSendDT] => 20251104000000
+            [IssueDT] => 20251104123009
+            [WriteDate] => 20251104
+            [ModifyCode] => 1
+            [TaxType] => 2
             [PurposeType] => 2
-            [InvoicerCorpNum] => 6315700716
+            [InvoicerCorpNum] => 3128630100
             [InvoicerTaxRegID] => 
-            [InvoicerCorpName] => 테크로지스
-            [InvoicerCEOName] => 이경열
-            [InvoicerAddr] => 충청북도 청주시 서원구 모충로26번길 60, 상가동 103호(개신동, 두산한솔2차아파트)
-            [InvoicerBizType] => 운수업
-            [InvoicerBizClass] => 화물운송주선
+            [InvoicerCorpName] => 제이엠테크
+            [InvoicerCEOName] => 전용문
+            [InvoicerAddr] => 충청남도 천안시 서북구 두정공단1길 149-2 (두정동, 미라클(주)) 제이엠테크
+            [InvoicerBizType] => 제조업
+            [InvoicerBizClass] => 산업기계 설계 및 개발
             [InvoicerContactName] => 
-            [InvoicerEmail] => lky5091@naver.com
-            [InvoiceeCorpNum] => 3128630100
+            [InvoicerEmail] => jmlaser@empas.com
+            [InvoiceeCorpNum] => 8608800642
             [InvoiceeTaxRegID] => 
-            [InvoiceeCorpName] => 제이엠테크주식회사
-            [InvoiceeCEOName] => 전용문
-            [InvoiceeAddr] => 충청남도 천안시 서북구 두정공단1길 149-2(두정동)
-            [InvoiceeBizType] => 제조업
-            [InvoiceeBizClass] => 산업기계,기타부수제작
+            [InvoiceeCorpName] => 주식회사 플렉시고
+            [InvoiceeCEOName] => 이기용
+            [InvoiceeAddr] => 천안시 동남구 목천읍 충절로 1065 3동
+            [InvoiceeBizType] => 제조
+            [InvoiceeBizClass] => 디스플레이, 반도체, 소프트웨어
             [InvoiceeContactName] => 
-            [InvoiceeEmail] => jmlaser@empas.com
+            [InvoiceeEmail] => flexigo@flexigo.co.kr
             [BrokerCorpNum] => 
             [BrokerTaxRegID] => 
             [BrokerCorpName] => 
@@ -89,26 +93,30 @@ class sales_document extends MY_Controller
             [BrokerBizClass] => 
             [BrokerContactName] => 
             [BrokerEmail] => 
-            [AmountTotal] => 440000
-            [TaxTotal] => 44000
-            [TotalAmount] => 484000
+            [AmountTotal] => -44500
+            [TaxTotal] => 0
+            [TotalAmount] => -44500
             [Cash] => 0
             [ChkBill] => 0
             [Note] => 0
             [Credit] => 0
-            [Remark1] => 하나은행 413-910019-14508 이경열(테크로지스
+            [Remark1] => 기업은행 489-023136-01-017당초 작성일자(2025-11-04)
             [Remark2] => 
             [Remark3] => 
-            [ItemName] => 운반비
-            [CorpNum] => 6315700716
+            [ItemName] => DUP-FE01
+            [CorpNum] => 8608800642
             [TaxRegID] => 
-            [CorpName] => 테크로지스
-            [CEOName] => 이경열
-            [created_at] => 2025-11-12 12:11:04
-            [updated_at] => 2025-11-12 12:11:04
+            [CorpName] => 주식회사 플렉시고
+            [CEOName] => 이기용
+            [created_at] => 2025-11-21 14:05:21
+            [updated_at] => 2025-11-21 14:05:21
+            [type] => sales
+        )
+
          */
-        $title = '매출세금계산서(현영/기타)';
-        $barobill_tax_invoice = $this->service_model->get_barobill_tax_invoice('all', [1]);
+        $barobill_tax_invoice = $this->service_model->get_barobill_tax_invoice('all', [
+            "type = 'sales'"
+        ]);
 
         $view_data =  [
             'title' => $title,

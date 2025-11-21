@@ -348,7 +348,7 @@ class service_model extends MY_Model
     public function get_barobill_tax_invoice($type, $where = [1], $limit = '')
     {
         $select = $type == 'one' ? "COUNT(*)" : "*";
-        $sql = sprintf("SELECT {$select} FROM jmtech.barobill_tax_invoice a WHERE %s ORDER BY a.created_at DESC", join(" AND ", $where));
+        $sql = sprintf("SELECT {$select} FROM jmtech.barobill_tax_invoice a WHERE %s ORDER BY a.WriteDate DESC", join(" AND ", $where));
         if (!empty($limit)) {
             $sql .= " LIMIT {$limit}";
         }

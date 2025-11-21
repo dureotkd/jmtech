@@ -1,21 +1,122 @@
+<style>
+    .litepicker {
+        font-size: 14px;
+        /* 기본값은 12~13px 정도 */
+    }
+</style>
+
 <div class="p-4 bg-white font-sans text-sm text-gray-800">
 
-    <h1 class="!text-xl !border-b !font-sans !border-gray-300 !pb-3">
-        수주서
-    </h1>
+    <div class="flex items-center !border-b !font-sans !border-gray-300 !pb-3 justify-between">
+        <h1 class="!text-xl">
+            수주서
+        </h1>
+
+        <div class="flex items-center gap-2 !text-xs">
+
+            <form id="searchForm" action="/sales/order" method="GET" class="flex items-center border border-gray-300 gap-2 rounded-sm overflow-hidden w-[330px] !text-xs">
+                <input type="hidden" name="excel_yn" value="<?= $excel_yn ?>" />
+                <input type="hidden" name="page" value="<?= $page ?>" />
+                <input type="hidden" name="start_date" autocomplete="off" value="<?= $start_date ?>" />
+                <input type="hidden" name="end_date" autocomplete="off" value="<?= $end_date ?>" />
+                <!-- 검색 입력창 -->
+                <input
+                    type="text"
+                    placeholder="검색어를 입력하세요"
+                    name="search_text"
+                    value="<?= htmlspecialchars($search_text) ?>"
+                    class="flex-1 px-2 py-2 outline-none placeholder-gray-400" />
+            </form>
+
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button">
+                    <button type="button" class="!px-2 py-1 !border-1 !border-gray-300 hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
+                            <path d="M4 5h16" />
+                            <path d="M4 12h16" />
+                            <path d="M4 19h16" />
+                        </svg>
+                    </button>
+
+                </div>
+                <ul
+                    tabindex="-1"
+                    class="!min-w-[210px] !border !border-gray-300 !bg-white !mt-2 items-center justify-center font-sans menu dropdown-content z-1 mt-4 w-52 shadow-sm">
+
+                    <div class="w-full flex flex-col justify-start !text-xs">
+
+                        <button onclick="download_excel();"
+                            class="!text-left flex items-center gap-2 border-b-1 border-gray-300 !p-4 sm-hover" type="button">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download">
+                                <path d="M12 15V3" />
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <path d="m7 10 5 5 5-5" />
+                            </svg>
+
+                            <span>
+                                엑셀파일 다운로드
+                            </span>
+                        </button>
+
+                        <button class="flex items-center gap-2 !text-left !p-4 sm-hover" onclick="show_prints();" type="button">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer-icon lucide-printer">
+                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                                <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" />
+                                <rect x="6" y="14" width="12" height="8" rx="1" />
+                            </svg>
+
+                            <span>
+                                수주서 인쇄
+                            </span>
+                        </button>
+                    </div>
+                </ul>
+            </div>
+        </div>
+
+    </div>
 
     <!-- 필터 영역 -->
     <div class="flex items-center gap-2 mb-4 !text-sm">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
-            <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
-                삭제
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+                    삭제
+                </button>
+
+                <div class="flex items-center gap-1 !text-xs">
+
+                    <input
+                        type="text"
+                        placeholder="시작날짜"
+                        name="search_text"
+                        id="start_date"
+                        value="<?= htmlspecialchars($start_date) ?>"
+                        class="w-[110px] flex-1 px-2 py-1 outline-none placeholder-gray-400" />
+                    ~
+                    <input
+                        type="text"
+                        placeholder="종료날짜"
+                        name="search_text"
+                        id="end_date"
+                        value="<?= htmlspecialchars($end_date) ?>"
+                        class="w-[110px] flex-1 px-2 py-1 outline-none placeholder-gray-400" />
+
+                    <img onclick="open_calendar_modal(event);" class="cursor-pointer" src="/assets/app_hyup/images/calendar.png" alt="캘린더">
+
+                    <button type="button" onclick="window.location.href = '/sales/order'" class="sm-btn">
+                        초기화
+                    </button>
+                </div>
+            </div>
             <button
-                onclick="open_popup_default('<?= REACT_PATH ?>?sub_type=S','수주서 등록',1000,820);"
+                onclick="open_popup_default('<?= REACT_PATH ?>','견적서 등록',1000,820);"
                 type="button"
                 class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
-                수주서 등록 +
+                견적서 등록 +
             </button>
         </div>
     </div>
@@ -34,7 +135,7 @@
                 <th class=" w-32"></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="item-tbody">
             <?
             $총공급가액 = 0;
             $총세액 = 0;
@@ -119,17 +220,80 @@
             }
             ?>
 
-        </tbody>
+            </tbodyi>
     </table>
 </div>
 
+<div id="calendar"></div>
+
 <script>
+    const picker = new Litepicker({
+        element: document.getElementById('start_date'),
+        elementEnd: document.getElementById('end_date'),
+        singleMode: false,
+        format: 'YYYY-MM-DD',
+        lang: 'ko',
+        numberOfMonths: 2,
+        numberOfColumns: 2,
+        onSelect: (start, end) => {
+            console.log('✅ 날짜 선택 완료!');
+            console.log('시작일:', start.format('YYYY-MM-DD'));
+            console.log('종료일:', end.format('YYYY-MM-DD'));
+        },
+    });
+
+    function open_calendar_modal(e) {
+        e.stopPropagation();
+
+        const target = $(e.currentTarget);
+        /**
+         * iframe
+         */
+        $.ajax({
+            type: "GET",
+            url: "/iframe/search_calendar",
+            dataType: "html",
+            success: function(response) {
+                $('#calendar').html(response);
+            }
+        });
+    }
+
     function go_detail(estimate_id) {
         open_popup_default(`/sales/estimate_detail?id=${estimate_id}`, '견적서 상세', 1000, 820);
     }
 
     function handle_select(event) {
         event.stopPropagation(); // 트리거링 방지
+    }
+
+    function download_excel() {
+        start_loading();
+
+        $("input[name='excel_yn']").val('Y')
+        $("#searchForm").submit();
+
+        setTimeout(() => {
+            stop_loading();
+            $("input[name='excel_yn']").val('N')
+        }, 1000);
+    }
+
+    function show_prints() {
+
+        const checked_ids = [];
+        $('#item-tbody input[type="checkbox"]:checked').each(function() {
+            const row = $(this).closest('tr');
+            const estimate_id = row.data('estimate-id');
+            checked_ids.push(estimate_id);
+        });
+
+        if (checked_ids.length === 0) {
+            alert('프린터 대상을 선택해주세요.');
+            return;
+        }
+
+        open_popup_default('<?= REACT_PATH ?>?main_type=pdf&sub_type=S&id=' + checked_ids.join(','), '수주서 프린터', 1000, 820);
     }
 
     function delete_estimate(e) {
@@ -142,11 +306,11 @@
         });
 
         if (checked_ids.length === 0) {
-            alert('삭제할 견적서를 선택해주세요.');
+            alert('삭제할 수주서를 선택해주세요.');
             return;
         }
 
-        if (!confirm('선택한 견적서를 삭제하시겠습니까?')) {
+        if (!confirm('선택한 수주서를 삭제하시겠습니까?')) {
             return;
         }
 

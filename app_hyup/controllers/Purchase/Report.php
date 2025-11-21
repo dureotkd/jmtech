@@ -55,6 +55,10 @@ class report extends MY_Controller
         $transcation_statement_all = $this->service_model->get_transcation_statement('all', $where);
         $title = '매입(거래명세표)';
 
+        $barobill_tax_invoice_all = $this->service_model->get_barobill_tax_invoice('all', [
+            "type = 'purchase'",
+        ]);
+
         $view_data =  [
             'transcation_statement_all' => $transcation_statement_all,
             'page'                  => $page,

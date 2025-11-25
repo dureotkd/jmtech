@@ -871,6 +871,32 @@ class sales extends MY_Controller
         echo json_encode($res_array);
     }
 
+    # 수주서 상태 변경
+    public function change_status2()
+    {
+        $id = $this->input->post('id') ?? '';
+        $status2 = $this->input->post('status2') ?? '';
+        $title = $this->input->post('title') ?? '수주서';
+
+        $res_array = [
+            'ok'                => true,
+            'msg'               => "{$title} 상태가 변경되었습니다.",
+            'su_estimate_id'    => '',
+        ];
+
+        try {
+
+            $res = $this->estimate_service->change_status2($id, $status2);
+
+            $res_array['su_estimate_id'] = $res;
+        } catch (Exception $e) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = $e->getMessage();
+        }
+
+        echo json_encode($res_array);
+    }
+
     # 견적서 삭제
     public function delete_estimate()
     {

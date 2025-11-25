@@ -137,6 +137,9 @@
         </thead>
         <tbody id="item-tbody">
             <?
+
+            use Mpdf\Tag\S;
+
             $총공급가액 = 0;
             $총세액 = 0;
             $총합계금액 = 0;
@@ -163,12 +166,12 @@
                         <td class=""><?= number_format($estimate['amount']) ?></td>
                         <td>
                             <div class="flex items-center gap-2">
-                                <select onclick="handle_select(event);" onchange="change_status(<?= $estimate['id'] ?>, event);" name="estimate_status" id="">
+                                <select onclick="handle_select(event);" onchange="change_status2(<?= $estimate['id'] ?>, event);" name="suju_status" id="">
                                     <?
-                                    $ESTIMATE_STATUS = unserialize(ESTIMATE_STATUS);
-                                    foreach ($ESTIMATE_STATUS as $status_key => $status_val) {
+                                    $SUJU_STATUS = unserialize(SUJU_STATUS);
+                                    foreach ($SUJU_STATUS as $status_key => $status_val) {
                                     ?>
-                                        <option <?= $status_key === $estimate['status'] ? 'selected' : '' ?> value="<?= $status_key ?>"><?= $status_val ?></option>
+                                        <option <?= $status_key === $estimate['status2'] ? 'selected' : '' ?> value="<?= $status_key ?>"><?= $status_val ?></option>
                                     <?
                                     }
 
@@ -341,39 +344,24 @@
         });
     }
 
-    function change_status(estimate_id, e) {
+    function change_status2(estimate_id, e) {
 
         start_loading();
 
         const selected_status = e.target.value;
 
-        if (selected_status === '수주전환') {
-            if (!confirm('수주전환 하시겠습니까?')) {
-                return;
-            }
-        }
-
         $.ajax({
             type: "POST",
-            url: "/sales/change_status",
+            url: "/sales/change_status2",
             data: {
                 id: estimate_id,
-                status: selected_status,
+                status2: selected_status,
                 title: '수주서'
             },
             dataType: "json",
             success: function(response) {
 
                 alert(response.msg);
-
-                if (response.ok && selected_status == '수주전환' && response.su_estimate_id) {
-
-                    open_popup_default(`/sales/estimate_detail?id=${response.su_estimate_id}`, '수주서 상세', 1000, 820);
-                }
-
-                if (response.ok) {
-                    window.location.reload();
-                }
 
             },
             error: function(xhr, status, error) {

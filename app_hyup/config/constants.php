@@ -342,13 +342,19 @@ define('SUB_TYPE', serialize([
     'S' => '수주서',
 ]));
 
-
 define('ESTIMATE_STATUS', serialize([
     '견적진행중' => '견적진행중',
     '네고중' => '네고중',
     '확정' => '확정',
     '수주전환' => '수주전환',
 ]));
+
+define('SUJU_STATUS', serialize([
+    '도면확인' => '도면확인',
+    '설계완료' => '설계완료',
+    '제작중' => '제작중',
+]));
+
 
 define('PAY_METHOD_CODE', serialize([
     "CARD"       => "신용카드",

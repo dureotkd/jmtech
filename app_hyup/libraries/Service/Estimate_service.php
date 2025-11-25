@@ -206,6 +206,28 @@ class Estimate_service
         return $res;
     }
 
+    public function change_status2($id, $status)
+    {
+        $res = null;
+
+        if (empty($status)) {
+            throw new Exception("변경할 상태값이 올바르지 않습니다.");
+        }
+
+        if (empty($id)) {
+            throw new Exception("수주서 아이디가 올바르지 않습니다.");
+        }
+
+        $this->obj->service_model->update_estimate(DEBUG, [
+            'status2'       => $status,
+            'updated_at'    => date('Y-m-d H:i:s')
+        ], [
+            "id = '{$id}'"
+        ]);
+
+        return $res;
+    }
+
     public function uploadFile($estimate_id)
     {
 

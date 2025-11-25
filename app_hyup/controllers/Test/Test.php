@@ -139,6 +139,17 @@ class test extends MY_Controller
         $this->barobill->매입세금계산서일별조회();
     }
 
+    // * https://jmtech.test/test/test/moneypin_test
+    public function moneypin_test()
+    {
+
+        $this->load->library('moneypin');
+
+        $response = $this->moneypin->searchCompany([]);
+        printr($response);
+        exit;
+    }
+
     private function layout_config()
     {
 

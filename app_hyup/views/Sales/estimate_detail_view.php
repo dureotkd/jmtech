@@ -585,13 +585,25 @@ $datetime = date('YmdHis');
         }, 1000);
     }
 
-    const handle_excel = (e) => {
+    const handle_excel = async () => {
         start_loading();
 
-        window.location.href = '/sales/download_estimate_excel?id=<?= $estimate['id'] ?>';
+        try {
+            const res = await fetch(`/sales/download_estimate_excel?id=<?= $estimate['id'] ?>`);
 
-        setTimeout(() => {
-            stop_loading();
-        }, 1000);
-    }
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "견적서.xlsx"; // 원하는 파일명
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            stop_loading(); // 다운로드 완료 후 실행됨
+        }
+    };
 </script>

@@ -583,11 +583,18 @@ class sales extends MY_Controller
         // ✅ 기존 행 아래로 밀기
         $sheet->insertNewRowBefore($insertAt, $count);
 
+        $합계금액_INDEX = 13;
+        $합계_INDEX = $합계금액_INDEX + 2; // * 15부터 시작
+        $VAT_TYPE = unserialize(VAT_TYPE);
+
+        $number_to_korean = number_to_korean($estimate_row['amount'] ?? 0);
+        $number_amount = number_format($estimate_row['amount'] ?? 0);
+        $vat_type = $VAT_TYPE[$estimate['vat_type']] ?? '';
+        $sheet->setCellValue("C{$합계금액_INDEX}", "합  계  금  액 : {$number_to_korean} 원정 (₩ {$number_amount}) {$vat_type}");
 
         foreach ($items as $index => $item) {
             // ✅ 새로 밀린 만큼 offset
             $row_num = $insertAt + $index;
-
             $tmp_index = $count - $index;
 
             $sheet->setCellValue("C{$row_num}", $tmp_index); // 순번
@@ -610,7 +617,18 @@ class sales extends MY_Controller
 
             $sheet->setCellValue("P{$row_num}", $item[6]); // 비고
             $sheet->mergeCells("P{$row_num}:U{$row_num}"); // P 병합
+
+            $합계_INDEX++;
         }
+
+        // 1️⃣ 셀 스타일 적용
+        $sheet->setCellValue("J{$합계_INDEX}", number_format($estimate_row['supply_amount'] ?? 0));
+        $sheet->setCellValue("L{$합계_INDEX}", number_format($estimate_row['tax_amount']));
+
+        // * 단가 오른쪽 정렬
+        $sheet->getStyle("J{$합계_INDEX}:L{$합계_INDEX}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
 
         // * 순번 가운데 정렬
         $sheet->getStyle("D{$insertAt}:D{$lastAt}")->getAlignment()
@@ -653,9 +671,94 @@ class sales extends MY_Controller
             ->setVertical(Alignment::VERTICAL_CENTER);
 
         // 2️⃣ 셀 값 입력
-        $sheet->setCellValue('C5', 'No. : 20251024-S0021111111');
-        $sheet->setCellValue('C6', '주식회사 지아이베콤 귀하');
-        $sheet->setCellValue('C9', '수주일자 : 2025-10-24');
+        $sheet->setCellValue('C5', "No. : " . $estimate_row['no']);
+        $sheet->setCellValue('C6', $estimate_row['partner_name'] . ' 귀하');
+        $sheet->setCellValue(
+            'C9',
+            ($estimate_row['sub_type'] === 'G' ? '견적일자 : ' : '수주일자 : ')
+                . $estimate_row['estimate_date']
+        );
+
+        // * ---------------- 배경색 다시주기 ----------------
+
+        $sheet->getStyle('G6')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('H6')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('H8')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('H9')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('H11')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('H12')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('L8')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('L11')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('L12')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('C14')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('E14')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('F14')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('G14')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('H14')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('I14')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('J14')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('K14')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('L14')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        $sheet->getStyle('P14')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('D9D9D9');
+
+        // * ---------------- 배경색 다시주기 ----------------
+
 
         // 3️⃣ 한글 파일명 처리
         $filename = $title . '_' . date('Ymd_His') . '.xlsx';

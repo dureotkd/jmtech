@@ -145,9 +145,44 @@ class test extends MY_Controller
 
         $this->load->library('moneypin');
 
-        $response = $this->moneypin->searchCompany([]);
-        printr($response);
-        exit;
+        $company_all = $this->service_model->get_business_partner('all', [
+            "company_num IN ('312-09-86753','312-86-00310')"
+        ]);
+
+        $company_nums = [];
+
+        foreach ($company_all as $company) {
+            $company_nums[] = str_replace('-', '', $company['company_num']);
+        }
+
+        $response = $this->moneypin->searchCompany($company_nums);
+
+        foreach ($response as $res) {
+
+            $info = $res['info'];
+
+            $bizNo = $info['bizNo'];
+            $bizName = $info['bizName'];
+            $ceoName = $info['ceoName'];
+            $address = $info['address'];
+            $bizStatus = $info['bizStatus'];
+            $taxType = $info['taxType'];
+            $simplifiedTaxTypeDate = $info['simplifiedTaxTypeDate'];
+            $closingDate = $info['closingDate'];
+
+            $this->service_model->insert_moneypin_biz_info(DEBUG, [
+                'biz_no' => $bizNo,
+                'biz_name' => $bizName,
+                'ceo_name' => $ceoName,
+                'address' => $address,
+                'biz_status' => $bizStatus,
+                'tax_type' => $taxType,
+                'simplified_tax_type_date' => $simplifiedTaxTypeDate,
+                'closing_date' => $closingDate,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
     }
 
     private function layout_config()

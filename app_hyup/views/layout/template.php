@@ -359,24 +359,32 @@
                         <div class="!space-y-2">
                             <div class="flex items-center">
                                 <div class="w-42 text-sm font-medium text-gray-500">성명</div>
-                                <div class="text-sm text-gray-800">유성균</div>
+                                <div class="text-sm text-gray-800">
+                                    <?= $login_user['name'] ?? '-' ?>
+                                </div>
                             </div>
 
                             <div class="flex items-center">
                                 <div class="w-42 text-sm font-medium text-gray-500">휴대전화번호</div>
-                                <div class="text-sm text-gray-800">010-4571-9170</div>
+                                <div class="text-sm text-gray-800">
+                                    <?= $login_user['phone'] ?? '-' ?>
+                                </div>
                             </div>
 
                             <div class="flex items-center">
                                 <div class="w-42 text-sm font-medium text-gray-500">이메일</div>
-                                <div class="text-sm text-gray-800">jjs7158@naver.com</div>
+                                <div class="text-sm text-gray-800">
+                                    <?= !empty($login_user['email']) ? $login_user['email'] : '-' ?>
+                                </div>
                             </div>
 
                             <hr class="my-3 border-gray-200" />
 
                             <div class="flex items-center">
                                 <div class="w-42 text-sm font-medium text-gray-500">아이디</div>
-                                <div class="text-sm text-gray-800">jmlaser@empas.com</div>
+                                <div class="text-sm text-gray-800">
+                                    <?= !empty($login_user['user_id']) ? $login_user['user_id'] : '-' ?>
+                                </div>
                             </div>
 
                             <div class="flex items-center">
@@ -391,8 +399,17 @@
                             </div>
 
                             <div class="flex items-center">
+                                <div class="w-42 text-sm font-medium text-gray-500">부서</div>
+                                <div class="text-sm text-gray-800">
+                                    <?= !empty($login_user['team']) ? $login_user['team'] : '-' ?>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center">
                                 <div class="w-42 text-sm font-medium text-gray-500">유형</div>
-                                <div class="text-sm text-gray-800">사용자</div>
+                                <div class="text-sm text-gray-800">
+                                    <?= $login_user['auth_type'] ?? '-' ?>
+                                </div>
                             </div>
                         </div>
 

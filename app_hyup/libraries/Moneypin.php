@@ -10,8 +10,8 @@ class Moneypin
 
     public function __construct()
     {
-        $this->CLIENT_ID = '1F196223-E6F2-4F4E-B59F-E60D246A0F11'; //연동인증키(실서비스용)
-        $this->CLIENT_SECRET = '3128630100'; //사업자번호
+        $this->CLIENT_ID = '5c7b52aa-b114-4bdb-9bbf-a0264f044b2f';
+        $this->CLIENT_SECRET = 'soPhM7vQSQFksisZ6hU+B6ZeKlEbPLcM/8vd7s+HHN4=';
     }
 
     private function getToken()
@@ -43,7 +43,10 @@ class Moneypin
         $response = curl_exec($curl);
 
         curl_close($curl);
-        echo $response;
+
+        $json = json_decode($response, true);
+
+        return $json['token'];
     }
 
     public function searchCompany($company_nums)
@@ -77,6 +80,9 @@ class Moneypin
         $response = curl_exec($curl);
 
         curl_close($curl);
-        echo $response;
+
+        $json = json_decode($response, true);
+
+        return $json;
     }
 }

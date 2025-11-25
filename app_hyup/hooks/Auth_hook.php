@@ -6,9 +6,10 @@ function redirect_handler()
     /**
      * 
      */
-
     @session_start();
-    $uid = isset($_SESSION['uid']) ? $_SESSION['uid'] : 1;
+
+    // * Check User Login
+    $uid = isset($_SESSION['uid']) ? $_SESSION['uid'] : 0;
 
     if (empty($uid)) {
 

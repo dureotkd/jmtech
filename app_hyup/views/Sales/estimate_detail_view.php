@@ -194,6 +194,44 @@ $datetime = date('YmdHis');
         <div class="flex items-center justify-between w-full print-hide">
             <!-- 왼쪽 버튼 그룹 -->
             <div class="flex space-x-2">
+                <button type="button" class="flex items-center border border-gray-400 px-3 py-1 gap-1 text-xs">
+
+                    <?
+                    if (!empty($estimate['su_estimate_id']) && $estimate['sub_type'] == 'G') {
+                    ?>
+                        <a href="/sales/estimate_detail?id=<?= $estimate['id'] ?>" class="!text-blue-600 hover:underline">
+                            <?= $estimate['gu_status'] ?>
+                        </a>
+                        <span class="!mx-0.5 !text-blue-600">
+                            >
+                        </span>
+                        <a href="/sales/estimate_detail?id=<?= $estimate['su_estimate_id'] ?>" class="!text-blue-600 hover:underline">
+                            <?= $estimate['su_status'] ?>
+                        </a>
+                    <?
+                    } else if (!empty($estimate['g_estimate_id']) && $estimate['sub_type'] == 'S') {
+                    ?>
+                        <a href="/sales/estimate_detail?id=<?= $estimate['g_estimate_id'] ?>" class="!text-blue-600 hover:underline">
+                            <?= $estimate['gu_status'] ?>
+                        </a>
+                        <span class="!mx-0.5 !text-blue-600">
+                            >
+                        </span>
+                        <a href="/sales/estimate_detail?id=<?= $estimate['id'] ?>" class="!text-blue-600 hover:underline">
+                            <?= $estimate['su_status'] ?>
+                        </a>
+                    <?
+                    } else {
+                    ?>
+                        <span>
+                            <?= $estimate['gu_status'] ?>
+                        </span>
+                    <?
+                    }
+                    ?>
+
+                </button>
+
                 <button onclick="window.location.href = '<?= REACT_PATH ?>?id=<?= $estimate['id'] ?>&sub_type=<?= $estimate['sub_type'] ?>'" class="flex items-center border border-gray-400 px-3 py-1 gap-1  text-xs hover:bg-gray-100">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-pen-line-icon lucide-file-pen-line">
                         <path d="m18.226 5.226-2.52-2.52A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-.351" />

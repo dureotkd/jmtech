@@ -232,6 +232,8 @@ class sales extends MY_Controller
             return;
         }
 
+        $title = $estimate['sub_type'] == 'G' ? '견적서' : ($estimate['sub_type'] == 'S' ? '수주서' : '발주서');
+
         $files = $this->service_model->get_file('all', [
             "ref_table = 'estimate'",
             "ref_id = {$id}"
@@ -245,7 +247,8 @@ class sales extends MY_Controller
             'estimate'      => $estimate,
             'sheets'        => $sheets,
             'files'         => $files,
-            'layout_data'   => $this->layout_blank_config('estimate', '견적서'),
+            'title'         => $title,
+            'layout_data'   => $this->layout_blank_config('estimate', $title),
         ];
 
         $this->layout->view('/Sales/estimate_detail_view', $view_data);

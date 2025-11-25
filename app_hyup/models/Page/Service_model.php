@@ -74,6 +74,8 @@ class service_model extends MY_Model
             "* , 
             (SELECT company_name FROM jmtech.business_partner bp WHERE bp.id = a.partner_id) AS partner_name ,
             (SELECT id FROM jmtech.estimate WHERE no = a.no AND sub_type = 'S') AS su_estimate_id ,
+            (SELECT status FROM jmtech.estimate WHERE no = a.no AND sub_type = 'G') AS gu_status ,
+            (SELECT status2 FROM jmtech.estimate WHERE no = a.no AND sub_type = 'S') AS su_status ,
             (SELECT id FROM jmtech.estimate WHERE no = a.no AND sub_type = 'G') AS g_estimate_id";
         $sql = sprintf("SELECT {$select} FROM jmtech.estimate a WHERE %s ORDER BY a.created_at DESC", join(" AND ", $where));
         return $this->excute($sql, $type, 'main');
@@ -226,6 +228,41 @@ class service_model extends MY_Model
     public function delete_community_event($debug = false, $where = [])
     {
         $sql = $this->getDeleteQuery('jmtech.community_event', $where);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+
+    // ===== moneypin_biz_info =====
+    public function get_moneypin_biz_info($type, $where = [1])
+    {
+        $select = $type == 'one' ? "COUNT(*)" : "*";
+        $sql = sprintf("SELECT {$select} FROM jmtech.moneypin_biz_info a WHERE %s", join(" AND ", $where));
+        return $this->excute($sql, $type, 'main');
+    }
+    public function insert_moneypin_biz_info($debug = false, $data = [])
+    {
+        $sql = $this->getInsertQuery('jmtech.moneypin_biz_info', $data);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+    public function update_moneypin_biz_info($debug = false, $data = [], $where = [])
+    {
+        $sql = $this->getUpdateQuery('jmtech.moneypin_biz_info', $data, $where);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+    public function delete_moneypin_biz_info($debug = false, $where = [])
+    {
+        $sql = $this->getDeleteQuery('jmtech.moneypin_biz_info', $where);
         if ($debug) {
             echo $sql . "<br/>";
             return 1;

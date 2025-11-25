@@ -29,7 +29,7 @@ class iframe extends MY_Controller
             'layout_data'           => $this->layout_config(),
         ];
 
-        $this->layout->view('/iframe/search_calendar_view', $view_data);
+        $this->layout->view('/Iframe/search_calendar_view', $view_data);
     }
 
     private function layout_config()

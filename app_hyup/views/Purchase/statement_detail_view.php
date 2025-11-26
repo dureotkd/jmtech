@@ -1191,7 +1191,7 @@ $datetime = date('YmdHis');
 
 </div>
 
-<div class="!space-y-1 !px-2 !text-xs">
+<div class="!space-y-1 !px-2 !text-xs print-hide">
 
     <?
     if (!empty($event_logs)) {
@@ -1230,8 +1230,24 @@ $datetime = date('YmdHis');
         window.location.href = `<?= REACT_PATH ?>?tab=copy&id=<?= $statement['id'] ?>&sub_type=<?= $statement['sub_type'] ?>`;
     }
 
+    const eventId = '<?= $statement['id'] ?>';
+    const eventTable = 'statement';
+
     // * 공급자 인쇄 */
     const handle_print2 = (e) => {
+
+        $.ajax({
+            type: "POST",
+            url: "/api/log_event",
+            async: true,
+            data: {
+                event_type: '인쇄',
+                event_id: eventId,
+                event_table: eventTable
+            },
+            dataType: "json",
+        });
+
         $("#printArea1").hide();
         $("#printArea2").show();
         window.print()
@@ -1239,6 +1255,19 @@ $datetime = date('YmdHis');
 
     // * 공급받는자 인쇄 */
     const handle_print1 = (e) => {
+
+        $.ajax({
+            type: "POST",
+            url: "/api/log_event",
+            async: true,
+            data: {
+                event_type: '인쇄',
+                event_id: eventId,
+                event_table: eventTable
+            },
+            dataType: "json",
+        });
+
         $("#printArea2").hide();
         $("#printArea1").show();
         window.print()
@@ -1248,6 +1277,19 @@ $datetime = date('YmdHis');
 
     // * 공급받는자 PDF */
     const handle_pdf1 = (e) => {
+
+        $.ajax({
+            type: "POST",
+            url: "/api/log_event",
+            async: true,
+            data: {
+                event_type: 'PDF출력',
+                event_id: eventId,
+                event_table: eventTable
+            },
+            dataType: "json",
+        });
+
         start_loading();
 
         window.location.href = '<?= REACT_PATH ?>?id=<?= $statement['id'] ?>&main_type=pdf&sub_type=MI'
@@ -1259,6 +1301,19 @@ $datetime = date('YmdHis');
 
     // * 공급자 PDF */
     const handle_pdf2 = (e) => {
+
+        $.ajax({
+            type: "POST",
+            url: "/api/log_event",
+            async: true,
+            data: {
+                event_type: 'PDF출력',
+                event_id: eventId,
+                event_table: eventTable
+            },
+            dataType: "json",
+        });
+
         start_loading();
 
         window.location.href = '<?= REACT_PATH ?>?id=<?= $statement['id'] ?>&main_type=pdf&sub_type=MC'
@@ -1269,6 +1324,19 @@ $datetime = date('YmdHis');
     }
 
     const handle_excel = (e) => {
+
+        $.ajax({
+            type: "POST",
+            url: "/api/log_event",
+            async: true,
+            data: {
+                event_type: '엑셀출력',
+                event_id: eventId,
+                event_table: eventTable
+            },
+            dataType: "json",
+        });
+
         start_loading();
 
         window.location.href = '/sales/download_statement_excel?id=<?= $statement['id'] ?>';

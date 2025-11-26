@@ -557,7 +557,7 @@ $datetime = date('YmdHis');
 
 </div>
 
-<div class="!space-y-1 !px-2 !py-6 !text-xs">
+<div class="!space-y-1 !px-2 !py-6 !text-xs print-hide">
 
     <?
     if (!empty($event_logs)) {

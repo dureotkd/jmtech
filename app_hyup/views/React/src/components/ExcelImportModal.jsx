@@ -150,7 +150,14 @@ export default function ExcelImportModal({
           {/* 본문 */}
           <div className="p-5 space-y-4">
             {/* 서식 다운로드 */}
-            <div className="flex justify-end text-sm text-gray-700 items-center">
+            <div
+              className="flex justify-end text-sm text-gray-700 items-center"
+              onClick={async () => {
+                setLoading(true);
+                await estimateApi.견적서일괄등록품목양식다운로드();
+                setLoading(false);
+              }}
+            >
               <a href="#" className="flex items-center text-xs hover:underline">
                 견적서 품목양식
                 <svg

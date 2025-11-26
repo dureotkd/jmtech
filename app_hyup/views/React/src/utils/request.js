@@ -28,6 +28,16 @@ const request = {
     }
   },
 
+  getBlob: async (url, { params } = {}) => {
+    try {
+      const searchParams = params ? new URLSearchParams(params).toString() : "";
+      const fullUrl = searchParams ? `${url}?${searchParams}` : url;
+      return await base.get(fullUrl).blob();
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
+
   post: async (url, body) => {
     try {
       const res = await base.post(url, { body: body, timeout: false }).json();

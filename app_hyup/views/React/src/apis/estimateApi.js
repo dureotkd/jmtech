@@ -29,6 +29,28 @@ const estimateApi = {
 
     return res;
   },
+
+  견적서일괄등록품목양식다운로드: async () => {
+    const res = await request.getBlob("download_bulk_estimate_item_template", {
+      responseType: "blob",
+    });
+
+    console.log(res);
+
+    // Blob 생성
+    const blob = new Blob([res], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    // 다운로드 처리
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "견적서_일괄등록_양식.xls";
+    a.click();
+
+    return res;
+  },
 };
 
 export default estimateApi;

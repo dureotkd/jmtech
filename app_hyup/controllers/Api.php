@@ -802,6 +802,10 @@ class api extends MY_Controller
                 }
             }
 
+            if (empty($rows)) {
+                throw new Exception('엑셀 파일에 데이터가 없습니다.');
+            }
+
             /**
              *                     ['철판', 'SS400', 10, 15000, '=D1*E1', "='내역서'!D1", ''],
                     ['볼트', 'M10', 20, 500, '=D2*E2', '=F2*0.1', ''],
@@ -834,6 +838,21 @@ class api extends MY_Controller
         }
 
         echo json_encode($res_array);
+    }
+
+    # 견적서 품목양식 다운로드
+    public function download_bulk_estimate_item_template()
+    {
+        $this->load->helper('download');
+
+        $file_path = FCPATH . "assets/app_hyup/excel/estimate_batch_excel.xls";
+
+        if (!file_exists($file_path)) {
+            echo "Not Found" . $file_path;
+            return;
+        }
+
+        force_download($file_path, NULL);
     }
 
     # 명세서 조회 (AJAX)

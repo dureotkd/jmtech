@@ -314,7 +314,7 @@ API 호출 중 서버오류가 발생한 경우입니다. 바로빌로 문의바
           $TaxType = 1;
           $DateType = 1;
           $CountPerPage = 100;
-          $CurrentPage = 2; // 1~3페이지 까지있음
+          $CurrentPage = 1; // 1~3페이지 까지있음
 
           $params = [
                'CERTKEY' => $this->CERTKEY,

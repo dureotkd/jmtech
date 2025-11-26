@@ -17,24 +17,25 @@
             <img class="object-cover h-14" src="/assets/app_hyup/images/logo.png" alt="로고">
         </div>
 
-        <div class="!w-full flex radio-inputs">
-            <label class="radio">
-                <input onchange="handle_login_tab(event);" id="gi" type="radio" name="radio" value="내부 IP" checked>
-                <span class="name">내부 IP</span>
-            </label>
-            <label class="radio">
-                <input onchange="handle_login_tab(event);" id="bi" type="radio" value="인증번호" name="radio">
-                <span class="name">인증번호</span>
-            </label>
-        </div>
-
         <!-- 입력 필드 -->
         <form onsubmit="handle_login_form(event);" class="user-box space-y-4">
+
+            <div class="!w-full flex radio-inputs !my-6">
+                <label class="radio">
+                    <input onchange="handle_login_tab(event);" id="gi" type="radio" name="tab" value="IP" checked>
+                    <span class="name">내부 IP</span>
+                </label>
+                <label class="radio">
+                    <input onchange="handle_login_tab(event);" id="bi" type="radio" value="authNumber" name="tab">
+                    <span class="name">인증번호</span>
+                </label>
+            </div>
+
             <input
                 type="text"
                 name="user_id"
                 placeholder="아이디"
-                class="w-full border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:outline-none" />
+                class="w-full border hw border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:outline-none" />
 
             <div class="relative !mb-4">
                 <input
@@ -308,13 +309,12 @@
         const target = $(event.target);
         const value = target.val();
 
-        if (value === '기존 회원') {
-
-            $(".user-box").show();
-            $(".non-user-box").hide();
-        } else if (value === '비회원 조회') {
-            $(".user-box").hide();
-            $(".non-user-box").show();
+        if (value === 'IP') {
+            $(".hw").attr("name", "user_id");
+            $(".hw").attr("placeholder", "아이디");
+        } else if (value === 'authNumber') {
+            $(".hw").attr("name", "auth_number");
+            $(".hw").attr("placeholder", "인증번호");
         }
 
     }

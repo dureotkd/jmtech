@@ -1,3 +1,4 @@
 {
-  "svn.ignoreMissingSvnWarning": true
+  "svn.ignoreMissingSvnWarning": true,
+  "php.version": "7.3"
 }

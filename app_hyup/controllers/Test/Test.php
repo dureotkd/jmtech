@@ -12,7 +12,8 @@ class test extends MY_Controller
 
         $this->load->library([
             'layout',
-            'barobill'
+            'barobill',
+            'moneypin'
         ]);
 
         $this->load->model('/Page/service_model');
@@ -128,6 +129,144 @@ class test extends MY_Controller
             }
         } catch (Exception $e) {
             echo '❌ 오류: ' . $e->getMessage();
+        }
+    }
+
+    // * https://jmtech.test/test/test/upload_excel3 (EXCEL 업로드 테스트)
+    public function upload_excel3()
+    {
+
+        // * Phpspreadsheet 라이브러리 로드
+        $this->load->library('phpspreadsheet');
+
+        // * C드라이브 파일 경로
+        $filePath = 'C:/ttttttttt.xls';  // 또는 Windows 서버라면 '\\' 대신 '/' 사용
+
+        try {
+            $spreadsheet = $this->phpspreadsheet->loadExcelFile($filePath);
+            $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+            $company_nums = [];
+            /**
+             * 
+    [26] => Array
+        (
+            [A] => 0000000023
+            [B] => sts 304 양P/S(레) 판 1.5t*1219*2438
+            [C] => 
+            [D] => 156,150
+            [E] => 0
+            [F] => 
+        )
+
+             */
+            foreach ($sheetData as $key => $row) {
+                if ($key < 3) {
+                    // 헤더 행 건너뛰기
+                    continue;
+                }
+
+                $사업자번호 = $row['B'];
+
+                if (empty($사업자번호)) {
+                    continue;
+                }
+
+                $사업자번호 = str_replace('-', '', $사업자번호);
+
+                if (strlen($사업자번호) != 10) {
+                    continue;
+                }
+
+                $company_nums[] = $사업자번호;
+            }
+
+            $response = $this->moneypin->searchCompany(['3128624947']);
+
+            printr($response);
+            exit;
+
+
+            // * company_nums 10개씩 배열로 나누기
+
+            /**
+             *             [0] => 3128209915
+            [1] => 3128624947
+            [2] => 1278651448
+            [3] => 1238161895
+            [4] => 3128137073
+            [5] => 3128158684
+            [6] => 1198108663
+            [7] => 5048124750
+            [8] => 3128139751
+            [9] => 1238625837
+             */
+            $company_nums = array_chunk($company_nums, 10);
+
+            foreach ($company_nums as $index => $company_num_chunk) {
+
+                echo '==== ' . ($index) . '번째 호출 ==== <br>';
+
+                $response = $this->moneypin->searchCompany($company_num_chunk);
+
+                $test_tmp = 0;
+
+                foreach ($response as $res) {
+
+                    $test_tmp++;
+
+                    echo '----' . $test_tmp . '----<br>';
+
+                    $info = $res['info'];
+
+                    $bizNo = $info['bizNo'];
+                    $bizName = $info['bizName'];
+                    $ceoName = $info['ceoName'];
+                    $address = $info['address'];
+                    $bizStatus = $info['bizStatus'];
+                    $taxType = $info['taxType'];
+                    $simplifiedTaxTypeDate = $info['simplifiedTaxTypeDate'];
+                    $closingDate = $info['closingDate'];
+
+                    $this->service_model->insert_moneypin_biz_info(DEBUG, [
+                        'biz_no' => $bizNo,
+                        'biz_name' => $bizName,
+                        'ceo_name' => $ceoName,
+                        'address' => $address,
+                        'biz_status' => $bizStatus,
+                        'tax_type' => $taxType,
+                        'simplified_tax_type_date' => $simplifiedTaxTypeDate,
+                        'closing_date' => $closingDate,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                }
+
+                sleep(1); // * 1초 대기
+
+            }
+        } catch (Exception $e) {
+            echo '❌ 오류: ' . $e->getMessage();
+        }
+    }
+
+    public function mig()
+    {
+
+        $moneypin_biz_info_all = $this->service_model->get_moneypin_biz_info('all', [
+            1
+        ]);
+
+        foreach ($moneypin_biz_info_all as $biz_info) {
+
+            $biz_no = $biz_info['biz_no'];
+
+            $this->service_model->update_business_partner(DEBUG, [
+                'address' => $biz_info['address'],
+                'biz_status' => $biz_info['biz_status'],
+                'closing_date' => $biz_info['closing_date'],
+            ], [
+                "REPLACE(company_num, '-', '') = '{$biz_no}'"
+            ]);
         }
     }
 

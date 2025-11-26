@@ -22,7 +22,7 @@ class service_model extends MY_Model
     }
     public function update_business_partner($debug = false, $data = [], $where = [])
     {
-        $sql = $this->getUpdateQuery('jmtech.order_detail', $data, $where);
+        $sql = $this->getUpdateQuery('jmtech.business_partner', $data, $where);
         if ($debug) {
             echo $sql . "<br/>";
             return 1;

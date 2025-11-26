@@ -33,7 +33,7 @@ function TranscationStatement() {
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
     parent_id: "",
-    estimate_date: "",
+    estimate_date: new Date().toISOString().slice(0, 10), // default 오늘날짜
     phone_number: "",
     fax_number: "",
     title: "",

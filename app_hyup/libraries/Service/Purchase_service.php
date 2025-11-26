@@ -10,7 +10,8 @@ class Purchase_service
 
         $this->obj->load->library([
             "ajax",
-            "file"
+            "file",
+            "/Service/event_log_service",
         ]);
 
         $this->obj->load->model("/Page/service_model");
@@ -56,12 +57,12 @@ class Purchase_service
         if (empty($estimate_date)) {
             throw new Exception("명세표일자를 입력해주세요.");
         }
-        if (empty($phone_number)) {
-            throw new Exception("전화번호를 입력해주세요.");
-        }
-        if (empty($title)) {
-            throw new Exception("제목을 입력해주세요.");
-        }
+        // if (empty($phone_number)) {
+        //     throw new Exception("전화번호를 입력해주세요.");
+        // }
+        // if (empty($title)) {
+        //     throw new Exception("제목을 입력해주세요.");
+        // }
 
         $res = $this->obj->service_model->insert_transcation_statement(DEBUG, [
             'type'          => $type,
@@ -87,16 +88,42 @@ class Purchase_service
             'updated_at'    => date('Y-m-d H:i:s'),
         ]);
 
+        if (empty($res)) {
+            throw new Exception("명세표 저장 중 오류가 발생했습니다.");
+        }
+
+        // * MI:매입,MC:매출
+        if ($sub_type === 'MI') {
+        } else if ($sub_type === 'MC') {
+
+            $this->obj->event_log_service->매출거래명세표등록($res);
+        }
+
         return $res;
     }
 
 
     public function update($update_data, $id)
     {
+        $statement_row = $this->obj->service_model->get_transcation_statement('row', [
+            "id = {$id}"
+        ]);
+
+        if (empty($statement_row)) {
+            show_404();
+            return;
+        }
 
         $res = $this->obj->service_model->update_transcation_statement(DEBUG, $update_data, [
             "id = '{$id}'"
         ]);
+
+        // * MI:매입,MC:매출
+        if ($statement_row['sub_type'] === 'MI') {
+        } else if ($statement_row['sub_type'] === 'MC') {
+
+            $this->obj->event_log_service->매출거래명세표수정($id);
+        }
 
         return $res;
     }
@@ -119,14 +146,12 @@ class Purchase_service
             "id = '{$id}'"
         ]);
 
-        // if ($statement_row['sub_type'] === 'G') {
+        // * MI:매입,MC:매출
+        if ($sub_type === 'MI') {
+        } else if ($sub_type === 'MC') {
 
-        //     // * 관련된 수주서도 함께 삭제
-        //     $this->obj->service_model->delete_transcation_statement(DEBUG, [
-        //         "sub_type = 'S'",   // 수주서
-        //         "no = '{$statement_no}'" // 견적서 번호 동일
-        //     ]);
-        // }
+            $this->obj->event_log_service->매출거래명세표삭제($id);
+        }
 
         return $res;
     }

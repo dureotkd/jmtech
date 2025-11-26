@@ -242,12 +242,18 @@ class sales extends MY_Controller
         $sheets_json = json_decode($estimate['sheets'], true);
         $sheets = $sheets_json[0]['data'] ?? [];
 
+        $event_logs = $this->service_model->get_admin_event_log('all', [
+            "target_table = 'estimate'",
+            "target_id = {$id}"
+        ]);
+
         $view_data =  [
             'id'            => $id,
             'estimate'      => $estimate,
             'sheets'        => $sheets,
             'files'         => $files,
             'title'         => $title,
+            'event_logs'    => $event_logs,
             'layout_data'   => $this->layout_blank_config('estimate', $title),
         ];
 

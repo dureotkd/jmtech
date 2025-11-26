@@ -1188,7 +1188,36 @@ $datetime = date('YmdHis');
         </div>
     </div>
 
+
 </div>
+
+<div class="!space-y-1 !px-2 !text-xs">
+
+    <?
+    if (!empty($event_logs)) {
+        foreach ($event_logs as $log) {
+    ?>
+            <div class="flex items-center justify-between !border !border-gray-300 !bg-gray-50 !px-3 !py-2 text-gray-700">
+                <div class="gap-6 flex items-center">
+                    <span class="text-gray-500">
+                        <?= $log['created_at'] ?>
+                    </span>
+                    <span class="font-medium">
+                        <?= $log['event_action'] ?>
+                    </span>
+                </div>
+                <span class="text-gray-600">
+                    <?= $log['admin_name'] ?>
+                </span>
+            </div>
+    <?
+        }
+    }
+    ?>
+</div>
+
+
+
 
 <script>
     const handle_delete = (e) => {

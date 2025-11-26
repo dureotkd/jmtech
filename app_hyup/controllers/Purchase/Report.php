@@ -120,6 +120,11 @@ class report extends MY_Controller
         $sheets_json = json_decode($statement['sheets'], true);
         $sheets = $sheets_json[0]['data'] ?? [];
 
+        $event_logs = $this->service_model->get_admin_event_log('all', [
+            "target_table = 'statement'",
+            "target_id = {$id}"
+        ]);
+
         $view_data =  [
             'id'            => $id,
             'statement'     => $statement,
@@ -130,7 +135,7 @@ class report extends MY_Controller
             'text_theme'    => $text_theme,
             'reverse_table_theme' => $reverse_table_theme,
             'reverse_text_theme'  => $reverse_text_theme,
-
+            'event_logs'    => $event_logs,
             'layout_data'   => $this->layout_blank_config('statement', '거래명세서'),
         ];
 

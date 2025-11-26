@@ -224,7 +224,7 @@ $datetime = date('YmdHis');
                     } else {
                     ?>
                         <span>
-                            <?= $estimate['gu_status'] ?>
+                            <?= $estimate['gu_status'] ?? $estimate['su_status'] ?>
                         </span>
                     <?
                     }
@@ -557,6 +557,32 @@ $datetime = date('YmdHis');
 
 </div>
 
+<div class="!space-y-1 !px-2 !py-6 !text-xs">
+
+    <?
+    if (!empty($event_logs)) {
+        foreach ($event_logs as $log) {
+    ?>
+            <div class="flex items-center justify-between !border !border-gray-300 !bg-gray-50 !px-3 !py-2 text-gray-700">
+                <div class="gap-6 flex items-center">
+                    <span class="text-gray-500">
+                        <?= $log['created_at'] ?>
+                    </span>
+                    <span class="font-medium">
+                        <?= $log['event_action'] ?>
+                    </span>
+                </div>
+                <span class="text-gray-600">
+                    <?= $log['admin_name'] ?>
+                </span>
+            </div>
+    <?
+        }
+    }
+    ?>
+</div>
+
+
 <script>
     const handle_delete = (e) => {
         if (confirm('정말로 삭제하시겠습니까? \n삭제된 견적서는 복구할 수 없습니다.\n(관련된 수주서도 함께 삭제됩니다.)')) {
@@ -571,18 +597,62 @@ $datetime = date('YmdHis');
 
     }
 
+    const eventId = '<?= $estimate['id'] ?>';
+    const eventTable = 'estimate';
+
     const handle_print = (e) => {
+
+        $.ajax({
+            type: "POST",
+            url: "/api/log_event",
+            async: true,
+            data: {
+                event_type: '인쇄',
+                event_id: eventId,
+                event_table: eventTable
+            },
+            dataType: "json",
+        });
+
         window.print()
+
     }
 
-    const handle_pdf = (e) => {
+    const handle_pdf = async (e) => {
+
         start_loading();
 
-        window.location.href = '/sales/download_estimate_pdf?id=<?= $estimate['id'] ?>';
+        try {
+            const res = await fetch('/sales/download_estimate_pdf?id=<?= $estimate['id'] ?>');
 
-        setTimeout(() => {
-            stop_loading();
-        }, 1000);
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "견적서.pdf"; // 원하는 파일명
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            stop_loading(); // 다운로드 완료 후 실행됨
+
+            $.ajax({
+                type: "POST",
+                url: "/api/log_event",
+                async: true,
+                data: {
+                    event_type: 'PDF출력',
+                    event_id: eventId,
+                    event_table: eventTable
+                },
+                dataType: "json",
+            });
+        }
+
+
     }
 
     const handle_excel = async () => {
@@ -604,6 +674,18 @@ $datetime = date('YmdHis');
             console.error(err);
         } finally {
             stop_loading(); // 다운로드 완료 후 실행됨
+
+            $.ajax({
+                type: "POST",
+                url: "/api/log_event",
+                async: true,
+                data: {
+                    event_type: '엑셀출력',
+                    event_id: eventId,
+                    event_table: eventTable
+                },
+                dataType: "json",
+            });
         }
     };
 </script>

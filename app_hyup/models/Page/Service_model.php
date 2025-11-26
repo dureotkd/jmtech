@@ -199,6 +199,48 @@ class service_model extends MY_Model
         return $this->excute($sql, 'exec', 'main');
     }
 
+    // ===== admin_event_log =====
+    public function get_admin_event_log($type, $where = [1], $limit = '')
+    {
+        $select = $type == 'one' ? "COUNT(*)" : "*";
+        $res_limit = !empty($limit) ? "LIMIT {$limit}" : "";
+        $sql = sprintf("SELECT {$select} FROM jmtech.admin_event_log a WHERE %s ORDER BY a.created_at DESC {$res_limit}", join(" AND ", $where));
+        return $this->excute($sql, $type, 'main');
+    }
+    public function get_admin_event_log_custom($type, $where = [1], $order = "")
+    {
+        $select = $type == 'one' ? "COUNT(*)" : "*";
+        $sql = sprintf(
+            "SELECT {$select} FROM jmtech.admin_event_log a WHERE %s %s",
+            join(" AND ", $where),
+            $order
+        );
+        return $this->excute($sql, $type, 'main');
+    }
+    public function insert_admin_event_log($data = [])
+    {
+        $sql = $this->getInsertQuery('jmtech.admin_event_log', $data);
+        return $this->excute($sql, 'exec', 'main');
+    }
+    public function update_admin_event_log($debug = false, $data = [], $where = [])
+    {
+        $sql = $this->getUpdateQuery('jmtech.admin_event_log', $data, $where);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+    public function delete_admin_event_log($debug = false, $where = [])
+    {
+        $sql = $this->getDeleteQuery('jmtech.admin_event_log', $where);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+
 
     // ===== community_event =====
     public function get_community_event($type, $where = [1])

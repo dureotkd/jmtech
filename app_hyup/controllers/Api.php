@@ -14,6 +14,7 @@ class api extends MY_Controller
             "/Service/user_service",
             "/Service/estimate_service",
             "/Service/purchase_service",
+            "/Service/event_log_service",
         ]);
 
         $this->load->model('/Page/service_model');
@@ -907,6 +908,33 @@ class api extends MY_Controller
         }
 
         echo json_encode($res_array);
+    }
+
+    # Log Event
+    public function log_event()
+    {
+        $event_type = $this->input->post('event_type') ?? '';
+        $event_id = $this->input->post('event_id') ?? '';
+        $event_table = $this->input->post('event_table') ?? '';
+
+        switch ($event_type) {
+            case '인쇄':
+                $this->event_log_service->인쇄($event_id, $event_table);
+                break;
+
+            case 'PDF출력':
+                $this->event_log_service->PDF출력($event_id, $event_table);
+                break;
+
+            case '엑셀출력':
+                $this->event_log_service->엑셀출력($event_id, $event_table);
+                break;
+        }
+
+        echo json_encode([
+            'ok'    => true,
+            'msg'   => '1',
+        ]);
     }
 
     // * 

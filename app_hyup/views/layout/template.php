@@ -243,13 +243,14 @@
                         </div>
                     <?
                     }
+
                     ?>
                 </div>
             </nav>
 
         </nav>
 
-        <div class="flex flex-col flex-1 min-w-[1120px]">
+        <div class="flex flex-col flex-1 2xl:min-w-[1120px]">
             <header class="!flex items-center justify-between w-full bg-[#558ad9] text-white font-bold h-[62px]">
                 <div class="!flex !h-full">
                     <!-- 판매 -->

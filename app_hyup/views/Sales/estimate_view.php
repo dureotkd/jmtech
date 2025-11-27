@@ -125,13 +125,13 @@
         <thead>
             <tr class="bg-[#788496] text-white">
                 <th class=" w-10"><input type="checkbox" id="all_check" /></th>
-                <th class="">발행일</th>
-                <th class="">공급받는자상호</th>
-                <th class="">공급가액</th>
-                <th class="">세액</th>
-                <th class="">합계금액</th>
-                <th class="">상태</th>
-                <th class=" w-32"></th>
+                <th class="w-21">발행일</th>
+                <th class="w-[300px]">공급받는자상호</th>
+                <th class="w-[120px]">공급가액</th>
+                <th class="w-[120px]">세액</th>
+                <th class="w-[120px]">합계금액</th>
+                <th class="w-[120px]">상태</th>
+                <th class=""></th>
             </tr>
         </thead>
         <tbody id="item-tbody">
@@ -180,7 +180,7 @@
                                     <button
                                         onclick="event.stopPropagation(); open_popup_default(`/sales/estimate_detail?id=<?= $estimate['su_estimate_id'] ?>`, '수주서 상세', 1000, 820);"
                                         type="button"
-                                        class="sm-btn bg-primary !m-0 text-xs">
+                                        class="sm-btn bg-primary !m-0 text-xs min-w-[90px]">
                                         수주서 보기
                                     </button>
                                 <?
@@ -206,9 +206,9 @@
                     <td></td>
                     <td class=""></td>
                     <td class="!font-bold">총 <?= count($estimate_all) ?>건</td>
-                    <td class="!font-bold">공급가액 : <?= number_format($총공급가액) ?></td>
-                    <td class="!font-bold">세액 : <?= number_format($총세액) ?></td>
-                    <td class="!font-bold">합계금액 : <?= number_format($총합계금액) ?></td>
+                    <td class="!font-bold"><?= number_format($총공급가액) ?></td>
+                    <td class="!font-bold"><?= number_format($총세액) ?></td>
+                    <td class="!font-bold"><?= number_format($총합계금액) ?></td>
                     <td class="!font-bold">
                     </td>
                     <td class="cursor-pointer">

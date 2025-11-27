@@ -332,7 +332,7 @@ $datetime = date('YmdHis');
                         <?= $estimate['partner_name'] ?>
 
                     </h2>
-                    <span class="absolute right-4 top-[7px]">
+                    <span class="absolute right-0 top-[7px]">
                         귀하
                     </span>
                 </div>

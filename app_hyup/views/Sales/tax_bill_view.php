@@ -133,10 +133,10 @@
     <table class="w-full border border-gray-300">
         <thead>
             <tr class="bg-[#788496] text-white">
-                <th class="">매출일자</th>
-                <th class="">공급받는자상호</th>
+                <th class="w-[100px]">매출일자</th>
+                <th class="w-[200px]">공급받는자상호</th>
                 <th class="!text-center">증빙</th>
-                <th class="!text-right w-[250px]">매출금액</th>
+                <th class="!text-right w-[200px]">매출금액</th>
                 <th class="w-[150px]">용도</th>
                 <th class="">내용</th>
                 <th class="">비고</th>
@@ -158,7 +158,7 @@
                         <td data-label="증빙" class="text-center">
                             <button
                                 type="button"
-                                class="px-3 py-[1px] text-red-600 border border-red-300 bg-red-50 rounded-full !text-xs font-medium hover:bg-red-100 transition">
+                                class="px-3 py-[1px] !min-w-[50px] text-red-600 border border-red-300 bg-red-50 rounded-full !text-xs font-medium hover:bg-red-100 transition">
                                 세계
                             </button>
                         </td>

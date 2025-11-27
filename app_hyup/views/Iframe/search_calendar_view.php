@@ -126,10 +126,6 @@
         modal.close();
     }
 
-    function go_detail(estimate_id) {
-        open_popup_default(`/sales/estimate_detail?id=${estimate_id}`, '상세', 1000, 820);
-    }
-
     function handle_select(event) {
         event.stopPropagation(); // 트리거링 방지
     }

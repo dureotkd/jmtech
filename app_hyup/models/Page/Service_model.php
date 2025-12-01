@@ -45,6 +45,58 @@ class service_model extends MY_Model
         $sql = sprintf("SELECT {$select} FROM jmtech.company a WHERE %s ORDER BY a.created_at DESC", join(" AND ", $where));
         return $this->excute($sql, $type, 'main');
     }
+
+    public function get_sales_monthly_summary_stat($where = [1])
+    {
+        $current_month = date('m'); // 현재 월 (예: 12)
+        $prev_month = date('m', strtotime('-1 month')); // 11
+        $prev_prev_month = date('m', strtotime('-2 months')); // 10
+        $prev_3_month = date('m', strtotime('-3 months')); // 09
+        $prev_4_month = date('m', strtotime('-4 months')); // 08
+        $prev_5_month = date('m', strtotime('-5 months')); // 07
+
+        $sql = sprintf("
+        SELECT 
+            SUM(a.sales_{$current_month} + a.sales_{$prev_month} + a.sales_{$prev_prev_month}) as sum_recent_3months,
+            SUM(a.sales_{$current_month} + a.sales_{$prev_month} + a.sales_{$prev_prev_month} + a.sales_{$prev_3_month} + a.sales_{$prev_4_month} + a.sales_{$prev_5_month}) as sum_recent_6months,
+            SUM(a.sales_01 + a.sales_02 + a.sales_03 + a.sales_04 + a.sales_05 + a.sales_06 + a.sales_07 + a.sales_08 + a.sales_09 + a.sales_10 + a.sales_11 + a.sales_12) as sum_current_year
+        FROM jmtech.sales_monthly_summary a 
+        WHERE %s
+    ", join(" AND ", $where));
+
+        return $this->excute($sql, 'row', 'main');
+    }
+
+    public function get_sales_monthly_summary($type, $where = [1], $order = 'a.created_at DESC', $limit = '')
+    {
+        $current_month = date('m'); // 현재 월 (예: 12)
+        $prev_month = date('m', strtotime('-1 month')); // 전월 (예: 11)
+        $prev_prev_month = date('m', strtotime('-2 months')); // 전전월 (예: 10)
+
+        if ($type == 'one') {
+            $select = "COUNT(*)";
+        } else {
+            $select = "
+            a.*,
+            a.sales_{$current_month} as current_month_sales,
+            a.sales_{$prev_month} as prev_month_sales,
+            a.sales_{$prev_prev_month} as prev_prev_month_sales,
+            (a.sales_{$current_month} + a.sales_{$prev_month} + a.sales_{$prev_prev_month}) as recent_3months_sales
+        ";
+        }
+
+        $sql = sprintf("SELECT {$select} FROM jmtech.sales_monthly_summary a WHERE %s ORDER BY {$order} LIMIT {$limit}", join(" AND ", $where));
+        return $this->excute($sql, $type, 'main');
+    }
+    public function insert_sales_monthly_summary($debug = false, $data = [])
+    {
+        $sql = $this->getInsertQuery('jmtech.sales_monthly_summary', $data);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
     public function insert_company($debug = false, $data = [])
     {
         $sql = $this->getInsertQuery('jmtech.company', $data);
@@ -75,6 +127,16 @@ class service_model extends MY_Model
             (SELECT company_name FROM jmtech.business_partner bp WHERE bp.id = a.partner_id) AS partner_name ,
             (SELECT id FROM jmtech.estimate WHERE no = a.no AND sub_type = 'S') AS su_estimate_id ,
             (SELECT status FROM jmtech.estimate WHERE no = a.no AND sub_type = 'G') AS gu_status ,
+            (SELECT GROUP_CONCAT(id SEPARATOR ',')
+ FROM jmtech.file
+ WHERE ref_table = 'estimate'
+   AND ref_id = a.id
+) AS file_ids,
+         (SELECT GROUP_CONCAT(file_name SEPARATOR ',')
+ FROM jmtech.file
+ WHERE ref_table = 'estimate'
+   AND ref_id = a.id
+) AS file_names,
             (SELECT status2 FROM jmtech.estimate WHERE no = a.no AND sub_type = 'S') AS su_status ,
             (SELECT id FROM jmtech.estimate WHERE no = a.no AND sub_type = 'G') AS g_estimate_id";
         $sql = sprintf("SELECT {$select} FROM jmtech.estimate a WHERE %s ORDER BY a.created_at DESC", join(" AND ", $where));

@@ -22,42 +22,6 @@ class partner extends MY_Controller
     {
         $page = $_REQUEST['page'] ?? 1;
 
-        // * 거채처
-
-        /**
-         * 
-    [1] => Array
-        (
-            [id] => 2
-            [type] => business
-            [company_name] => (유)에이지케이특수강
-            [partner_name] => 
-            [company_num] => 113-81-40307
-            [private_num] => 
-            [ceo_name] => 
-            [phone_country_code] => +82
-            [phone_number] => 
-            [fax_number] => 
-            [company_tel_number] => 
-            [address] => 
-            [business_type] => 
-            [business_item] => 
-            [group_sales] => 0
-            [group_purchase] => 0
-            [group_etc] => 0
-            [is_active] => 1
-            [memo] => 
-            [account_info_json] => 
-            [appoint_user_name] => 
-            [appoint_user_phone] => 
-            [appoint_user_email] => 
-            [appoint_user_memo] => 
-            [created_at] => 2025-10-29 22:47:54
-            [updated_at] => 2025-10-29 22:47:54
-            [이월미수금] => 
-            [이월미지급금] => 
-        )
-         */
         $page                       = !empty($_REQUEST['page']) ? $_REQUEST['page'] : 1;
         $row_num                    = !empty($_REQUEST['row_num']) ? $_REQUEST['row_num'] : 15;
         $block_num                  = !empty($_REQUEST['block_num']) ? $_REQUEST['block_num'] : 10;

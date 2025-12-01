@@ -929,6 +929,81 @@ class api extends MY_Controller
         echo json_encode($res_array);
     }
 
+    # 견적서 조회 (AJAX)
+    public function get_estimate_detail()
+    {
+        $id = $this->input->get('id') ?? '';
+
+        $res_array = [
+            'ok'    => true,
+            'msg'   => '',
+            'data'  => [],
+        ];
+
+        try {
+
+            if (empty($id)) {
+                throw new Exception('견적서 ID가 누락되었습니다.');
+            }
+
+            if (strstr($id, ',')) {
+
+                $ids_array = explode(',', $id);
+                $estimate_all = $this->service_model->get_estimate('all', [
+                    "id IN ('" . implode("','", $ids_array) . "')"
+                ]);
+
+                if (empty($estimate_all)) {
+                    throw new Exception('존재하지 않는 견적서입니다.');
+                }
+
+                foreach ($estimate_all as &$estimate) {
+
+                    $sheets = !empty($estimate['sheets']) ? json_decode($estimate['sheets'], true) : [];
+                    $filtered_sheets = [];
+
+                    foreach ($sheets[0]['data'] as $index => $row) {
+                        if (!empty($row[0])) {
+                            $filtered_sheets[] = array_merge([$index + 1], $row);
+                        }
+                    }
+
+                    $estimate['sheets'] = $filtered_sheets;
+                }
+
+                $res_array['data'] = $estimate_all;
+            } else {
+
+                $estimate = $this->service_model->get_estimate('row', [
+                    "id = '{$id}'"
+                ]);
+
+                if (empty($estimate)) {
+                    throw new Exception('존재하지 않는 견적서입니다.');
+                }
+
+                $sheets = !empty($estimate['sheets']) ? json_decode($estimate['sheets'], true) : [];
+                $filtered_sheets = [];
+
+                foreach ($sheets[0]['data'] as $index => $row) {
+                    if (!empty($row[0])) {
+
+                        // * 순번넣어주기
+                        $filtered_sheets[] = array_merge([$index + 1], $row);
+                    }
+                }
+
+                $estimate['sheets'] = $filtered_sheets;
+                $res_array['data'] = $estimate;
+            }
+        } catch (Exception $e) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = $e->getMessage();
+        }
+
+        echo json_encode($res_array);
+    }
+
     # Log Event
     public function log_event()
     {
@@ -954,51 +1029,5 @@ class api extends MY_Controller
             'ok'    => true,
             'msg'   => '1',
         ]);
-    }
-
-    // * 
-    public function test()
-    {
-
-        $curl = curl_init();
-
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://api.moneypin.biz/bizno/v1/biz/info/base',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => '{
-            "bizNoList": [
-                "0000000000",
-                "6428700732"
-            ]
-            }',
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json',
-                'Accept: application/json',
-                'Authorization: Bearer <TOKEN>'
-            ),
-        ));
-
-        $response = curl_exec($curl);
-
-        curl_close($curl);
-        echo $response;
-
-        if ($error) {
-            echo "cURL Error: " . $error;
-            return;
-        }
-
-        // JSON 파싱
-        $result = json_decode($response, true);
-
-        echo "<pre>";
-        print_r($result);
-        echo "</pre>";
     }
 }

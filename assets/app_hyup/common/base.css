@@ -132,6 +132,11 @@ span {
   background-color: #2b609c;
 }
 
+.amount,
+.number {
+  font-family: "Inter", sans-serif;
+}
+
 /* ------------------- 프린트 설정 ------------------- */
 
 @media (min-width: 1024px) {

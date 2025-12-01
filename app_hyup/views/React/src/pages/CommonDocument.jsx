@@ -223,11 +223,11 @@ export default function CommonDocument() {
 
       alert("견적서가 성공적으로 저장되었습니다.");
 
-      if (res?.redirect_url) {
-        window.location.href = `${STATIC_URL}${res.redirect_url}`;
-      }
+      // if (res?.redirect_url) {
+      //   window.location.href = `${STATIC_URL}${res.redirect_url}`;
+      // }
 
-      window?.opener?.location.reload();
+      // window?.opener?.location.reload();
     } catch (err) {
       console.error("업로드 실패:", err);
     } finally {
@@ -721,7 +721,7 @@ export default function CommonDocument() {
               type="button"
               id="attachBtn"
               onClick={handleAttachClick}
-              className="!my-2 flex items-center gap-1 border border-gray-300 rounded h-7 !text-xs !px-1 bg-white hover:bg-gray-50 transition text-sm"
+              className="!my-2 min-w-[80px] flex items-center gap-1 border border-gray-300 text-center rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs"
             >
               <input
                 type="file"
@@ -747,7 +747,7 @@ export default function CommonDocument() {
               <span>첨부파일</span>
             </button>
 
-            <div className="flex gap-1">
+            <div className="flex !flex-wrap my-2 gap-1">
               {files.length > 0 && (
                 <>
                   {files.map((file, idx) => (

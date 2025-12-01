@@ -213,7 +213,7 @@ define('MENU', serialize([
                         'path'            => '/sales_profit/partner_report',
                         'auth_level'    => [11]
                     ],
-                    'sales_report'          => [
+                    /*       'sales_report'          => [
                         'name'            => '매출보고서',
                         'path'            => '/sales_profit/sales_report',
                         'auth_level'    => [11]
@@ -222,7 +222,7 @@ define('MENU', serialize([
                         'name'            => '손익보고서',
                         'path'            => '/sales_profit/profit_report',
                         'auth_level'    => [11]
-                    ],
+                    ], */
                 ]
             ],
         ],

@@ -236,8 +236,8 @@ No	변수명	타입	길이	필수	설명
                'UserID' => $this->UserID,
                'TaxType' => $TaxType,
                'DateType' => $DateType,
-               'StartDate' => $StartDate,
-               'EndDate' => $EndDate,
+               'StartDate' => str_replace('-', '', $StartDate),
+               'EndDate' => str_replace('-', '', $EndDate),
                'CountPerPage' => $CountPerPage,
                'CurrentPage' => $CurrentPage,
           ];
@@ -248,14 +248,6 @@ No	변수명	타입	길이	필수	설명
 
                return [];
           } else { // 호출 성공
-               echo $Result->CurrentPage;
-               echo '<br/>';
-               echo $Result->CountPerPage;
-               echo '<br/>';
-               echo $Result->MaxPageNum;
-               echo '<br/>';
-               echo $Result->MaxIndex;
-               echo '<br/>';
 
                if (!array_key_exists('SimpleTaxInvoiceEx', $Result->SimpleTaxInvoiceExList)) {
                     $SimpleTaxInvoices = [];
@@ -322,8 +314,8 @@ API 호출 중 서버오류가 발생한 경우입니다. 바로빌로 문의바
                'UserID' => $this->UserID,
                'TaxType' => $TaxType,
                'DateType' => $DateType,
-               'StartDate' => $StartDate,
-               'EndDate' => $EndDate,
+               'StartDate' => str_replace('-', '', $StartDate),
+               'EndDate' => str_replace('-', '', $EndDate),
                'CountPerPage' => $CountPerPage,
                'CurrentPage' => $CurrentPage,
           ];
@@ -334,14 +326,6 @@ API 호출 중 서버오류가 발생한 경우입니다. 바로빌로 문의바
 
                return [];
           } else { // 호출 성공
-               echo $Result->CurrentPage;
-               echo '<br/>';
-               echo $Result->CountPerPage;
-               echo '<br/>';
-               echo $Result->MaxPageNum;
-               echo '<br/>';
-               echo $Result->MaxIndex;
-               echo '<br/>';
 
                if (!array_key_exists('SimpleTaxInvoiceEx', $Result->SimpleTaxInvoiceExList)) {
                     $SimpleTaxInvoices = [];
@@ -363,7 +347,7 @@ API 호출 중 서버오류가 발생한 경우입니다. 바로빌로 문의바
           $TaxType = 1;
           $DateType = 1;
           $BaseDate = '';
-          $CountPerPage = 10;
+          $CountPerPage = 100;
           $CurrentPage = 1;
 
           $Result = $this->BaroService_TI->GetDailyTaxInvoiceSalesList([

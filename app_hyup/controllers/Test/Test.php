@@ -278,6 +278,69 @@ class test extends MY_Controller
         $this->barobill->매입세금계산서일별조회();
     }
 
+    // * 매출처현황 업로드 https://jmtech.test/test/test/sales_excel_upload
+    public function sales_excel_upload()
+    {
+
+        $file_path = 'C:\1.xls';
+
+        try {
+            // 엑셀 파일 읽기
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file_path);
+            $sheet = $spreadsheet->getActiveSheet();
+            $highestRow = $sheet->getHighestRow();
+
+            echo "총 {$highestRow}개 행 발견<br>";
+
+            // 2행부터 시작 (1행은 헤더)
+            for ($row = 2; $row <= $highestRow; $row++) {
+
+                if ($row === 2) {
+                    continue;
+                }
+
+                $partner_name = $sheet->getCell("A{$row}")->getValue();
+                $registration_number = $sheet->getCell("B{$row}")->getValue();
+                $unit = $sheet->getCell("C{$row}")->getValue();
+
+                // 빈 행 스킵
+                if (empty($partner_name)) {
+                    continue;
+                }
+
+                // 월별 매출 데이터 (D~O 컬럼 = 1~12월)
+                $sales_data = [];
+                $columns = ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
+
+                for ($i = 0; $i < 12; $i++) {
+                    $month = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
+                    $value = $sheet->getCell("{$columns[$i]}{$row}")->getValue();
+                    $sales_data["sales_{$month}"] = !empty($value) ? floatval(str_replace(',', '', $value)) : 0;
+                }
+
+                // 최근거래일자 (P 컬럼)
+                $last_transaction_date = $sheet->getCell("P{$row}")->getValue();
+
+                // DB에 저장
+                $insert_data = array_merge([
+                    'partner_name' => $partner_name,
+                    'company_num' => $registration_number,
+                    'sales' => $unit,
+                ], $sales_data, [
+                    'desc' => $last_transaction_date,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+
+                $this->service_model->insert_sales_monthly_summary(DEBUG, $insert_data);
+            }
+
+            echo "<br>✅ 업로드 완료!";
+        } catch (Exception $e) {
+            echo "❌ 오류: " . $e->getMessage();
+        }
+    }
+
     // * https://jmtech.test/test/test/moneypin_test
     public function moneypin_test()
     {

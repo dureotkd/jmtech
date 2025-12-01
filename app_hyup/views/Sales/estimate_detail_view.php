@@ -582,7 +582,6 @@ $datetime = date('YmdHis');
     ?>
 </div>
 
-
 <script>
     const handle_delete = (e) => {
         if (confirm('정말로 삭제하시겠습니까? \n삭제된 견적서는 복구할 수 없습니다.\n(관련된 수주서도 함께 삭제됩니다.)')) {
@@ -618,42 +617,29 @@ $datetime = date('YmdHis');
 
     }
 
-    const handle_pdf = async (e) => {
+    const handle_pdf = (e) => {
+
+        $.ajax({
+            type: "POST",
+            url: "/api/log_event",
+            async: true,
+            data: {
+                event_type: 'PDF출력',
+                event_id: eventId,
+                event_table: eventTable
+            },
+            dataType: "json",
+        });
 
         start_loading();
 
-        try {
-            const res = await fetch('/sales/download_estimate_pdf?id=<?= $estimate['id'] ?>');
+        window.location.href = '<?= REACT_PATH ?>?id=<?= $estimate['id'] ?>&main_type=pdf&sub_type=<?= $estimate['sub_type'] ?>'
 
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
-
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "견적서.pdf"; // 원하는 파일명
-            a.click();
-
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            stop_loading(); // 다운로드 완료 후 실행됨
-
-            $.ajax({
-                type: "POST",
-                url: "/api/log_event",
-                async: true,
-                data: {
-                    event_type: 'PDF출력',
-                    event_id: eventId,
-                    event_table: eventTable
-                },
-                dataType: "json",
-            });
-        }
-
-
+        setTimeout(() => {
+            stop_loading();
+        }, 1000);
     }
+
 
     const handle_excel = async () => {
         start_loading();

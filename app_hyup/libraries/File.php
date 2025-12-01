@@ -101,11 +101,15 @@ class file
         $allowedExtensions = $allowedExtensions ?? $this->allowedExtensions;
         $results = [];
 
+
         // 파일 배열 체크
         if (isset($_FILES[$fileInputName]) && is_array($_FILES[$fileInputName]['name'])) {
             $fileCount = count($_FILES[$fileInputName]['name']);
 
-            for ($i = 0; $i < $fileCount; $i++) {
+            // * 0번쨰가 아닌 $_FILES의 첫번쨰 키부터 시작
+            $startKey = array_key_first($_FILES[$fileInputName]['name']);
+
+            for ($i = $startKey; $i <= $fileCount; $i++) {
                 $file = [
                     'name' => $_FILES[$fileInputName]['name'][$i],
                     'type' => $_FILES[$fileInputName]['type'][$i],

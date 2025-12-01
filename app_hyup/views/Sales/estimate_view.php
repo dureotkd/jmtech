@@ -153,9 +153,44 @@
                             <?= date('Y-m-d', strtotime($estimate['created_at'])) ?>
                         </td>
                         <td class="">
-                            <span onclick="go_detail(<?= $estimate['id'] ?>);" class="underline cursor-pointer">
-                                <?= $estimate['partner_name'] ?>
-                            </span>
+                            <div class="flex items-center gap-2">
+
+                                <span onclick="go_detail(<?= $estimate['id'] ?>);" class="underline cursor-pointer">
+                                    <?= $estimate['partner_name'] ?>
+                                </span>
+
+                                <?
+                                if (!empty($estimate['file_names'])) {
+
+                                    $file_name_array = explode(',', $estimate['file_names']);
+                                    $file_id_array = explode(',', $estimate['file_ids']);
+                                ?>
+                                    <div class="relative">
+                                        <svg onclick="show_file_list(event);" class="lucide lucide-paperclip-icon lucide-paperclip cursor-pointer" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" />
+                                        </svg>
+
+                                        <div class="bg-white file-list !border-1 !divide-y-1 !divide-gray-200 z-10 absolute left-0 top-0 hidden">
+                                            <?
+                                            foreach ($file_name_array as $index => $file_name) {
+                                            ?>
+                                                <div onclick="file_download(<?= $file_id_array[$index] ?>)" class="flex items-center gap-3 !p-2 hover:bg-gray-100 cursor-pointer">
+                                                    <!-- <img src="/icons/pdf-icon.png" class="w-5 h-5" alt="pdf" /> -->
+                                                    <span class="text-sm text-gray-800 truncate">
+                                                        <?= $file_name ?>
+                                                    </span>
+                                                </div>
+                                            <?
+                                            }
+                                            ?>
+
+                                        </div>
+                                    </div>
+                                <?
+                                }
+                                ?>
+
+                            </div>
                         </td>
                         <td class=""><?= number_format($estimate['supply_amount']) ?></td>
                         <td class=""><?= number_format($estimate['tax_amount']) ?></td>
@@ -226,6 +261,13 @@
 <div id="calendar"></div>
 
 <script>
+    // 배경 클릭 시 file-list 숨기기
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.file-list').length && !$(e.target).closest('.lucide-paperclip').length) {
+            $(".file-list").addClass('hidden');
+        }
+    });
+
     const picker = new Litepicker({
         element: document.getElementById('start_date'),
         elementEnd: document.getElementById('end_date'),
@@ -240,6 +282,18 @@
             console.log('종료일:', end.format('YYYY-MM-DD'));
         },
     });
+
+    const file_download = (id) => {
+        window.location.href = `/sales/download_file?id=${id}`;
+    }
+
+    const show_file_list = (event) => {
+        event.stopPropagation();
+
+        const target = $(event.currentTarget);
+        $('.file-list').addClass('hidden');
+        target.next('.file-list').toggleClass('hidden');
+    }
 
     function open_calendar_modal(e) {
         e.stopPropagation();

@@ -9,6 +9,7 @@ const TranscationStatement = React.lazy(() =>
   import("./pages/TranscationStatement")
 );
 const PdfDocument = React.lazy(() => import("./pages/PdfDocument"));
+const PdfEstimate = React.lazy(() => import("./pages/PdfEstimate"));
 
 function App() {
   const queryString = new URLSearchParams(window.location.search);
@@ -16,13 +17,32 @@ function App() {
   const mainType = queryString.get("main_type") ?? "";
   const id = queryString.get("id") ?? "";
 
-  // PDF 모드
+  // * -------------------- PDF 모드 --------------------
+
   if (mainType === "pdf") {
-    return (
-      <React.Suspense fallback={<Loading />}>
-        <PdfDocument id={id} subType={subType} />
-      </React.Suspense>
-    );
+    switch (subType) {
+      case "MI":
+      case "MC":
+        return (
+          <React.Suspense fallback={<Loading />}>
+            <PdfDocument id={id} subType={subType} />
+          </React.Suspense>
+        );
+      case "G":
+      case "S":
+      case "B":
+        return (
+          <React.Suspense fallback={<Loading />}>
+            <PdfEstimate id={id} subType={subType} />
+          </React.Suspense>
+        );
+      default:
+        return (
+          <React.Suspense fallback={<Loading />}>
+            <div>잘못된 문서 유형입니다.</div>
+          </React.Suspense>
+        );
+    }
   }
 
   // 문서 매핑

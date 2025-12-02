@@ -109,6 +109,8 @@ class file
             // * 0번쨰가 아닌 $_FILES의 첫번쨰 키부터 시작
             $startKey = array_key_first($_FILES[$fileInputName]['name']);
 
+            echo "startKey : {$startKey}";
+
             for ($i = $startKey; $i <= $fileCount; $i++) {
                 $file = [
                     'name' => $_FILES[$fileInputName]['name'][$i],

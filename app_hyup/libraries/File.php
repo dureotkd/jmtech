@@ -109,21 +109,22 @@ class file
             // * 0번쨰가 아닌 $_FILES의 첫번쨰 키부터 시작
             $startKey = array_key_first($_FILES[$fileInputName]['name']);
 
-            echo "startKey : {$startKey}";
-
             for ($i = $startKey; $i <= $fileCount; $i++) {
-                $file = [
-                    'name' => $_FILES[$fileInputName]['name'][$i],
-                    'type' => $_FILES[$fileInputName]['type'][$i],
-                    'tmp_name' => $_FILES[$fileInputName]['tmp_name'][$i],
-                    'error' => $_FILES[$fileInputName]['error'][$i],
-                    'size' => $_FILES[$fileInputName]['size'][$i],
-                ];
 
-                // 단일 업로드 함수 재활용
-                $_FILES['__single_temp'] = $file;
-                $result = $this->upload('__single_temp', $uploadDirectory, $maxSizeMB, $allowedExtensions);
-                $results[] = $result;
+                if (!empty($_FILES[$fileInputName]['name'][$i])) {
+                    $file = [
+                        'name' => $_FILES[$fileInputName]['name'][$i],
+                        'type' => $_FILES[$fileInputName]['type'][$i],
+                        'tmp_name' => $_FILES[$fileInputName]['tmp_name'][$i],
+                        'error' => $_FILES[$fileInputName]['error'][$i],
+                        'size' => $_FILES[$fileInputName]['size'][$i],
+                    ];
+
+                    // 단일 업로드 함수 재활용
+                    $_FILES['__single_temp'] = $file;
+                    $result = $this->upload('__single_temp', $uploadDirectory, $maxSizeMB, $allowedExtensions);
+                    $results[] = $result;
+                }
             }
 
             // 임시 필드 제거

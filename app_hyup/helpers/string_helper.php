@@ -20,6 +20,13 @@ function timeAgo($datetime)
     }
 }
 
+function fileIcon($file_name)
+{
+    $ext = explode('.', $file_name);
+    $ext = end($ext);
+    return "/assets/app_hyup/icons/" . $ext . ".png";
+}
+
 function maskString($str)
 {
     $visible = mb_substr($str, 0, 5, 'UTF-8');

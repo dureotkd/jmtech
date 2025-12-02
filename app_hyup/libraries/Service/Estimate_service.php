@@ -189,39 +189,38 @@ class Estimate_service
                     "no = '{$estimate_row['no']}'" // 견적서 번호 동일
                 ]);
 
-                if (!empty($su_estimate_row)) {
-                    throw new Exception("이미 수주전환된 수주서가 존재합니다.");
+                if (empty($su_estimate_row)) {
+
+                    $su_estimate_row = [
+                        'type'              => $estimate_row['type'],
+                        'no'                => $estimate_row['no'],
+                        'estimate_date'     => date('Y-m-d'),
+                        'phone_number'      => $estimate_row['phone_number'],
+                        'fax_number'        => $estimate_row['fax_number'],
+                        'partner_id'        => $estimate_row['partner_id'],
+                        'title'             => $estimate_row['title'],
+                        'amount'            => $estimate_row['amount'],
+                        'memo'              => $estimate_row['memo'],
+                        'created_at'        => date('Y-m-d H:i:s'),
+                        'updated_at'        => date('Y-m-d H:i:s'),
+                        'due_at'            => $estimate_row['due_at'],
+                        'valid_at'          => $estimate_row['valid_at'],
+                        'payment_type'      => $estimate_row['payment_type'],
+                        'etc_memo'          => $estimate_row['etc_memo'],
+                        'vat_type'          => $estimate_row['vat_type'],
+                        'sheets'            => $estimate_row['sheets'],
+                        'sub_type'          => 'S', // 수주서로 생성
+                        'status2'           => '도면확인',
+                    ];
+
+                    $res = $this->obj->service_model->insert_estimate(DEBUG, $su_estimate_row);
+
+                    if (empty($res)) {
+                        throw new Exception("수주전환 중 오류가 발생했습니다.");
+                    }
+
+                    $this->obj->event_log_service->수주서등록($res);
                 }
-
-                $su_estimate_row = [
-                    'type'              => $estimate_row['type'],
-                    'no'                => $estimate_row['no'],
-                    'estimate_date'     => date('Y-m-d'),
-                    'phone_number'      => $estimate_row['phone_number'],
-                    'fax_number'        => $estimate_row['fax_number'],
-                    'partner_id'        => $estimate_row['partner_id'],
-                    'title'             => $estimate_row['title'],
-                    'amount'            => $estimate_row['amount'],
-                    'memo'              => $estimate_row['memo'],
-                    'created_at'        => date('Y-m-d H:i:s'),
-                    'updated_at'        => date('Y-m-d H:i:s'),
-                    'due_at'            => $estimate_row['due_at'],
-                    'valid_at'          => $estimate_row['valid_at'],
-                    'payment_type'      => $estimate_row['payment_type'],
-                    'etc_memo'          => $estimate_row['etc_memo'],
-                    'vat_type'          => $estimate_row['vat_type'],
-                    'sheets'            => $estimate_row['sheets'],
-                    'sub_type'          => 'S', // 수주서로 생성
-                    'status2'           => '도면확인',
-                ];
-
-                $res = $this->obj->service_model->insert_estimate(DEBUG, $su_estimate_row);
-
-                if (empty($res)) {
-                    throw new Exception("수주전환 중 오류가 발생했습니다.");
-                }
-
-                $this->obj->event_log_service->수주서등록($res);
             }
         }
 

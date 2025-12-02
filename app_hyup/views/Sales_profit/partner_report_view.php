@@ -170,11 +170,11 @@
                                 <?
                                 if (!empty(explode(' ', $row['desc'])[1])) {
                                 ?>
-                                    <?= explode(' ', $row['desc'])[0] ?>
+                                    <?= explode(' ', $row['desc'])[0] ?? '' ?>
                                     <span class="text-red-600 font-semibold">
                                         +<?= explode(' ', $row['desc'])[1] ?>
                                     </span>
-                                    <?= explode(' ', $row['desc'])[2] ?>
+                                    <?= explode(' ', $row['desc'])[2] ?? '' ?>
                                 <?
                                 }
                                 ?>

@@ -175,7 +175,7 @@
                                             foreach ($file_name_array as $index => $file_name) {
                                             ?>
                                                 <div onclick="file_download(<?= $file_id_array[$index] ?>)" class="flex items-center gap-3 !p-2 hover:bg-gray-100 cursor-pointer">
-                                                    <!-- <img src="/icons/pdf-icon.png" class="w-5 h-5" alt="pdf" /> -->
+                                                    <img src="<?= fileIcon($file_name) ?>" class="w-4 h-4" />
                                                     <span class="text-sm text-gray-800 truncate">
                                                         <?= $file_name ?>
                                                     </span>

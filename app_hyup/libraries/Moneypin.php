@@ -10,8 +10,8 @@ class Moneypin
 
     public function __construct()
     {
-        $this->CLIENT_ID = '5c7b52aa-b114-4bdb-9bbf-a0264f044b2f';
-        $this->CLIENT_SECRET = 'soPhM7vQSQFksisZ6hU+B6ZeKlEbPLcM/8vd7s+HHN4=';
+        $this->CLIENT_ID = 'a79a52a8-620a-4e86-9a2a-a9c34c1c6946';
+        $this->CLIENT_SECRET = 'wafnFL/3/zOgNWaUm4nH14glGRUcIqFs8M9N8Khbl2k=';
     }
 
     private function getToken()
@@ -61,7 +61,7 @@ class Moneypin
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://api.moneypin.biz/bizno/v1/biz/info/base',
+            CURLOPT_URL => 'https://api.moneypin.biz/bizno/v1/biz/info/all',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,

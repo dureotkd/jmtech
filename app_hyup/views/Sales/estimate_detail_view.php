@@ -537,7 +537,8 @@ $datetime = date('YmdHis');
                 foreach ($files as $file) {
             ?>
                     <div
-                        class="flex items-center border border-gray-300 rounded !px-4 !py-2 bg-gray-100">
+                        class="flex items-center border border-gray-300 rounded !px-4 !py-2 gap-2 bg-gray-100">
+                        <img src="<?= fileIcon($file['file_name']) ?>" class="w-4 h-4" />
                         <a
                             href="/sales/download_file?id=<?= $file['id'] ?>"
                             class="text-blue-600 hover:underline">

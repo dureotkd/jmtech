@@ -125,8 +125,8 @@
     <table class="w-full border border-gray-300">
         <thead>
             <tr class="bg-[#788496] text-white">
-                <th class=" w-10"><input type="checkbox" id="all_check" /></th>
-                <th class="">발행일</th>
+                <th class="w-10"><input type="checkbox" id="all_check" /></th>
+                <th class="w-[100px]">발행일</th>
                 <th class="">공급받는자상호</th>
                 <th class="">공급가액</th>
                 <th class="">세액</th>
@@ -157,7 +157,7 @@
                             <?= date('Y-m-d', strtotime($estimate['created_at'])) ?>
                         </td>
                         <td class="">
-                            <span onclick="go_detail(<?= $estimate['id'] ?>);" class="underline cursor-pointer">
+                            <span class="underline cursor-pointer truncate inline-block max-w-[250px]" onclick="go_detail(<?= $estimate['id'] ?>);" title="<?= $estimate['partner_name'] ?>">
                                 <?= $estimate['partner_name'] ?>
                             </span>
                         </td>
@@ -165,7 +165,7 @@
                         <td class=""><?= number_format($estimate['tax_amount']) ?></td>
                         <td class=""><?= number_format($estimate['amount']) ?></td>
                         <td>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 w-fit">
                                 <select onclick="handle_select(event);" onchange="change_status2(<?= $estimate['id'] ?>, event);" name="suju_status" id="">
                                     <?
                                     $SUJU_STATUS = unserialize(SUJU_STATUS);
@@ -184,8 +184,8 @@
                                     <button
                                         onclick="event.stopPropagation(); open_popup_default(`/sales/estimate_detail?id=<?= $estimate['g_estimate_id'] ?>`, '견적서 상세', 1000, 820);"
                                         type="button"
-                                        class="sm-btn bg-primary !m-0 text-xs">
-                                        견적서 보기
+                                        class="sm-btn bg-primary min-w-[62px] !m-0 text-xs">
+                                        견적서
                                     </button>
                                 <?
                                 }

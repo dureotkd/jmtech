@@ -206,6 +206,8 @@ class Estimate_service
                         'due_at'            => $estimate_row['due_at'],
                         'valid_at'          => $estimate_row['valid_at'],
                         'payment_type'      => $estimate_row['payment_type'],
+                        'supply_amount'     => $estimate_row['supply_amount'],
+                        'tax_amount'        => $estimate_row['tax_amount'],
                         'etc_memo'          => $estimate_row['etc_memo'],
                         'vat_type'          => $estimate_row['vat_type'],
                         'sheets'            => $estimate_row['sheets'],

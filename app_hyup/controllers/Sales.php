@@ -531,6 +531,7 @@ class sales extends MY_Controller
     }
 
     # 엑셀 다운로드 (견적서,수주서,발주서)
+    # sales/download_estimate_excel?id=56
     public function download_estimate_excel()
     {
         $id = $this->input->get('id') ?? '';
@@ -578,8 +579,6 @@ class sales extends MY_Controller
         // * C+D  merge
 
         // ✅ 열 너비 설정
-        $sheet->getColumnDimension('C')->setAutoSize(true); // 순번
-        $sheet->getColumnDimension('E')->setAutoSize(true); // 품목
         $sheet->getColumnDimension('F')->setWidth(10); // 규격
         $sheet->getColumnDimension('G')->setWidth(10); // 수량
         $sheet->getColumnDimension('H')->setWidth(15); // 단가
@@ -598,7 +597,8 @@ class sales extends MY_Controller
         $number_amount = number_format($estimate_row['amount'] ?? 0);
         $vat_type = $VAT_TYPE[$estimate_row['vat_type']] ?? '';
         $sheet->setCellValue("C{$합계금액_INDEX}", "합  계  금  액 : {$number_to_korean} 원정 (₩ {$number_amount}) {$vat_type}");
-        $sheet->setCellValue("", $number_to_korean);
+        // $sheet->setCellValue("", $number_to_korean);
+
         foreach ($items as $index => $item) {
             // ✅ 새로 밀린 만큼 offset
             $row_num = $insertAt + $index;
@@ -627,6 +627,9 @@ class sales extends MY_Controller
 
             $합계_INDEX++;
         }
+
+        $sheet->getColumnDimension('C')->setAutoSize(true); // 순번
+        $sheet->getColumnDimension('E')->setWidth(80); // 품목
 
         // 1️⃣ 셀 스타일 적용
         $sheet->setCellValue("J{$합계_INDEX}", number_format($estimate_row['supply_amount'] ?? 0));
@@ -875,7 +878,8 @@ class sales extends MY_Controller
         $phone_number = $this->input->post('phone_number') ?? '';
         $fax_number = $this->input->post('fax_number') ?? '';
         $title = $this->input->post('title') ?? '';
-
+        $supply_amount = $this->input->post('supply_amount') ?? '';
+        $tax_amount = $this->input->post('tax_amount') ?? '';
         $due_at = $this->input->post('due_at') ?? '';
         $location = $this->input->post('location') ?? '';
         $valid_at = $this->input->post('valid_at') ?? '';
@@ -901,6 +905,8 @@ class sales extends MY_Controller
                     'location'          => $location,
                     'due_at'            => $due_at,
                     'valid_at'          => $valid_at,
+                    'supply_amount'     => $supply_amount,
+                    'tax_amount'        => $tax_amount,
                     'payment_type'      => $payment_type,
                     'etc_memo'          => $etc_memo,
                 ]);

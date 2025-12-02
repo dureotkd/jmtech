@@ -223,11 +223,11 @@ export default function CommonDocument() {
 
       alert("견적서가 성공적으로 저장되었습니다.");
 
-      // if (res?.redirect_url) {
-      //   window.location.href = `${STATIC_URL}${res.redirect_url}`;
-      // }
+      if (res?.redirect_url) {
+        window.location.href = `${STATIC_URL}${res.redirect_url}`;
+      }
 
-      // window?.opener?.location.reload();
+      window?.opener?.location.reload();
     } catch (err) {
       console.error("업로드 실패:", err);
     } finally {

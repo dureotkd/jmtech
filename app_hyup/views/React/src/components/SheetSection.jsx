@@ -68,6 +68,30 @@ const SheetSection = ({
     }
   );
 
+  // nestedHeaders 배열을 Handsontable 형식으로 변환
+  // nestedHeaders는 이미 2차원 배열 형태로 전달됨
+  const nestedHeadersArray =
+    activeSheetOptions.nestedHeaders &&
+    activeSheetOptions.nestedHeaders.length > 0
+      ? activeSheetOptions.nestedHeaders.map((row) =>
+          row.map((header) => {
+            // 빈 문자열이면 그대로 반환
+            if (header === "") {
+              return "";
+            }
+            // 문자열이면 그대로 반환
+            if (typeof header === "string") {
+              return header;
+            }
+            // 객체면 label과 colspan으로 변환
+            return {
+              label: header.label,
+              colspan: header.colspan || 1,
+            };
+          })
+        )
+      : undefined;
+
   const themeStyles = {
     light: {
       base: "bg-gray-100 hover:bg-gray-200 text-gray-800",
@@ -119,10 +143,48 @@ const SheetSection = ({
         stretchH="all"
         rowHeaders={true}
         colHeaders={true}
+        nestedHeaders={nestedHeadersArray}
         viewportColumnRenderingOffset={5}
         viewportColumnRenderingThreshold={10}
+        afterRender={() => {
+          // 재료비와 가공비 헤더를 bold 처리
+          if (nestedHeadersArray && nestedHeadersArray.length > 0) {
+            const hotInstance = hotRef.current?.hotInstance;
+            if (!hotInstance) return;
+
+            // 헤더 테이블 찾기
+            const headerTable = hotInstance.rootElement?.querySelector(
+              ".ht_clone_top thead"
+            );
+            if (!headerTable) return;
+
+            const firstRow = headerTable.querySelector("tr:first-child");
+            if (!firstRow) return;
+
+            // 첫 번째 행의 모든 셀을 확인하여 재료비와 가공비 찾기
+            const cells = firstRow.querySelectorAll("th");
+            cells.forEach((cell) => {
+              const text = cell.textContent?.trim();
+              if (text === "재료비" || text === "가공비") {
+                cell.style.fontWeight = "bold";
+              }
+            });
+          }
+        }}
         beforeChange={function (changes, source) {
           console.log("beforeChange");
+        }}
+        afterCreateRow={(row, amount) => {
+          // 새 행이 추가될 때 비중 컬럼에 수식 설정
+          if (activeSheet === "내역서") {
+            // const 비중ColIndex = 12;
+            // const rowNum = row + 5;
+            // const 도번Col = "B";
+            // const 재질Col = "C";
+            // const formula = `=IF(${도번Col}${rowNum}="","",IF(${재질Col}${rowNum}="SUS",7.93,IF(${재질Col}${rowNum}="AL",2.8,7.85)))`;
+            // console.log("🚀 Debug: ~ SheetSection ~ formula:", formula);
+            // this.setDataAtCell(row, 비중ColIndex, formula);
+          }
         }}
         afterChange={function (changes, source) {
           switch (subType) {

@@ -55,21 +55,6 @@ export default function CommonDocument() {
   const [sheets, setSheets] = React.useState([
     // * 모의 데이터 (템플릿은 PHP 서버에서 가져옴)
     {
-      name: "견적서",
-      data: [],
-      columns: [
-        { title: "품목", type: "dropdown", source: [] },
-        { title: "규격" },
-        { title: "수량" },
-        { title: "단가" },
-        { title: "공급가액" },
-        { title: "세액" },
-        { title: "비고" },
-      ],
-      colWidths: [278, 100, 80, 100, 120, 100, 150],
-      height: "auto",
-    },
-    {
       name: "내역서",
       data: [],
       columns: [
@@ -83,6 +68,21 @@ export default function CommonDocument() {
       ],
       colWidths: [278, 100, 80, 100, 120, 100, 150],
       height: 400,
+    },
+    {
+      name: "견적서",
+      data: [],
+      columns: [
+        { title: "품목", type: "dropdown", source: [] },
+        { title: "규격" },
+        { title: "수량" },
+        { title: "단가" },
+        { title: "공급가액" },
+        { title: "세액" },
+        { title: "비고" },
+      ],
+      colWidths: [278, 100, 80, 100, 120, 100, 150],
+      height: "auto",
     },
   ]);
 
@@ -135,31 +135,12 @@ export default function CommonDocument() {
   const registerSheetEvents = async () => {
     if (!sheets.length) return;
 
-    // 순차 실행: 각 시트를 잠깐씩 활성화
-    let index = 0;
+    for (let i = 0; i < sheets.length; i++) {
+      setActiveSheet(sheets[i].name);
+      await wait(500);
+    }
 
-    const interval = setInterval(() => {
-      const current = sheets[index];
-      if (current) {
-        setActiveSheet(current.name);
-        console.log(`🔹 Activated sheet: ${current.name}`);
-      }
-
-      index++;
-
-      // 모든 시트를 순회한 후 0번째 시트로 복귀
-      if (index >= sheets.length) {
-        setTimeout(() => {
-          setActiveSheet(sheets[0].name);
-          console.log(`✅ Returned to first sheet: ${sheets[0].name}`);
-        }, 200);
-        clearInterval(interval);
-      }
-    }, 200); // 시트간 딜레이 (ms 단위)
-
-    await wait(sheets.length * 250);
-
-    return () => clearInterval(interval);
+    setActiveSheet(sheets[0].name);
   };
 
   // * 견적서 저장 핸들러
@@ -373,7 +354,9 @@ export default function CommonDocument() {
         await loadPartnerList();
 
         // * 시트 이벤트 등록 (한바퀴 돌아야 Formula 적용 가능)
-        await registerSheetEvents();
+        if (sheets.length > 0) {
+          await registerSheetEvents();
+        }
       } catch (error) {
         alert("엑셀 템플릿 로드 중 오류가 발생했습니다.");
       } finally {

@@ -1,4 +1,6 @@
 {
   "svn.ignoreMissingSvnWarning": true,
-  "php.version": "7.3"
+  "php.version": "7.3",
+  "workbench.activityBar.orientation": "vertical",
+  "workbench.editor.enablePreview": false
 }

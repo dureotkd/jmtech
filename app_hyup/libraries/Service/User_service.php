@@ -241,6 +241,12 @@ class User_service
             throw new Exception('비밀번호를 다시 한번 확인해주세요.');
         }
 
+        $this->obj->service_model->update_user(DEBUG, [
+            "last_login_at" => date('Y-m-d H:i:s'),
+        ], [
+            "id = {$user['id']}"
+        ]);
+
         // if (get_is_developer()) {
         // } else {
         // }

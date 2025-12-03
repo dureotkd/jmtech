@@ -72,7 +72,7 @@ class api extends MY_Controller
          */
         // 내역서 초기 데이터 템플릿 (컬럼 순서대로)
         $rowTemplate = [
-            'AADAD', // 도번
+            '', // 도번
             '', // 재질
             // 재료비 섹션
             '', // 가로
@@ -136,25 +136,25 @@ class api extends MY_Controller
             $rowNum = $i + 1;
 
             // 재료비 섹션 수식
-            $row[$비중ColIndex] = "=IF(B{$rowNum}=\"\",\"\",IF(C{$rowNum}=\"SUS\",7.93,IF(C{$rowNum}=\"AL\",2.8,7.85)))";
-            $row[$무게ColIndex] = "=IF(B{$rowNum}=\"\",\"\",(D{$rowNum}*E{$rowNum}*F{$rowNum}*M{$rowNum})/1000000)";
-            $row[$재료비단가ColIndex] = "=IF(B{$rowNum}=\"\",\"\",IF(C{$rowNum}=\"SUS\",6500,IF(C{$rowNum}=\"AL\",7500,1600)))";
-            $row[$재료비소계ColIndex] = "=IF(B{$rowNum}=\"\",\"\",N{$rowNum}*O{$rowNum})";
+            $row[$비중ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(B{$rowNum}=\"SUS\",7.93,IF(B{$rowNum}=\"AL\",2.8,7.85)))";
+            $row[$무게ColIndex] = "=IF(A{$rowNum}=\"\",\"\",(C{$rowNum}*D{$rowNum}*E{$rowNum}*L{$rowNum})/1000000)";
+            $row[$재료비단가ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(B{$rowNum}=\"SUS\",6500,IF(B{$rowNum}=\"AL\",7500,1600)))";
+            $row[$재료비소계ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUND(M{$rowNum}*N{$rowNum},0))";
 
             // 가공비 섹션 수식
-            $row[$외곽ColIndex] = "=IF(B{$rowNum}=\"\",\"\",IF(F{$rowNum}>=3,(D{$rowNum}+E{$rowNum})*2*F{$rowNum},(D{$rowNum}+E{$rowNum})*5))";
-            $row[$홀탭ColIndex] = "=IF(B{$rowNum}=\"\",\"\",IF(AND(G{$rowNum}=\"\",H{$rowNum}=\"\"),\"\",IF(F{$rowNum}>=4,(G{$rowNum}+(H{$rowNum}*1.5))*300*1.5,(G{$rowNum}+(H{$rowNum}*1.5))*300)))";
-            $row[$밴딩ColIndex] = "=IF(I{$rowNum}=\"\",\"\",IF(F{$rowNum}>=4,I{$rowNum}*J{$rowNum}*3*1.5,I{$rowNum}*J{$rowNum}*3))";
+            $row[$외곽ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(E{$rowNum}>=3,(C{$rowNum}+D{$rowNum})*2*E{$rowNum},(C{$rowNum}+D{$rowNum})*5))";
+            $row[$홀탭ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(AND(F{$rowNum}=\"\",G{$rowNum}=\"\"),\"\",IF(E{$rowNum}>=4,(F{$rowNum}+(G{$rowNum}*1.5))*300*1.5,(F{$rowNum}+(G{$rowNum}*1.5))*300)))";
+            $row[$밴딩ColIndex] = "=IF(H{$rowNum}=\"\",\"\",IF(E{$rowNum}>=4,H{$rowNum}*I{$rowNum}*3*1.5,H{$rowNum}*I{$rowNum}*3))";
             // 용접, 연마는 수동 입력
-            $row[$후처리ColIndex] = "=IF(K{$rowNum}=\"\",\"\",IF(K{$rowNum}=\"E\",D{$rowNum}*E{$rowNum}*0.15,IF(K{$rowNum}=\"N\",D{$rowNum}*E{$rowNum}*0.12,IF(K{$rowNum}=\"A\",D{$rowNum}*E{$rowNum}*0.075,IF(K{$rowNum}=\"P\",D{$rowNum}*E{$rowNum}*0.025,D{$rowNum}*E{$rowNum}*0.04)))))";
+            $row[$후처리ColIndex] = "=IF(J{$rowNum}=\"\",\"\",ROUND(IF(J{$rowNum}=\"E\",C{$rowNum}*D{$rowNum}*0.15,IF(J{$rowNum}=\"N\",C{$rowNum}*D{$rowNum}*0.12,IF(J{$rowNum}=\"A\",C{$rowNum}*D{$rowNum}*0.075,IF(J{$rowNum}=\"P\",C{$rowNum}*D{$rowNum}*0.025,C{$rowNum}*D{$rowNum}*0.04)))),0))";
             // 기타는 수동 입력
-            $row[$가공비소계ColIndex] = "=IF(B{$rowNum}=\"\",\"\",SUM(Q{$rowNum}:W{$rowNum}))";
+            $row[$가공비소계ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUND(SUM(P{$rowNum}:V{$rowNum}),0))";
 
             // 기타 섹션 수식
-            $row[$이익ColIndex] = "=IF(B{$rowNum}=\"\",\"\",(X{$rowNum}+P{$rowNum})*0.15)";
-            $row[$최종수량ColIndex] = "=IF(L{$rowNum}=\"\",\"\",L{$rowNum})";
-            $row[$최종단가ColIndex] = "=IF(B{$rowNum}=\"\",\"\",ROUNDUP(Y{$rowNum}+X{$rowNum}+P{$rowNum},-2))";
-            $row[$금액ColIndex] = "=IF(B{$rowNum}=\"\",\"\",AA{$rowNum}*Z{$rowNum})"; // 금액 (최종 단가 * 수량)
+            $row[$이익ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUND((W{$rowNum}+O{$rowNum})*0.15,0))";
+            $row[$최종수량ColIndex] = "=IF(K{$rowNum}=\"\",\"\",K{$rowNum})";
+            $row[$최종단가ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUNDUP(X{$rowNum}+W{$rowNum}+O{$rowNum},-2))";
+            $row[$금액ColIndex] = "=IF(A{$rowNum}=\"\",\"\",Z{$rowNum}*Y{$rowNum})"; // 금액 (최종 단가 * 수량)
             $initialData[] = $row;
         }
 
@@ -163,40 +163,114 @@ class api extends MY_Controller
                 'name' => '내역서',
                 'data' => $initialData,
                 'columns' => [
-                    ['title' => '도번'],
-                    ['title' => '재질'],
+                    ['title' => '도번', 'className' => 'htCenter'],
+                    ['title' => '재질', 'className' => 'htCenter'],
                     // 재료비 섹션
-                    ['title' => '가로'],
-                    ['title' => '세로'],
-                    ['title' => '두께'],
-                    ['title' => '홀수'],
-                    ['title' => '탭'],
-                    ['title' => '절곡'],
-                    ['title' => '길이'],
-                    ['title' => '후'],
-                    ['title' => '수량'],
-                    ['title' => '비중'],
-                    ['title' => '무게'],
-                    ['title' => '단가'],
-                    ['title' => '소계'],
+                    ['title' => '가로', 'className' => 'htRight'],
+                    ['title' => '세로', 'className' => 'htRight'],
+                    ['title' => '두께', 'className' => 'htRight'],
+                    ['title' => '홀수', 'className' => 'htRight'],
+                    ['title' => '탭', 'className' => 'htRight'],
+                    ['title' => '절곡', 'className' => 'htRight'],
+                    ['title' => '길이', 'className' => 'htRight'],
+                    ['title' => '후', 'className' => 'htCenter'],
+                    ['title' => '수량', 'className' => 'htRight'],
+                    ['title' => '비중', 'className' => 'htRight'],
+                    [
+                        'title' => '무게',
+                        'type' => 'numeric',
+                        'className' => 'htRight',
+                        'numericFormat' => [
+                            'pattern' => '0.00', // 소수점 2자리
+                        ],
+                    ],
+                    ['title' => '단가', 'className' => 'htRight'],
+                    [
+                        'title' => '소계',
+                        'type' => 'numeric',
+                        'className' => 'htRight',
+                        'numericFormat' => [
+                            'pattern' => '0,0', // 콤마 구분, 정수
+                        ],
+                    ],
                     // 가공비 섹션
-                    ['title' => '외곽'],
-                    ['title' => '홀/탭'],
-                    ['title' => '밴딩'],
-                    ['title' => '용접'],
-                    ['title' => '연마'],
-                    ['title' => '후처리'],
-                    ['title' => '기타'],
-                    ['title' => '소계'],
+                    [
+                        'title' => '외곽',
+                        'className' => 'htRight',
+                        'type' => 'numeric',
+                        'numericFormat' => [
+                            'pattern' => '0,0', // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '홀/탭',
+                        'className' => 'htRight',
+                        'type' => 'numeric',
+                        'numericFormat' => [
+                            'pattern' => '0,0', // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '밴딩',
+                        'className' => 'htRight',
+                    ],
+                    ['title' => '용접', 'className' => 'htRight'],
+                    ['title' => '연마', 'className' => 'htRight'],
+                    [
+                        'title' => '후처리',
+                        'className' => 'htRight',
+                        'type' => 'numeric',
+                        'numericFormat' => [
+                            'pattern' => '0,0', // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    ['title' => '기타', 'className' => 'htRight'],
+                    [
+                        'title' => '소계',
+                        'type' => 'numeric',
+                        'className' => 'htRight',
+                        'numericFormat' => [
+                            'pattern' => '0,0', // 콤마 구분, 정수
+                        ],
+                    ],
                     // 기타
-                    ['title' => '이익'],
-                    ['title' => '수량'],
-                    ['title' => '단가'],
-                    ['title' => '금액'],
-                    ['title' => '비고'],
+                    [
+                        'title' => '이익',
+                        'className' => 'htRight',
+                        'type' => 'numeric',
+                        'numericFormat' => [
+                            'pattern' => '0,0', // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '수량',
+                        'className' => 'htRight',
+                        'type' => 'numeric',
+                        'numericFormat' => [
+                            'pattern' => '0,0', // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '단가',
+                        'className' => 'htRight',
+                        'type' => 'numeric',
+                        'numericFormat' => [
+                            'pattern' => '0,0', // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '금액',
+                        'className' => 'htRight',
+                        'type' => 'numeric',
+                        'numericFormat' => [
+                            'pattern' => '0,0', // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    ['title' => '비고', 'className' => 'htCenter'],
                 ],
                 'nestedHeaders' => [
-                    // 첫 번째 행 (상위 헤더)
+                    // 첫 번째 행: 알파벳 (A~AB)
+                    // 두 번째 행 (상위 헤더)
                     [
                         ['label' => '도번', 'colspan' => 1],
                         ['label' => '재질', 'colspan' => 1],
@@ -241,6 +315,36 @@ class api extends MY_Controller
                         '', // 단가 (빈 공간)
                         '', // 금액 (빈 공간)
                         '', // 비고 (빈 공간)
+                    ],
+                    [
+                        'A',
+                        'B',
+                        'C',
+                        'D',
+                        'E',
+                        'F',
+                        'G',
+                        'H',
+                        'I',
+                        'J',
+                        'K',
+                        'L',
+                        'M',
+                        'N',
+                        'O',
+                        'P',
+                        'Q',
+                        'R',
+                        'S',
+                        'T',
+                        'U',
+                        'V',
+                        'W',
+                        'X',
+                        'Y',
+                        'Z',
+                        'AA',
+                        'AB'
                     ],
                 ],
                 'colWidths' => [

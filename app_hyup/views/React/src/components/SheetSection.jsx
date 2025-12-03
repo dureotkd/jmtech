@@ -92,6 +92,8 @@ const SheetSection = ({
         )
       : undefined;
 
+  console.log(nestedHeadersArray);
+
   const themeStyles = {
     light: {
       base: "bg-gray-100 hover:bg-gray-200 text-gray-800",
@@ -142,35 +144,10 @@ const SheetSection = ({
         height={activeSheetOptions.height || "auto"}
         stretchH="all"
         rowHeaders={true}
-        colHeaders={true}
         nestedHeaders={nestedHeadersArray}
         viewportColumnRenderingOffset={5}
         viewportColumnRenderingThreshold={10}
-        afterRender={() => {
-          // 재료비와 가공비 헤더를 bold 처리
-          if (nestedHeadersArray && nestedHeadersArray.length > 0) {
-            const hotInstance = hotRef.current?.hotInstance;
-            if (!hotInstance) return;
-
-            // 헤더 테이블 찾기
-            const headerTable = hotInstance.rootElement?.querySelector(
-              ".ht_clone_top thead"
-            );
-            if (!headerTable) return;
-
-            const firstRow = headerTable.querySelector("tr:first-child");
-            if (!firstRow) return;
-
-            // 첫 번째 행의 모든 셀을 확인하여 재료비와 가공비 찾기
-            const cells = firstRow.querySelectorAll("th");
-            cells.forEach((cell) => {
-              const text = cell.textContent?.trim();
-              if (text === "재료비" || text === "가공비") {
-                cell.style.fontWeight = "bold";
-              }
-            });
-          }
-        }}
+        afterRender={() => {}}
         beforeChange={function (changes, source) {
           console.log("beforeChange");
         }}
@@ -191,7 +168,7 @@ const SheetSection = ({
             case "G": // 일반
             case "S": // 수주서
             case "B": // 발주서
-              if (source === "edit" && changes) {
+              if (source === "edit" && changes && activeSheet === "견적서") {
                 // * 0번쨰 품목 수정시
                 if (changes[0][3]?.key) {
                   changes.forEach(([row, prop, oldValue, newValue]) => {

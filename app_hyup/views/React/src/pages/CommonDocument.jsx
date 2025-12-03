@@ -29,9 +29,8 @@ export default function CommonDocument() {
 
   // * title 설정
 
-  const { hotRefs, getActiveHotRef, setActiveSheet } = useExcelStore(
-    (state) => state
-  );
+  const { hotRefs, getActiveHotRef, setActiveSheet, activeSheet } =
+    useExcelStore((state) => state);
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
     parent_id: "",
@@ -596,7 +595,103 @@ export default function CommonDocument() {
               onClick={() => {
                 const hot = getActiveHotRef();
                 if (!hot || hot.isDestroyed) return;
-                hot.alter("insert_row_above", hot.countRows());
+
+                const newRowIndex = hot.countRows();
+                hot.alter("insert_row_above", newRowIndex);
+
+                // * 내역서에서 추가시 수식 적용
+                if (activeSheet === "내역서") {
+                  const rowNum = newRowIndex + 1; // 엑셀 행 번호 (1-based)
+
+                  // 컬럼 인덱스 정의
+                  const 비중ColIndex = 11;
+                  const 무게ColIndex = 12;
+                  const 재료비단가ColIndex = 13;
+                  const 재료비소계ColIndex = 14;
+                  const 외곽ColIndex = 15;
+                  const 홀탭ColIndex = 16;
+                  const 밴딩ColIndex = 17;
+                  const 후처리ColIndex = 20;
+                  const 가공비소계ColIndex = 22;
+                  const 이익ColIndex = 23;
+                  const 최종수량ColIndex = 24;
+                  const 최종단가ColIndex = 25;
+                  const 금액ColIndex = 26;
+
+                  // 수식 설정
+                  setTimeout(() => {
+                    // 재료비 섹션 수식
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      비중ColIndex,
+                      `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",7.93,IF(B${rowNum}="AL",2.8,7.85)))`
+                    );
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      무게ColIndex,
+                      `=IF(A${rowNum}="","",(C${rowNum}*D${rowNum}*E${rowNum}*L${rowNum})/1000000)`
+                    );
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      재료비단가ColIndex,
+                      `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",6500,IF(B${rowNum}="AL",7500,1600)))`
+                    );
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      재료비소계ColIndex,
+                      `=IF(A${rowNum}="","",ROUND(M${rowNum}*N${rowNum},0))`
+                    );
+
+                    // 가공비 섹션 수식
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      외곽ColIndex,
+                      `=IF(A${rowNum}="","",IF(E${rowNum}>=3,(C${rowNum}+D${rowNum})*2*E${rowNum},(C${rowNum}+D${rowNum})*5))`
+                    );
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      홀탭ColIndex,
+                      `=IF(A${rowNum}="","",IF(AND(F${rowNum}="",G${rowNum}=""),"",IF(E${rowNum}>=4,(F${rowNum}+(G${rowNum}*1.5))*300*1.5,(F${rowNum}+(G${rowNum}*1.5))*300)))`
+                    );
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      밴딩ColIndex,
+                      `=IF(H${rowNum}="","",IF(E${rowNum}>=4,H${rowNum}*I${rowNum}*3*1.5,H${rowNum}*I${rowNum}*3))`
+                    );
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      후처리ColIndex,
+                      `=IF(J${rowNum}="","",ROUND(IF(J${rowNum}="E",C${rowNum}*D${rowNum}*0.15,IF(J${rowNum}="N",C${rowNum}*D${rowNum}*0.12,IF(J${rowNum}="A",C${rowNum}*D${rowNum}*0.075,IF(J${rowNum}="P",C${rowNum}*D${rowNum}*0.025,C${rowNum}*D${rowNum}*0.04)))),0))`
+                    );
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      가공비소계ColIndex,
+                      `=IF(A${rowNum}="","",ROUND(SUM(P${rowNum}:V${rowNum}),0))`
+                    );
+
+                    // 기타 섹션 수식
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      이익ColIndex,
+                      `=IF(A${rowNum}="","",ROUND((W${rowNum}+O${rowNum})*0.15,0))`
+                    );
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      최종수량ColIndex,
+                      `=IF(K${rowNum}="","",K${rowNum})`
+                    );
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      최종단가ColIndex,
+                      `=IF(A${rowNum}="","",ROUNDUP(X${rowNum}+W${rowNum}+O${rowNum},-2))`
+                    );
+                    hot.setDataAtCell(
+                      newRowIndex,
+                      금액ColIndex,
+                      `=IF(A${rowNum}="","",Z${rowNum}*Y${rowNum})`
+                    );
+                  }, 100);
+                }
               }}
               className="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition"
             >

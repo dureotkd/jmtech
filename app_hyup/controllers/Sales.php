@@ -248,6 +248,15 @@ class sales extends MY_Controller
             "target_id = {$id}"
         ]);
 
+        /**
+         *   [0] => D111
+            [1] => AL
+            [2] => 1
+            [3] => EA
+            [4] => 49800
+            [5] => 49800
+            [6] => 
+         */
         $view_data =  [
             'id'            => $id,
             'estimate'      => $estimate,

@@ -42,6 +42,7 @@ class Estimate_service
         $valid_at = $payloads['valid_at'] ?? '';
         $payment_type = $payloads['payment_type'] ?? '';
         $etc_memo = $payloads['etc_memo'] ?? '';
+        $real_sheets = $payloads['real_sheets'] ?? [];
 
         $no = $this->makeUniqueNo();
 
@@ -89,6 +90,17 @@ class Estimate_service
         ]);
 
         if ($sub_type === 'G') {
+
+            /**
+             * * 견적서 시트 저장
+             */
+            if (!empty($real_sheets)) {
+                $this->obj->service_model->insert_estimate_sheet(DEBUG, [
+                    'estimate_id' => $res,
+                    'sheets'      => $real_sheets,
+                ]);
+            }
+
             $this->obj->event_log_service->견적서등록($res);
         } else if ($sub_type === 'S') {
             $this->obj->event_log_service->수주서등록($res);
@@ -109,11 +121,41 @@ class Estimate_service
             return;
         }
 
-        $res = $this->obj->service_model->update_estimate(DEBUG, $update_data, [
+        $res = $this->obj->service_model->update_estimate(DEBUG, [
+            // 기존의 업데이트 데이터에서 real_sheets만 새 값으로 바꿔서 전체 배열로 전달
+            'partner_id'     => $update_data['partner_id'] ?? null,
+            'estimate_date'  => $update_data['estimate_date'] ?? null,
+            'phone_number'   => $update_data['phone_number'] ?? null,
+            'fax_number'     => $update_data['fax_number'] ?? null,
+            'title'          => $update_data['title'] ?? null,
+            'location'       => $update_data['location'] ?? null,
+            'amount'         => $update_data['amount'] ?? null,
+            'supply_amount'  => $update_data['supply_amount'] ?? null,
+            'tax_amount'     => $update_data['tax_amount'] ?? null,
+            'vat_type'       => $update_data['vat_type'] ?? null,
+            'sheets'         => $update_data['sheets'] ?? null,
+            'due_at'         => $update_data['due_at'] ?? null,
+            'valid_at'       => $update_data['valid_at'] ?? null,
+            'payment_type'   => $update_data['payment_type'] ?? null,
+            'etc_memo'       => $update_data['etc_memo'] ?? null,
+            'updated_at'     => date('Y-m-d H:i:s'),
+        ], [
             "id = '{$id}'"
         ]);
 
         if ($estimate_row['sub_type'] === 'G') {
+
+            if (!empty($update_data['real_sheets'])) {
+
+                // * 견적서 시트 수정
+                $this->obj->service_model->update_estimate_sheet(DEBUG, [
+                    'sheets'      => $update_data['real_sheets'],
+                ], [
+                    "estimate_id = '{$id}'"
+                ]);
+            }
+
+
             $this->obj->event_log_service->견적서수정($id);
         } else if ($estimate_row['sub_type'] === 'S') {
             $this->obj->event_log_service->수주서등록($id);
@@ -141,6 +183,11 @@ class Estimate_service
         ]);
 
         if ($estimate_row['sub_type'] === 'G') {
+
+            // * 견적서 시트 삭제
+            $this->obj->service_model->delete_estimate_sheet(DEBUG, [
+                "estimate_id = '{$id}'"
+            ]);
 
             // * 관련된 수주서도 함께 삭제
             $this->obj->service_model->delete_estimate(DEBUG, [

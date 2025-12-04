@@ -444,13 +444,21 @@ $datetime = date('YmdHis');
         <table class="estimate">
             <thead>
                 <tr>
-                    <th>순번</th>
+                    <!-- <th>순번</th>
                     <th>품목</th>
                     <th>규격</th>
                     <th>수량</th>
                     <th>단가</th>
                     <th>공급가액</th>
                     <th>세액</th>
+                    <th>비고</th> -->
+                    <th>순번</th>
+                    <th>도면번호/품명</th>
+                    <th>소재</th>
+                    <th>수량</th>
+                    <th>단위</th>
+                    <th>단가</th>
+                    <th>금액</th>
                     <th>비고</th>
                 </tr>
             </thead>
@@ -474,7 +482,7 @@ $datetime = date('YmdHis');
                                 <?= $item[2] ?>
                             </td>
                             <td class="!text-right">
-                                <?= !empty($item[3]) ? number_format($item[3]) : '' ?>
+                                <?= $item[3] ?>
                             </td>
                             <td class="!text-right">
                                 <?= !empty($item[4]) ? number_format($item[4]) : '' ?>
@@ -584,6 +592,13 @@ $datetime = date('YmdHis');
 </div>
 
 <script>
+    /**
+     * * 접근시 팝업 사이즈를 1000, 820로 조정
+     */
+    $(document).ready(function() {
+        window.resizeTo(1000, 820);
+    });
+
     const handle_delete = (e) => {
         if (confirm('정말로 삭제하시겠습니까? \n삭제된 견적서는 복구할 수 없습니다.\n(관련된 수주서도 함께 삭제됩니다.)')) {
             window.location.href = '/sales/delete_estimate?id=<?= $estimate['id'] ?>';
@@ -592,9 +607,7 @@ $datetime = date('YmdHis');
 
     const handle_copy = (e) => {
 
-
         window.location.href = `<?= REACT_PATH ?>?tab=copy&id=<?= $estimate['id'] ?>&sub_type=<?= $estimate['sub_type'] ?>`;
-
     }
 
     const eventId = '<?= $estimate['id'] ?>';

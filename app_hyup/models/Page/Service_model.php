@@ -261,6 +261,52 @@ class service_model extends MY_Model
         return $this->excute($sql, 'exec', 'main');
     }
 
+    // ===== estimate_sheet =====
+    public function get_estimate_sheet($type, $where = [1], $limit = '')
+    {
+        $select = $type == 'one' ? "COUNT(*)" : "*";
+        $res_limit = !empty($limit) ? "LIMIT {$limit}" : "";
+        $sql = sprintf("SELECT {$select} FROM jmtech.estimate_sheet a WHERE %s {$res_limit}", join(" AND ", $where));
+        return $this->excute($sql, $type, 'main');
+    }
+    public function get_estimate_sheet_custom($type, $where = [1], $order = "")
+    {
+        $select = $type == 'one' ? "COUNT(*)" : "*";
+        $sql = sprintf(
+            "SELECT {$select} FROM jmtech.estimate_sheet a WHERE %s %s",
+            join(" AND ", $where),
+            $order
+        );
+        return $this->excute($sql, $type, 'main');
+    }
+    public function insert_estimate_sheet($debug = false, $data = [])
+    {
+        $sql = $this->getInsertQuery('jmtech.estimate_sheet', $data);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+    public function update_estimate_sheet($debug = false, $data = [], $where = [])
+    {
+        $sql = $this->getUpdateQuery('jmtech.estimate_sheet', $data, $where);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+    public function delete_estimate_sheet($debug = false, $where = [])
+    {
+        $sql = $this->getDeleteQuery('jmtech.estimate_sheet', $where);
+        if ($debug) {
+            echo $sql . "<br/>";
+            return 1;
+        }
+        return $this->excute($sql, 'exec', 'main');
+    }
+
     // ===== admin_event_log =====
     public function get_admin_event_log($type, $where = [1], $limit = '')
     {

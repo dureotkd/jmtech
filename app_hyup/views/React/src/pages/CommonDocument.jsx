@@ -151,12 +151,12 @@ export default function CommonDocument() {
     const target = e.target;
     const formData = new FormData(target);
 
-    console.log(hotRefs);
-
     const hot1 = hotRefs["견적서"];
     const hot2 = hotRefs["내역서"];
 
-    const hots = [hot1, hot2].map((hot) => hot.getData());
+    const hots = [hot1.getData(), hot2.getData()];
+
+    const hots2 = [hot1.getSourceData(), hot2.getSourceData()];
 
     let supplyAmount = 0;
     let taxAmount = 0;
@@ -175,6 +175,7 @@ export default function CommonDocument() {
     cloneSheets[0].data = hots[0];
     cloneSheets[1].data = hots[1];
 
+    formData.append("real_sheets", JSON.stringify(hots2));
     formData.append("sheets", JSON.stringify(cloneSheets));
     formData.append("file_ids", fileIds);
 

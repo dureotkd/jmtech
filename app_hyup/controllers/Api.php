@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * TODO: 복사 기능
+ * TODO: 발주서,수주서 확인
+ * TODO: PDF 및 엑셀 확인
+ * TODO: 세금계산서 발행 확인
+ * TODO: supply_amount, tax_amount 확인
+ */
 class api extends MY_Controller
 {
 
@@ -649,10 +656,53 @@ class api extends MY_Controller
 
                     break;
 
-                case 'B':
-                case 'S':
                 case 'G':
 
+                    $estimate = $this->service_model->get_estimate('row', [
+                        "id = '{$id}'"
+                    ]);
+
+                    if (empty($estimate)) {
+                        throw new Exception('존재하지 않는 견적서입니다.');
+                    }
+
+                    $estimate_sheet = $this->service_model->get_estimate_sheet('row', [
+                        "estimate_id = '{$id}'"
+                    ]);
+
+                    if (empty($estimate_sheet)) {
+                        throw new Exception('존재하지 않는 견적서 시트입니다.');
+                    }
+
+                    $sheets = !empty($estimate['sheets']) ? json_decode($estimate['sheets'], true) : [];
+
+                    /**
+                     * 0번쨰 견적서
+                     * 1번쨰 내역서
+                     */
+                    $original_sheets = !empty($estimate_sheet['sheets']) ? json_decode($estimate_sheet['sheets'], true) : [];
+
+                    // * 내역서 시트 데이터 (ORIGINAL DATA)
+                    $sheets[0]['data'] = $original_sheets[1];
+
+                    // * 견적서 시트 데이터 (ORIGINAL DATA)
+                    $sheets[1]['data'] = $original_sheets[0];
+
+                    $files = $this->service_model->get_file('all', [
+                        "ref_table = 'estimate'",
+                        "ref_id = '{$id}'"
+                    ]);
+
+                    $estimate['sheets'] = $sheets;
+                    $res_array['data'] = [
+                        'estimate' => $estimate,
+                        'files'    => $files,
+                    ];
+
+                    break;
+
+                case 'B':
+                case 'S':
                     $estimate = $this->service_model->get_estimate('row', [
                         "id = '{$id}'"
                     ]);
@@ -709,6 +759,7 @@ class api extends MY_Controller
         $payment_type = $this->input->post('payment_type') ?? '';
         $etc_memo = $this->input->post('etc_memo') ?? '';
         $file_ids = $this->input->post('file_ids') ?? '';
+        $real_sheets = $this->input->post('real_sheets') ?? '';
 
         $amount = (int)preg_replace('/[^0-9]/u', '', $amount); // 숫자만 남김
 
@@ -787,6 +838,7 @@ class api extends MY_Controller
                                 'valid_at'          => $valid_at,
                                 'payment_type'      => $payment_type,
                                 'etc_memo'          => $etc_memo,
+                                'real_sheets'       => $real_sheets,
                                 'updated_at'        => date('Y-m-d H:i:s'),
                             ], $id);
 
@@ -826,6 +878,7 @@ class api extends MY_Controller
                         'valid_at'          => $valid_at,
                         'payment_type'      => $payment_type,
                         'etc_memo'          => $etc_memo,
+                        'real_sheets'       => $real_sheets,
                         'tab'               => 'original',
                     ]);
 

@@ -174,7 +174,7 @@
                                             <?
                                             foreach ($file_name_array as $index => $file_name) {
                                             ?>
-                                                <div onclick="file_download(<?= $file_id_array[$index] ?>)" class="flex items-center gap-3 !p-2 hover:bg-gray-100 cursor-pointer">
+                                                <div onclick="file_download(<?= $file_id_array[$index] ?>)" class="min-w-[200px] flex items-center gap-3 !p-2 hover:bg-gray-100 cursor-pointer">
                                                     <img src="<?= fileIcon($file_name) ?>" class="w-4 h-4" />
                                                     <span class="text-sm text-gray-800 truncate">
                                                         <?= $file_name ?>

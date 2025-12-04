@@ -613,26 +613,53 @@ class sales extends MY_Controller
             $row_num = $insertAt + $index;
             $tmp_index = $count - $index;
 
-            $sheet->setCellValue("C{$row_num}", $tmp_index); // 순번
-            $sheet->mergeCells("C{$row_num}:D{$row_num}"); // C+D 병합
+            if ($sub_type === 'G') {
 
-            $sheet->setCellValue("E{$row_num}", $item[0]); // 품목
+                $sheet->setCellValue("C{$row_num}", $tmp_index);     // 순번
+                $sheet->mergeCells("C{$row_num}:D{$row_num}"); // C+D 병합
 
-            $sheet->setCellValue("F{$row_num}", $item[1]); // 규격
+                $sheet->setCellValue("E{$row_num}", $item[0]); //  도면번호/품명
 
-            $sheet->setCellValue("G{$row_num}", $item[2]); // 수량
+                $sheet->setCellValue("F{$row_num}", $item[1]); // 소재
 
-            $sheet->setCellValue("H{$row_num}", !empty($item[3]) ? number_format($item[3]) : ''); // 단가
-            $sheet->mergeCells("H{$row_num}:I{$row_num}"); // H+I 병합
+                $sheet->setCellValue("G{$row_num}", number_format($item[2])); // 수량
 
-            $sheet->setCellValue("J{$row_num}", !empty($item[4]) ? number_format($item[4]) : ''); // 공급가액
-            $sheet->mergeCells("J{$row_num}:K{$row_num}"); // J+K 병합
+                $sheet->setCellValue("H{$row_num}", $item[3]); // 단위
+                $sheet->mergeCells("H{$row_num}:I{$row_num}"); // H+I 병합
 
-            $sheet->setCellValue("L{$row_num}", !empty($item[5]) ? number_format($item[5]) : ''); // 세액
-            $sheet->mergeCells("L{$row_num}:O{$row_num}"); // L+M+N+O 병합
+                $sheet->setCellValue("J{$row_num}", number_format($item[4])); // 단가
+                $sheet->mergeCells("J{$row_num}:K{$row_num}"); // J+K 병합
 
-            $sheet->setCellValue("P{$row_num}", $item[6]); // 비고
-            $sheet->mergeCells("P{$row_num}:U{$row_num}"); // P 병합
+                $sheet->setCellValue("L{$row_num}", number_format($item[5])); // 금액
+                $sheet->mergeCells("L{$row_num}:O{$row_num}"); // L+M+N+O 병합
+
+                $sheet->setCellValue("P{$row_num}", $item[6]); // 비고
+                $sheet->mergeCells("P{$row_num}:U{$row_num}"); // P 병합
+
+            } else {
+
+                $sheet->setCellValue("C{$row_num}", $tmp_index); // 순번
+                $sheet->mergeCells("C{$row_num}:D{$row_num}"); // C+D 병합
+
+                $sheet->setCellValue("E{$row_num}", $item[0]); // 품목
+
+                $sheet->setCellValue("F{$row_num}", $item[1]); // 규격
+
+                $sheet->setCellValue("G{$row_num}", $item[2]); // 수량
+
+                $sheet->setCellValue("H{$row_num}", !empty($item[3]) ? number_format($item[3]) : ''); // 단가
+                $sheet->mergeCells("H{$row_num}:I{$row_num}"); // H+I 병합
+
+                $sheet->setCellValue("J{$row_num}", !empty($item[4]) ? number_format($item[4]) : ''); // 공급가액
+                $sheet->mergeCells("J{$row_num}:K{$row_num}"); // J+K 병합
+
+                $sheet->setCellValue("L{$row_num}", !empty($item[5]) ? number_format($item[5]) : ''); // 세액
+                $sheet->mergeCells("L{$row_num}:O{$row_num}"); // L+M+N+O 병합
+
+                $sheet->setCellValue("P{$row_num}", $item[6]); // 비고
+                $sheet->mergeCells("P{$row_num}:U{$row_num}"); // P 병합
+            }
+
 
             $합계_INDEX++;
         }

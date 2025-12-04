@@ -161,13 +161,38 @@ export default function CommonDocument() {
     let supplyAmount = 0;
     let taxAmount = 0;
 
-    if (!empty(hots[0])) {
-      hots[0].forEach((row) => {
-        const 공급가액 = parseFloat(row[4]) || 0;
-        const 세액 = parseFloat(row[5]) || 0;
-        supplyAmount += 공급가액;
-        taxAmount += 세액;
-      });
+    switch (subType) {
+      case "G":
+        //  *
+        supplyAmount = hots[0].reduce((acc, row) => {
+          const 금액 = parseFloat(row[5]) || 0;
+          return acc + 금액;
+        }, 0);
+
+        if (form.vat_type === "Y") {
+          supplyAmount = supplyAmount / 1.1;
+          taxAmount = supplyAmount * 0.1;
+        } else if (form.vat_type === "N") {
+          taxAmount = supplyAmount * 0.1;
+        } else if (form.vat_type === "X") {
+          taxAmount = 0;
+        }
+
+        formData.append("amount", supplyAmount + taxAmount || 0);
+        break;
+      default:
+        if (!empty(hots[0])) {
+          hots[0].forEach((row) => {
+            const 공급가액 = parseFloat(row[4]) || 0;
+            const 세액 = parseFloat(row[5]) || 0;
+            supplyAmount += 공급가액;
+            taxAmount += 세액;
+          });
+        }
+
+        formData.append("amount", amount || 0);
+
+        break;
     }
 
     const cloneSheets = deepClone(sheets);
@@ -183,7 +208,6 @@ export default function CommonDocument() {
     formData.append("type", type);
     formData.append("sub_type", subType);
     formData.append("partner_id", form?.partner_id || "");
-    formData.append("amount", amount || 0);
     formData.append("supply_amount", supplyAmount || 0);
     formData.append("tax_amount", taxAmount || 0);
     formData.append("id", id || "");
@@ -263,6 +287,9 @@ export default function CommonDocument() {
 
   // * 부가세 처리
   const handleVat = (e) => {
+    // * 견적서는 부가세 함수처리 안하고 백엔드에서 처리
+    if (subType === "G") return;
+
     const vatOption = e.target.value;
     const cloneSheets = deepClone(sheets);
 
@@ -699,6 +726,50 @@ export default function CommonDocument() {
                           newRowIndex,
                           금액ColIndex,
                           `=IF(A${rowNum}="","",Z${rowNum}*Y${rowNum})`
+                        );
+                      }, 100);
+                    } else if (sheetName === "견적서") {
+                      const rowNum = newRowIndex + 1; // 엑셀 행 번호 (1-based)
+
+                      // 컬럼 인덱스 정의
+                      const 도면번호품명ColIndex = 0;
+                      const 소재ColIndex = 1;
+                      const 수량ColIndex = 2;
+                      const 단위ColIndex = 3;
+                      const 단가ColIndex = 4;
+                      const 금액ColIndex = 5;
+
+                      // 수식 설정 (내역서 참조)
+                      setTimeout(() => {
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          도면번호품명ColIndex,
+                          `=IF('내역서'!A${rowNum}="","",'내역서'!A${rowNum})`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          소재ColIndex,
+                          `=IF('내역서'!B${rowNum}="","",'내역서'!B${rowNum})`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          수량ColIndex,
+                          `='내역서'!Y${rowNum}`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          단위ColIndex,
+                          `=IF(A${rowNum}="","","EA")`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          단가ColIndex,
+                          `='내역서'!Z${rowNum}`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          금액ColIndex,
+                          `='내역서'!AA${rowNum}`
                         );
                       }, 100);
                     }

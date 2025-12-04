@@ -89,7 +89,7 @@ const SheetSection = ({
           }}
           afterChange={function (changes, source) {
             switch (subType) {
-              case "G": // 일반
+              // case "G": // 일반
               case "S": // 수주서
               case "B": // 발주서
                 if (source === "edit" && changes && sheetName === "견적서") {

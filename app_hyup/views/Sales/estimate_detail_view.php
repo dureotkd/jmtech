@@ -519,7 +519,7 @@ $datetime = date('YmdHis');
                 <tr>
                     <td class="tg-0pky !text-xs !border-1 text-center th-bg">유효일자</td>
                     <td class="tg-0pky !text-xs !border-1 w-[400px]">
-                        <?= $estimate['valid_at'] ?>
+                        <?= $estimate['valid_at'] === '0000-00-00' ? '' : $estimate['valid_at'] ?>
                     </td>
                     <td class="tg-0pky !text-xs !border-1 th-bg !w-[100px] !text-center">결제조건</td>
                     <td class="tg-0pky !text-xs !border-1">

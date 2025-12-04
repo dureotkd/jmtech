@@ -798,6 +798,7 @@ class api extends MY_Controller
                                 'due_at'            => $due_at,
                                 'valid_at'          => $valid_at,
                                 'payment_type'      => $payment_type,
+                                'real_sheets'       => $real_sheets,
                                 'etc_memo'          => $etc_memo,
                                 'tab'               => 'copy',
                             ]);

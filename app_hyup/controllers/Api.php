@@ -51,21 +51,21 @@ class api extends MY_Controller
     public function load_excel_template()
     {
 
-        $items = $this->service_model->get_item('all', [
-            "is_active = 1"
-        ]);
+        // $items = $this->service_model->get_item('all', [
+        //     "is_active = 1"
+        // ]);
 
-        $source = [];
+        // $source = [];
 
-        if (!empty($items)) {
-            foreach ($items as $item) {
-                $source[] = [
-                    'key'   => $item['id'],
-                    'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
-                    'title' => $item['item_name'],
-                ];
-            }
-        }
+        // if (!empty($items)) {
+        //     foreach ($items as $item) {
+        //         $source[] = [
+        //             'key'   => $item['id'],
+        //             'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
+        //             'title' => $item['item_name'],
+        //         ];
+        //     }
+        // }
 
         /**
          * * columns 컬럼 정보
@@ -135,27 +135,57 @@ class api extends MY_Controller
             // Handsontable은 0부터 시작, Excel은 5행부터 시작 (헤더 2행 포함)
             $rowNum = $i + 1;
 
-            // 재료비 섹션 수식
+            // 재료비 섹션 수식 (0일 때 빈 문자열 반환)
             $row[$비중ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(B{$rowNum}=\"SUS\",7.93,IF(B{$rowNum}=\"AL\",2.8,7.85)))";
-            $row[$무게ColIndex] = "=IF(A{$rowNum}=\"\",\"\",(C{$rowNum}*D{$rowNum}*E{$rowNum}*L{$rowNum})/1000000)";
+            $row[$무게ColIndex] = "=IF(OR(A{$rowNum}=\"\",(C{$rowNum}*D{$rowNum}*E{$rowNum}*L{$rowNum})/1000000=0),\"\",(C{$rowNum}*D{$rowNum}*E{$rowNum}*L{$rowNum})/1000000)";
             $row[$재료비단가ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(B{$rowNum}=\"SUS\",6500,IF(B{$rowNum}=\"AL\",7500,1600)))";
-            $row[$재료비소계ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUND(M{$rowNum}*N{$rowNum},0))";
+            $row[$재료비소계ColIndex] = "=IF(OR(A{$rowNum}=\"\",ROUND(M{$rowNum}*N{$rowNum},0)=0),\"\",ROUND(M{$rowNum}*N{$rowNum},0))";
 
-            // 가공비 섹션 수식
-            $row[$외곽ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(E{$rowNum}>=3,(C{$rowNum}+D{$rowNum})*2*E{$rowNum},(C{$rowNum}+D{$rowNum})*5))";
-            $row[$홀탭ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(AND(F{$rowNum}=\"\",G{$rowNum}=\"\"),\"\",IF(E{$rowNum}>=4,(F{$rowNum}+(G{$rowNum}*1.5))*300*1.5,(F{$rowNum}+(G{$rowNum}*1.5))*300)))";
-            $row[$밴딩ColIndex] = "=IF(H{$rowNum}=\"\",\"\",IF(E{$rowNum}>=4,H{$rowNum}*I{$rowNum}*3*1.5,H{$rowNum}*I{$rowNum}*3))";
+            // 가공비 섹션 수식 (0일 때 빈 문자열 반환)
+            $row[$외곽ColIndex] = "=IF(OR(A{$rowNum}=\"\",IF(E{$rowNum}>=3,(C{$rowNum}+D{$rowNum})*2*E{$rowNum},(C{$rowNum}+D{$rowNum})*5)=0),\"\",IF(E{$rowNum}>=3,(C{$rowNum}+D{$rowNum})*2*E{$rowNum},(C{$rowNum}+D{$rowNum})*5))";
+            $row[$홀탭ColIndex] = "=IF(OR(A{$rowNum}=\"\",AND(F{$rowNum}=\"\",G{$rowNum}=\"\")),\"\",IF(IF(E{$rowNum}>=4,(F{$rowNum}+(G{$rowNum}*1.5))*300*1.5,(F{$rowNum}+(G{$rowNum}*1.5))*300)=0,\"\",IF(E{$rowNum}>=4,(F{$rowNum}+(G{$rowNum}*1.5))*300*1.5,(F{$rowNum}+(G{$rowNum}*1.5))*300)))";
+            $row[$밴딩ColIndex] = "=IF(OR(H{$rowNum}=\"\",IF(E{$rowNum}>=4,H{$rowNum}*I{$rowNum}*3*1.5,H{$rowNum}*I{$rowNum}*3)=0),\"\",IF(E{$rowNum}>=4,H{$rowNum}*I{$rowNum}*3*1.5,H{$rowNum}*I{$rowNum}*3))";
             // 용접, 연마는 수동 입력
-            $row[$후처리ColIndex] = "=IF(J{$rowNum}=\"\",\"\",ROUND(IF(J{$rowNum}=\"E\",C{$rowNum}*D{$rowNum}*0.15,IF(J{$rowNum}=\"N\",C{$rowNum}*D{$rowNum}*0.12,IF(J{$rowNum}=\"A\",C{$rowNum}*D{$rowNum}*0.075,IF(J{$rowNum}=\"P\",C{$rowNum}*D{$rowNum}*0.025,C{$rowNum}*D{$rowNum}*0.04)))),0))";
+            $row[$후처리ColIndex] = "=IF(OR(J{$rowNum}=\"\",ROUND(IF(J{$rowNum}=\"E\",C{$rowNum}*D{$rowNum}*0.15,IF(J{$rowNum}=\"N\",C{$rowNum}*D{$rowNum}*0.12,IF(J{$rowNum}=\"A\",C{$rowNum}*D{$rowNum}*0.075,IF(J{$rowNum}=\"P\",C{$rowNum}*D{$rowNum}*0.025,C{$rowNum}*D{$rowNum}*0.04)))),0)=0),\"\",ROUND(IF(J{$rowNum}=\"E\",C{$rowNum}*D{$rowNum}*0.15,IF(J{$rowNum}=\"N\",C{$rowNum}*D{$rowNum}*0.12,IF(J{$rowNum}=\"A\",C{$rowNum}*D{$rowNum}*0.075,IF(J{$rowNum}=\"P\",C{$rowNum}*D{$rowNum}*0.025,C{$rowNum}*D{$rowNum}*0.04)))),0))";
             // 기타는 수동 입력
-            $row[$가공비소계ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUND(SUM(P{$rowNum}:V{$rowNum}),0))";
+            $row[$가공비소계ColIndex] = "=IF(OR(A{$rowNum}=\"\",ROUND(SUM(P{$rowNum}:V{$rowNum}),0)=0),\"\",ROUND(SUM(P{$rowNum}:V{$rowNum}),0))";
 
-            // 기타 섹션 수식
-            $row[$이익ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUND((W{$rowNum}+O{$rowNum})*0.15,0))";
-            $row[$최종수량ColIndex] = "=IF(K{$rowNum}=\"\",\"\",K{$rowNum})";
-            $row[$최종단가ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUNDUP(X{$rowNum}+W{$rowNum}+O{$rowNum},-2))";
-            $row[$금액ColIndex] = "=IF(A{$rowNum}=\"\",\"\",Z{$rowNum}*Y{$rowNum})"; // 금액 (최종 단가 * 수량)
+            // 기타 섹션 수식 (0일 때 빈 문자열 반환)
+            $row[$이익ColIndex] = "=IF(OR(A{$rowNum}=\"\",ROUND((W{$rowNum}+O{$rowNum})*0.15,0)=0),\"\",ROUND((W{$rowNum}+O{$rowNum})*0.15,0))";
+            $row[$최종수량ColIndex] = "=IF(OR(K{$rowNum}=\"\",K{$rowNum}=0),\"\",K{$rowNum})";
+            $row[$최종단가ColIndex] = "=IF(OR(A{$rowNum}=\"\",ROUNDUP(X{$rowNum}+W{$rowNum}+O{$rowNum},-2)=0),\"\",ROUNDUP(X{$rowNum}+W{$rowNum}+O{$rowNum},-2))";
+            $row[$금액ColIndex] = "=IF(OR(A{$rowNum}=\"\",Z{$rowNum}*Y{$rowNum}=0),\"\",Z{$rowNum}*Y{$rowNum})";
             $initialData[] = $row;
+        }
+
+        // 견적서 초기 데이터 템플릿
+        $견적서RowTemplate = [
+            '', // 도면번호/품명 (수식으로 자동 설정됨)
+            '', // 소재 (수식으로 자동 설정됨)
+            '', // 수량 (수식으로 자동 설정됨)
+            '', // 단위 (수식으로 자동 설정됨)
+            '', // 단가 (수식으로 자동 설정됨)
+            '', // 금액 (수식으로 자동 설정됨)
+            '', // 비고
+        ];
+
+        // 견적서 초기 데이터 생성 (3행)
+        $견적서InitialData = [];
+        for ($i = 0; $i < 3; $i++) {
+            $row = $견적서RowTemplate;
+            // Handsontable은 0부터 시작, Excel은 5행부터 시작
+            $rowNum = $i + 1;
+
+            // 견적서 수식 설정 (내역서 참조)
+            $row[0] = "=IF('내역서'!A{$rowNum}=\"\",\"\",'내역서'!A{$rowNum})"; // 도면번호/품명
+            $row[1] = "=IF('내역서'!B{$rowNum}=\"\",\"\",'내역서'!B{$rowNum})"; // 소재
+            $row[2] = "='내역서'!Y{$rowNum}"; // 수량
+            $row[3] = "=IF(A{$rowNum}=\"\",\"\",\"EA\")"; // 단위
+            $row[4] = "='내역서'!Z{$rowNum}"; // 단가
+            $row[5] = "='내역서'!AA{$rowNum}"; // 금액
+            // 비고는 빈 값
+
+            $견적서InitialData[] = $row;
         }
 
         $sheets = [
@@ -316,36 +346,36 @@ class api extends MY_Controller
                         '', // 금액 (빈 공간)
                         '', // 비고 (빈 공간)
                     ],
-                    [
-                        'A',
-                        'B',
-                        'C',
-                        'D',
-                        'E',
-                        'F',
-                        'G',
-                        'H',
-                        'I',
-                        'J',
-                        'K',
-                        'L',
-                        'M',
-                        'N',
-                        'O',
-                        'P',
-                        'Q',
-                        'R',
-                        'S',
-                        'T',
-                        'U',
-                        'V',
-                        'W',
-                        'X',
-                        'Y',
-                        'Z',
-                        'AA',
-                        'AB'
-                    ],
+                    // [
+                    //     'A',
+                    //     'B',
+                    //     'C',
+                    //     'D',
+                    //     'E',
+                    //     'F',
+                    //     'G',
+                    //     'H',
+                    //     'I',
+                    //     'J',
+                    //     'K',
+                    //     'L',
+                    //     'M',
+                    //     'N',
+                    //     'O',
+                    //     'P',
+                    //     'Q',
+                    //     'R',
+                    //     'S',
+                    //     'T',
+                    //     'U',
+                    //     'V',
+                    //     'W',
+                    //     'X',
+                    //     'Y',
+                    //     'Z',
+                    //     'AA',
+                    //     'AB'
+                    // ],
                 ],
                 'colWidths' => [
                     80,  // 도번
@@ -384,61 +414,50 @@ class api extends MY_Controller
             ],
             [
                 'name' => '견적서',
-                'data' => [
-                    [], // ^ 데이터
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                ],
+                'data' => $견적서InitialData,
                 'columns' => [
                     [
-                        'title'     => '품목',
-                        'type'      => 'dropdown',
-
-                        // ^ 드롭다운 샘플 데이터
-                        'source'    => $source,
+                        'title'     => '도면번호/품명',
+                        'className' => 'htCenter',
                     ],
                     [
-                        'title' => '규격',
+                        'title' => '소재',
+                        'className' => 'htCenter',
                     ],
                     [
                         'title' => '수량',
                         'type' => 'numeric',
+                        'className' => 'htRight',
                         'numericFormat' => [
                             'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
                         ],
+                    ],
+                    [
+                        'title' => '단위',
+                        'className' => 'htCenter',
                     ],
                     [
                         'title' => '단가',
                         'type' => 'numeric',
-                        'className' => 'ht-yellow-bg',
+                        'className' => 'ht-yellow-bg htRight',
                         'numericFormat' => [
                             'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
                         ],
                     ],
                     [
-                        'title' => '공급가액',
+                        'title' => '금액',
                         'type' => 'numeric',
-                        'className' => 'ht-red-text',
-                        'numericFormat' => [
-                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
-                        ],
-                    ],
-                    [
-                        'title' => '세액',
-                        'type' => 'numeric',
-                        'className' => 'ht-red-text',
+                        'className' => 'ht-yellow-bg htRight',
                         'numericFormat' => [
                             'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
                         ],
                     ],
                     [
                         'title' => '비고',
+                        'className' => 'htCenter',
                     ]
                 ],
-                'colWidths' => [360, 60, 60, 100, 120, 100, 80],
+                'colWidths' => [220, 60, 60, 100, 140, 140, 80],
                 'height' => 300,
             ],
         ];

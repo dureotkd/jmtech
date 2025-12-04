@@ -22,13 +22,13 @@ const SheetSection = ({
   theme = "light",
   subType = "G",
 }) => {
-  console.log("Render SheetSection");
   const hotRef = React.useRef(null);
   const {
     activeSheet = sheets[0]?.name,
     setActiveSheet,
     registerHotRef,
-    getHotRef,
+    hotRefs,
+    getActiveHotRef,
   } = useExcelStore((state) => state);
 
   // ✅ HyperFormula 엔진 생성 (전역 1개)
@@ -55,18 +55,22 @@ const SheetSection = ({
   }, [activeSheet, registerHotRef]);
 
   const showSheet = (sheetName) => {
+    console.log("🚀 Debug: ~ showSheet ~ sheetName:", sheetName);
+    /**
+     * * ---------- 이떄 행 체크해서 탭끼리 행의 개수를 맞추는 로직이 필요함 ----------
+     */
     setActiveSheet(sheetName);
   };
 
-  const columnsWithHeader = (activeSheetOptions.columns || []).map(
-    (col, index) => {
-      const alphabet = String.fromCharCode(65 + index);
-      return {
-        ...col,
-        title: `${col.title || ""} ${alphabet}`,
-      };
-    }
-  );
+  // const columnsWithHeader = (activeSheetOptions.columns || []).map(
+  //   (col, index) => {
+  //     const alphabet = String.fromCharCode(65 + index);
+  //     return {
+  //       ...col,
+  //       title: `${col.title || ""} ${alphabet}`,
+  //     };
+  //   }
+  // );
 
   // nestedHeaders 배열을 Handsontable 형식으로 변환
   // nestedHeaders는 이미 2차원 배열 형태로 전달됨
@@ -91,8 +95,6 @@ const SheetSection = ({
           })
         )
       : undefined;
-
-  console.log(nestedHeadersArray);
 
   const themeStyles = {
     light: {
@@ -138,7 +140,7 @@ const SheetSection = ({
         ref={hotRef}
         themeName="ht-theme-main"
         className={`hot-table-theme-${theme}`}
-        columns={columnsWithHeader}
+        columns={activeSheetOptions.columns}
         data={activeSheetOptions.data || []}
         colWidths={activeSheetOptions.colWidths || 100}
         height={activeSheetOptions.height || "auto"}
@@ -148,9 +150,7 @@ const SheetSection = ({
         viewportColumnRenderingOffset={5}
         viewportColumnRenderingThreshold={10}
         afterRender={() => {}}
-        beforeChange={function (changes, source) {
-          console.log("beforeChange");
-        }}
+        beforeChange={function (changes, source) {}}
         afterCreateRow={(row, amount) => {
           // 새 행이 추가될 때 비중 컬럼에 수식 설정
           if (activeSheet === "내역서") {
@@ -172,7 +172,6 @@ const SheetSection = ({
                 // * 0번쨰 품목 수정시
                 if (changes[0][3]?.key) {
                   changes.forEach(([row, prop, oldValue, newValue]) => {
-                    console.log(oldValue, newValue);
                     if (prop === 0 && oldValue !== newValue.title) {
                       this.setDataAtCell(row, 0, newValue.title); // * 품목
                     }
@@ -181,8 +180,6 @@ const SheetSection = ({
 
                 changes.forEach(([row, prop, oldValue, newValue]) => {
                   if (prop === 2 || prop === 3) {
-                    console.log(row, prop, newValue, vatType);
-
                     let targetValue = "";
 
                     // * 수량
@@ -208,7 +205,6 @@ const SheetSection = ({
                       case "N": // 부가세 별도
                         supply = total;
                         tax = Math.round(supply * 0.1);
-                        console.log("🚀 Debug: ~ SheetSection ~ tax:", tax);
                         break;
 
                       case "X": // 면세
@@ -225,10 +221,6 @@ const SheetSection = ({
 
                     setTimeout(() => {
                       const hotData = hotRef.current.hotInstance.getData();
-                      console.log(
-                        "🚀 Debug: ~ SheetSection ~ hotData:",
-                        hotData
-                      );
                       const sumAmount = hotData.reduce((acc, cur) => {
                         const supplyValue = parseFloat(cur[4]) || 0;
                         const taxValue = parseFloat(cur[5]) || 0;
@@ -258,8 +250,6 @@ const SheetSection = ({
 
                 changes.forEach(([row, prop, oldValue, newValue]) => {
                   if (prop === 3 || prop === 4) {
-                    console.log(row, prop, newValue, vatType);
-
                     let targetValue = "";
 
                     // * 수량
@@ -285,7 +275,6 @@ const SheetSection = ({
                       case "N": // 부가세 별도
                         supply = total;
                         tax = Math.round(supply * 0.1);
-                        console.log("🚀 Debug: ~ SheetSection ~ tax:", tax);
                         break;
 
                       case "X": // 면세
@@ -302,10 +291,6 @@ const SheetSection = ({
 
                     setTimeout(() => {
                       const hotData = hotRef.current.hotInstance.getData();
-                      console.log(
-                        "🚀 Debug: ~ SheetSection ~ hotData:",
-                        hotData
-                      );
                       const sumAmount = hotData.reduce((acc, cur) => {
                         const supplyValue = parseFloat(cur[5]) || 0;
                         const taxValue = parseFloat(cur[6]) || 0;

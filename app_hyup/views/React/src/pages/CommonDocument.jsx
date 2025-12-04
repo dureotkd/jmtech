@@ -707,6 +707,13 @@ export default function CommonDocument() {
                 if (!hot || hot.isDestroyed) return;
                 if (hot.countRows() > 1) {
                   hot.alter("remove_row", hot.countRows() - 1);
+
+                  console.log(hotRefs["내역서"] === hotRefs["견적서"]);
+
+                  // hotRefs["견적서"].alter(
+                  //   "remove_row",
+                  //   hotRefs["견적서"].countRows() - 1
+                  // );
                 }
               }}
               className="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition"

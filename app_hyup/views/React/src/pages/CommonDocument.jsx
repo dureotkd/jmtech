@@ -127,14 +127,13 @@ export default function CommonDocument() {
 
     console.log(hotRefs);
 
-    const hot = hotRefs[subTypeKorean];
-    const hots = hot.getData();
+    const hot = hotRefs[subTypeKorean].getData();
 
     let supplyAmount = 0;
     let taxAmount = 0;
 
-    if (!empty(hots[0])) {
-      hots[0].forEach((row) => {
+    if (!empty(hot)) {
+      hot.forEach((row) => {
         const 공급가액 = parseFloat(row[4]) || 0;
         const 세액 = parseFloat(row[5]) || 0;
         supplyAmount += 공급가액;
@@ -143,8 +142,7 @@ export default function CommonDocument() {
     }
 
     const cloneSheets = deepClone(sheets);
-
-    cloneSheets[0].data = hots[0];
+    cloneSheets[0].data = hot;
 
     formData.append("sheets", JSON.stringify(cloneSheets));
     formData.append("file_ids", fileIds);
@@ -174,11 +172,11 @@ export default function CommonDocument() {
 
       alert(`${subTypeKorean}가 성공적으로 저장되었습니다.`);
 
-      // if (res?.redirect_url) {
-      //   window.location.href = `${STATIC_URL}${res.redirect_url}`;
-      // }
+      if (res?.redirect_url) {
+        window.location.href = `${STATIC_URL}${res.redirect_url}`;
+      }
 
-      // window?.opener?.location.reload();
+      window?.opener?.location.reload();
     } catch (err) {
       console.error("업로드 실패:", err);
     } finally {

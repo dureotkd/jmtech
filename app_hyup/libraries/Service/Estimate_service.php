@@ -158,7 +158,7 @@ class Estimate_service
 
             $this->obj->event_log_service->견적서수정($id);
         } else if ($estimate_row['sub_type'] === 'S') {
-            $this->obj->event_log_service->수주서등록($id);
+            $this->obj->event_log_service->수주서수정($id);
         }
 
         return $res;

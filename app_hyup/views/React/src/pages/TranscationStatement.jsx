@@ -11,6 +11,7 @@ import Loading from "../components/Loading";
 import ExcelImportModal from "../components/ExcelImportModal";
 import SimpleAutocomplete from "../components/SimpleAutoComplete";
 import SheetSection from "../components/SheetSection";
+import NormalSheetSection from "../components/NormalSheetSection";
 
 /**
  * ^ 거래명세표 페이지 컴포넌트
@@ -25,7 +26,8 @@ function TranscationStatement() {
   const id = queryString.get("id") ?? "";
   const type = queryString.get("type") ?? "BUY"; // * SELL / BUY (판매,구매)
   const subType = queryString.get("sub_type") ?? "MI"; // * MI / MO (매입,매출)
-
+  const subTypeKorean =
+    subType === "MI" ? "매입 거래명세표" : "매출 거래명세표";
   // * title 설정
   const { hotRefs, getActiveHotRef, setActiveSheet } = useExcelStore(
     (state) => state
@@ -87,12 +89,9 @@ function TranscationStatement() {
   const { 공급가액합계, 세액합계 } = React.useMemo(() => {
     let total1 = 0;
     let total2 = 0;
-
-    const 견적서 = sheets.find((sheet) => sheet.name === "견적서");
-    console.log("🚀 Debug: ~ TranscationStatement ~ 견적서:", 견적서.data);
-
-    if (견적서.data) {
-      견적서.data.forEach((row) => {
+    const row = sheets[0];
+    if (row.data) {
+      row.data.forEach((row) => {
         console.log(row);
         const 공급가액 = parseFloat(row[5]) || 0;
         const 세액 = parseFloat(row[6]) || 0; // ✅ 세액 컬럼도 더하기
@@ -147,7 +146,7 @@ function TranscationStatement() {
 
   // * 초기 엑셀 템플릿 로드
   const loadExcelTemplate = async () => {
-    const res = await purchaseApi.초기엑셀템플릿();
+    const res = await purchaseApi.초기엑셀템플릿(subType);
     setSheets(res);
   };
 
@@ -410,9 +409,6 @@ function TranscationStatement() {
 
         // * 거래처 목록 로드
         await loadPartnerList();
-
-        // * 시트 이벤트 등록 (한바퀴 돌아야 Formula 적용 가능)
-        await registerSheetEvents();
       } catch (error) {
         console.log("zz");
       } finally {
@@ -666,22 +662,8 @@ function TranscationStatement() {
             <button
               type="button"
               onClick={() => {
-                document.getElementById("my_modal_1").showModal();
-              }}
-              className="flex items-center gap-1 border border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs"
-            >
-              <img
-                width="16"
-                alt="Logo of Microsoft Excel since 2019"
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Microsoft_Office_Excel_%282019%E2%80%932025%29.svg/32px-Microsoft_Office_Excel_%282019%E2%80%932025%29.svg.png?20190925171014"
-              />
-              <span>일괄등록</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                const hot = getActiveHotRef();
+                console.log(hotRefs);
+                const hot = hotRefs[subTypeKorean];
                 if (!hot || hot.isDestroyed) return;
                 hot.alter("insert_row_above", hot.countRows());
               }}
@@ -695,7 +677,7 @@ function TranscationStatement() {
             <button
               type="button"
               onClick={() => {
-                const hot = getActiveHotRef();
+                const hot = hotRefs[subTypeKorean];
                 if (!hot || hot.isDestroyed) return;
                 if (hot.countRows() > 1) {
                   hot.alter("remove_row", hot.countRows() - 1);
@@ -711,12 +693,12 @@ function TranscationStatement() {
         </div>
 
         <div className={`border-2 ${tableTheme.border} mx-[9px]`}>
-          <SheetSection
+          <NormalSheetSection
             theme={subType === "MI" ? "blue" : "red"}
-            subType={subType}
             sheets={sheets}
             vatType={form.vat_type}
             setAmount={setAmount}
+            subType={subType}
           />
 
           {/* 하단 입력 테이블 */}

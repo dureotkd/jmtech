@@ -444,22 +444,31 @@ $datetime = date('YmdHis');
         <table class="estimate">
             <thead>
                 <tr>
-                    <!-- <th>순번</th>
-                    <th>품목</th>
-                    <th>규격</th>
-                    <th>수량</th>
-                    <th>단가</th>
-                    <th>공급가액</th>
-                    <th>세액</th>
-                    <th>비고</th> -->
-                    <th>순번</th>
-                    <th>도면번호/품명</th>
-                    <th>소재</th>
-                    <th>수량</th>
-                    <th>단위</th>
-                    <th>단가</th>
-                    <th>금액</th>
-                    <th>비고</th>
+                    <?
+                    if ($estimate['sub_type'] == 'G') {
+                    ?>
+                        <th>순번</th>
+                        <th>도면번호/품명</th>
+                        <th>소재</th>
+                        <th>수량</th>
+                        <th>단위</th>
+                        <th>단가</th>
+                        <th>금액</th>
+                        <th>비고</th>
+                    <?
+                    } else {
+                    ?>
+                        <th>순번</th>
+                        <th>품목</th>
+                        <th>규격</th>
+                        <th>수량</th>
+                        <th>단가</th>
+                        <th>공급가액</th>
+                        <th>세액</th>
+                        <th>비고</th>
+                    <?
+                    }
+                    ?>
                 </tr>
             </thead>
             <tbody>
@@ -482,7 +491,17 @@ $datetime = date('YmdHis');
                                 <?= $item[2] ?>
                             </td>
                             <td class="!text-right">
-                                <?= $item[3] ?>
+                                <?
+                                if ($estimate['sub_type'] == 'G') {
+                                ?>
+                                    <?= $item[3] ?>
+                                <?
+                                } else {
+                                ?>
+                                    <?= number_format($item[3]) ?>
+                                <?
+                                }
+                                ?>
                             </td>
                             <td class="!text-right">
                                 <?= !empty($item[4]) ? number_format($item[4]) : '' ?>

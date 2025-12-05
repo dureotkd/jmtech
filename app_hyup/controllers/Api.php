@@ -58,22 +58,6 @@ class api extends MY_Controller
     public function load_excel_template()
     {
 
-        // $items = $this->service_model->get_item('all', [
-        //     "is_active = 1"
-        // ]);
-
-        // $source = [];
-
-        // if (!empty($items)) {
-        //     foreach ($items as $item) {
-        //         $source[] = [
-        //             'key'   => $item['id'],
-        //             'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
-        //             'title' => $item['item_name'],
-        //         ];
-        //     }
-        // }
-
         /**
          * * columns 컬럼 정보
          */
@@ -476,6 +460,7 @@ class api extends MY_Controller
     # Handsontable Excel 템플릿 Load Init (거래명세표)
     public function load_excel_template_v2()
     {
+        $sub_type = $this->input->get('sub_type') ?? '';
 
         $items = $this->service_model->get_item('all', [
             "is_active = 1"
@@ -495,7 +480,8 @@ class api extends MY_Controller
 
         $sheets = [
             [
-                'name' => '견적서',
+                'name' => $sub_type === 'MI' ? '매입 거래명세표' : '매출 거래명세표',
+                'key' => $sub_type,
                 'data' => [
                     [], // ^ 데이터
                     [],
@@ -569,37 +555,6 @@ class api extends MY_Controller
                     ]
                 ],
                 'colWidths' => [110, 250, 60, 60, 100, 120, 100, 80],
-                'height' => 'auto',
-            ],
-            [
-                'name' => '내역서',
-                'data' => [
-                    ["='견적서'!D2"],  // ✅ 교차시트 수식
-                    [],
-                    [],
-                ],
-                'columns' => [
-                    ['title' => '품목'],
-                    [
-                        'title' => '규격',
-                    ],
-                    [
-                        'title' => '수량',
-                    ],
-                    [
-                        'title' => '단가',
-                    ],
-                    [
-                        'title' => '공급가액',
-                    ],
-                    [
-                        'title' => '세액',
-                    ],
-                    [
-                        'title' => '비고',
-                    ]
-                ],
-                'colWidths' => [300, 100, 60, 100, 120, 100, 100],
                 'height' => 'auto',
             ],
         ];

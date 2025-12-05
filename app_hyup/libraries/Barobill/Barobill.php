@@ -53,17 +53,17 @@ Return
 
           $TaxInvoice = array(
                // 📦 세금계산서 기본정보
-               'IssueDirection' => 1,   // 발급방향 (int) [필수] 1: 정발급, 2: 역발행
-               'TaxInvoiceType' => 1,   // 세금계산서 형태 (int) [필수] 1: 세금계산서, 2: 계산서, 4: 위수탁세금계산서, 5: 위수탁계산서
+               'IssueDirection' => 1,   // * 발급방향 (int) *필수* 1: 정발급, 2: 역발행 (그냥 정발급)
+               'TaxInvoiceType' => 1,   // * 세금계산서 형태 (int) *필수* 1: 세금계산서, 2: 계산서, 4: 위수탁세금계산서, 5: 위수탁계산서 (그냥 세금계산서)
                'ModifyCode' => '',      // 수정사유 코드 (string, 1자리) [선택] 1: 기재사항 착오/정정, 2: 공급가액 변동, 3: 환입, 4: 계약 해제, 5: 내국신용장 사후개설, 6: 이중발급
-               'TaxType' => 1,          // 과세형태 (int) [필수] 1: 과세, 2: 영세, 3: 면세
-               'PurposeType' => 2,      // 영수/청구 형태 (int) [필수] 1: 영수, 2: 청구
-               'WriteDate' => '',       // 작성일자 (string, 8자리) [필수] YYYYMMDD 형식 (미입력 시 오늘 날짜)
+               'TaxType' => 1,          // * 과세형태 (int) *필수* 1: 과세, 2: 영세, 3: 면세 (그냥 과세)
+               'PurposeType' => 2,      // * 영수/청구 형태 (int) *필수* 1: 영수, 2: 청구 
+               'WriteDate' => '',       // * 작성일자 (string, 8자리) *필수* YYYYMMDD 형식 (미입력 시 오늘 날짜)
 
                // 💰 금액 관련
-               'AmountTotal' => '',     // 공급가액 (string, 18자리) [필수] 숫자만 입력 (-99999999999999999 ~ 999999999999999999)
-               'TaxTotal' => '',        // 세액 (string, 18자리) [필수]
-               'TotalAmount' => '',     // 합계금액 (string, 18자리) [필수]
+               'AmountTotal' => '',     // * 공급가액 (string, 18자리) *필수* 숫자만 입력 (-99999999999999999 ~ 999999999999999999)
+               'TaxTotal' => '',        // * 세액 (string, 18자리) *필수*
+               'TotalAmount' => '',     // * 합계금액 (string, 18자리) *필수*
                'Cash' => '',            // 현금 (string, 18자리) [선택]
                'ChkBill' => '',         // 수표 (string, 18자리) [선택]
                'Note' => '',            // 어음 (string, 18자리) [선택]
@@ -80,10 +80,10 @@ Return
                // 🏢 공급자 정보 (InvoicerParty)
                'InvoicerParty' => [
                     'MgtNum' => '',       // 문서관리번호 (string) [선택]
-                    'CorpNum' => '',      // 사업자번호 (string, 10~13자리) [필수]
+                    'CorpNum' => '',      // * 사업자번호 (string, 10~13자리) *필수*
                     'TaxRegID' => '',     // 종사업장 식별번호 (string, 4) [선택]
-                    'CorpName' => '',     // 회사명 (string, 200) [필수]
-                    'CEOName' => '',      // 대표자명 (string, 100) [필수]
+                    'CorpName' => '',     // * 회사명 (string, 200) *필수*
+                    'CEOName' => '',      // * 대표자명 (string, 100) *필수*
                     'Addr' => '',         // 주소 (string, 300) [선택]
                     'BizType' => '',      // 업태 (string, 100) [선택]
                     'BizClass' => '',     // 종목 (string, 100) [선택]
@@ -97,10 +97,10 @@ Return
                // 🧾 공급받는자 정보 (InvoiceeParty)
                'InvoiceeParty' => [
                     'MgtNum' => '',       // 문서관리번호 (string) [선택]
-                    'CorpNum' => '',      // 사업자번호 (string, 10~13자리) [필수]
+                    'CorpNum' => '',      // * 사업자번호 (string, 10~13자리) *필수*
                     'TaxRegID' => '',     // 종사업장 식별번호 (string, 4) [선택]
-                    'CorpName' => '',     // 회사명 (string, 200) [필수]
-                    'CEOName' => '',      // 대표자명 (string, 100) [필수]
+                    'CorpName' => '',     // * 회사명 (string, 200) *필수*
+                    'CEOName' => '',      // * 대표자명 (string, 100) *필수*
                     'Addr' => '',         // 주소 (string, 300) [선택]
                     'BizType' => '',      // 업태 (string, 100) [선택]
                     'BizClass' => '',     // 종목 (string, 100) [선택]
@@ -111,34 +111,34 @@ Return
                     'Email' => '',        // 이메일 (string, 100) [선택]
                ],
 
-               // 🤝 수탁자 정보 (BrokerParty)
-               'BrokerParty' => [
-                    'MgtNum' => '',       // 문서관리번호 (string) [선택]
-                    'CorpNum' => '',      // 사업자번호 (string, 10~13자리) [필수 - 위수탁 시]
-                    'TaxRegID' => '',     // 종사업장 식별번호 (string, 4) [선택]
-                    'CorpName' => '',     // 회사명 (string, 200) [필수 - 위수탁 시]
-                    'CEOName' => '',      // 대표자명 (string, 100) [필수 - 위수탁 시]
-                    'Addr' => '',         // 주소 (string, 300) [선택]
-                    'BizType' => '',      // 업태 (string, 100) [선택]
-                    'BizClass' => '',     // 종목 (string, 100) [선택]
-                    'ContactID' => '',    // 담당자 아이디 (string) [선택]
-                    'ContactName' => '',  // 담당자명 (string) [선택]
-                    'TEL' => '',          // 전화번호 (string) [선택]
-                    'HP' => '',           // 휴대폰 (string) [선택]
-                    'Email' => '',        // 이메일 (string, 100) [선택]
-               ],
+               // 🤝 수탁자 정보 (BrokerParty) 
+               // 'BrokerParty' => [
+               //      'MgtNum' => '',       // 문서관리번호 (string) [선택]
+               //      'CorpNum' => '',      // * 사업자번호 (string, 10~13자리) *필수 - 위수탁 시*
+               //      'TaxRegID' => '',     // 종사업장 식별번호 (string, 4) [선택]
+               //      'CorpName' => '',     // * 회사명 (string, 200) *필수 - 위수탁 시*
+               //      'CEOName' => '',      // * 대표자명 (string, 100) *필수 - 위수탁 시*
+               //      'Addr' => '',         // 주소 (string, 300) [선택]
+               //      'BizType' => '',      // 업태 (string, 100) [선택]
+               //      'BizClass' => '',     // 종목 (string, 100) [선택]
+               //      'ContactID' => '',    // 담당자 아이디 (string) [선택]
+               //      'ContactName' => '',  // 담당자명 (string) [선택]
+               //      'TEL' => '',          // 전화번호 (string) [선택]
+               //      'HP' => '',           // 휴대폰 (string) [선택]
+               //      'Email' => '',        // 이메일 (string, 100) [선택]
+               // ],
 
                // 📋 품목 상세 목록 (최대 99개)
                'TaxInvoiceTradeLineItems' => [
                     'TaxInvoiceTradeLineItem' => [
                          [
-                              'PurchaseExpiry' => '',  // 거래일자 (string) [필수] YYYYMMDD
-                              'Name' => '',            // 품목명 (string, 100) [필수]
+                              'PurchaseExpiry' => '',  // * 거래일자 (string) *필수* YYYYMMDD
+                              'Name' => '',            // * 품목명 (string, 100) *필수*
                               'Information' => '',     // 규격 (string, 40) [선택]
                               'ChargeableUnit' => '',  // 단위 (string, 10) [선택]
                               'UnitPrice' => '',       // 단가 (string, 18) [선택]
-                              'Amount' => '',          // 공급가액 (string, 18) [필수]
-                              'Tax' => '',             // 세액 (string, 18) [필수]
+                              'Amount' => '',          // * 공급가액 (string, 18) *필수*
+                              'Tax' => '',             // * 세액 (string, 18) *필수*
                               'Description' => '',     // 비고 (string, 200) [선택]
                          ],
                          // ... 추가 품목 가능 (최대 99개)
@@ -147,10 +147,10 @@ Return
 
                // 🔗 기타 부가 정보
                'OriginalNTSSendKey' => '',  // 국세청 승인번호 (string, 24) [선택] 수정세금계산서일 경우 원본 승인번호
-               'ChargeDirection' => '',     // 발급비용 과금대상 (int) [선택] 역발행 시 필수 (1: 공급자, 2: 공급받는자)
-               'SMSSendYN' => 0,            // SMS 전송 여부 (int) [필수] 0: 미전송, 1: 전송
-               'BusinessLicenseYN' => 0,    // 사업자등록증 첨부 여부 (int) [필수] 0: 미첨부, 1: 첨부
-               'BankBookYN' => 0,           // 통장 사본 첨부 여부 (int) [필수] 0: 미첨부, 1: 첨부
+               'ChargeDirection' => '',     // 발급비용 과금대상 (int) [선택] 역발행 시 *필수* (1: 공급자, 2: 공급받는자)
+               'SMSSendYN' => 0,            // * SMS 전송 여부 (int) *필수* 0: 미전송, 1: 전송
+               'BusinessLicenseYN' => 0,    // * 사업자등록증 첨부 여부 (int) *필수* 0: 미첨부, 1: 첨부
+               'BankBookYN' => 0,           // * 통장 사본 첨부 여부 (int) *필수* 0: 미첨부, 1: 첨부
                'Memo' => '',                // 메모 (string, 200) [선택]
                'EmailTitle' => '',          // 이메일 제목 (string, 200) [선택] 미입력 시 기본 제목 사용
           );
@@ -243,7 +243,10 @@ No	변수명	타입	길이	필수	설명
           ];
 
           $Result = $this->BaroService_TI->GetPeriodTaxInvoiceSalesList($params)->GetPeriodTaxInvoiceSalesListResult;
-
+          echo '<pre>';
+          print_r($Result);
+          echo '</pre>';
+          exit;
           if ($Result->CurrentPage < 0) { // 호출 실패
 
                return [];

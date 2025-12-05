@@ -54,7 +54,7 @@ class api extends MY_Controller
         echo json_encode($user);
     }
 
-    # Excel 템플릿 Load Init
+    # Handsontable Excel 템플릿 Load Init (견적서)
     public function load_excel_template()
     {
 
@@ -473,7 +473,7 @@ class api extends MY_Controller
         exit;
     }
 
-    # Excel 템플릿 Load Init (거래명세표)
+    # Handsontable Excel 템플릿 Load Init (거래명세표)
     public function load_excel_template_v2()
     {
 
@@ -601,6 +601,102 @@ class api extends MY_Controller
                 ],
                 'colWidths' => [300, 100, 60, 100, 120, 100, 100],
                 'height' => 'auto',
+            ],
+        ];
+
+        echo json_encode($sheets);
+        exit;
+    }
+
+    # Handsontable Excel 템플릿 Load Init (발주서,수주서)
+    public function load_excel_template_v3()
+    {
+        $sub_type = $this->input->get('sub_type') ?? '';
+
+        switch ($sub_type) {
+            case 'B':
+                $sheet_name = '발주서';
+                break;
+            case 'S':
+                $sheet_name = '수주서';
+                break;
+        }
+
+        $items = $this->service_model->get_item('all', [
+            "is_active = 1"
+        ]);
+
+        $source = [];
+
+        if (!empty($items)) {
+            foreach ($items as $item) {
+                $source[] = [
+                    'key'   => $item['id'],
+                    'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
+                    'title' => $item['item_name'],
+                ];
+            }
+        }
+
+        $sheets = [
+            [
+                'name' => $sheet_name,
+                'data' => [
+                    [], // ^ 데이터
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                ],
+                'columns' => [
+                    [
+                        'title'     => '품목',
+                        'type'      => 'dropdown',
+
+                        // ^ 드롭다운 샘플 데이터
+                        'source'    => $source,
+                    ],
+                    [
+                        'title' => '규격',
+                    ],
+                    [
+                        'title' => '수량',
+                        'type' => 'numeric',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '단가',
+                        'type' => 'numeric',
+                        'className' => 'ht-yellow-bg',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '공급가액',
+                        'type' => 'numeric',
+                        'className' => 'ht-red-text',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '세액',
+                        'type' => 'numeric',
+                        'className' => 'ht-red-text',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
+                    ],
+                    [
+                        'title' => '비고',
+                    ]
+                ],
+                'colWidths' => [360, 60, 60, 100, 120, 100, 80],
+                'height' => 300,
             ],
         ];
 
@@ -738,7 +834,6 @@ class api extends MY_Controller
     public function save_estimate()
     {
         $id = $this->input->post('id') ?? '';
-
         $tab = $this->input->post('tab') ?? ''; // * copay (복사)
         $type = $this->input->post('type') ?? ''; // * sell / buy (판매,구매)
         $sub_type = $this->input->post('sub_type') ?? ''; // * g / s (견적서,수주서)

@@ -1,6 +1,7 @@
 import React from "react";
 
 import Loading from "../components/Loading";
+import SheetSection from "../components/SheetSection";
 import ExcelImportModal from "../components/ExcelImportModal";
 import SimpleAutocomplete from "../components/SimpleAutoComplete";
 
@@ -11,27 +12,25 @@ import request, { STATIC_URL } from "../utils/request";
 import estimateApi from "../apis/estimateApi";
 
 import { useExcelStore } from "../store/useExcelStore";
-import NormalSheetSection from "../components/NormalSheetSection";
 
 /**
  * ^ 공통문서 페이지 컴포넌트
- * * * [수주서,발주서]
+ * * * [견적서]
  * @returns
  */
-export default function CommonDocument() {
+export default function EstimateDocument() {
   // ? & (queryString)
   const queryString = new URLSearchParams(window.location.search);
 
   const tab = queryString.get("tab") ?? ""; // * copay (복사)
   const id = queryString.get("id") ?? "";
   const type = queryString.get("type") ?? "SELL"; // * SELL / BUY (판매,구매)
-  const subType = queryString.get("sub_type") ?? ""; // * G / S (견적서,수주서)
-  const subTypeKorean = subType === "S" ? "수주서" : "발주서";
+  const subType = queryString.get("sub_type") ?? "G"; // * G / S (견적서,수주서)
+
   // * title 설정
 
-  const { hotRefs, getActiveHotRef, setActiveSheet } = useExcelStore(
-    (state) => state
-  );
+  const { hotRefs, getActiveHotRef, setActiveSheet, activeSheet, hfInstance } =
+    useExcelStore((state) => state);
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
     parent_id: "",
@@ -54,6 +53,21 @@ export default function CommonDocument() {
   const [partners, setPartners] = React.useState([]);
   const [sheets, setSheets] = React.useState([
     // * 모의 데이터 (템플릿은 PHP 서버에서 가져옴)
+    {
+      name: "내역서",
+      data: [],
+      columns: [
+        { title: "품목" },
+        { title: "규격" },
+        { title: "수량" },
+        { title: "단가" },
+        { title: "공급가액" },
+        { title: "세액" },
+        { title: "비고" },
+      ],
+      colWidths: [278, 100, 80, 100, 120, 100, 150],
+      height: 400,
+    },
     {
       name: "견적서",
       data: [],
@@ -106,7 +120,7 @@ export default function CommonDocument() {
 
   // * 초기 엑셀 템플릿 로드
   const loadExcelTemplate = async () => {
-    const res = await estimateApi.초기엑셀템플릿(subType);
+    const res = await estimateApi.견적서초기엑셀템플릿();
     setSheets(res);
   };
 
@@ -114,6 +128,18 @@ export default function CommonDocument() {
   const loadPartnerList = async () => {
     const res = await estimateApi.거래처목록();
     setPartners(res);
+  };
+
+  // * 시트 이벤트 등록 (한바퀴 돌아야 Formula 적용 가능)
+  const registerSheetEvents = async () => {
+    if (!sheets.length) return;
+
+    for (let i = 0; i < sheets.length; i++) {
+      setActiveSheet(sheets[i].name);
+      await wait(500);
+    }
+
+    setActiveSheet(sheets[0].name);
   };
 
   // * 견적서 저장 핸들러
@@ -125,27 +151,56 @@ export default function CommonDocument() {
     const target = e.target;
     const formData = new FormData(target);
 
-    console.log(hotRefs);
+    const hot1 = hotRefs["견적서"];
+    const hot2 = hotRefs["내역서"];
 
-    const hot = hotRefs[subTypeKorean];
-    const hots = hot.getData();
+    const hots = [hot1.getData(), hot2.getData()];
+
+    const hots2 = [hot1.getSourceData(), hot2.getSourceData()];
 
     let supplyAmount = 0;
     let taxAmount = 0;
 
-    if (!empty(hots[0])) {
-      hots[0].forEach((row) => {
-        const 공급가액 = parseFloat(row[4]) || 0;
-        const 세액 = parseFloat(row[5]) || 0;
-        supplyAmount += 공급가액;
-        taxAmount += 세액;
-      });
+    switch (subType) {
+      case "G":
+        //  *
+        supplyAmount = hots[0].reduce((acc, row) => {
+          const 금액 = parseFloat(row[5]) || 0;
+          return acc + 금액;
+        }, 0);
+
+        if (form.vat_type === "Y") {
+          supplyAmount = supplyAmount / 1.1;
+          taxAmount = supplyAmount * 0.1;
+        } else if (form.vat_type === "N") {
+          taxAmount = supplyAmount * 0.1;
+        } else if (form.vat_type === "X") {
+          taxAmount = 0;
+        }
+
+        formData.append("amount", supplyAmount + taxAmount || 0);
+        break;
+      default:
+        if (!empty(hots[0])) {
+          hots[0].forEach((row) => {
+            const 공급가액 = parseFloat(row[4]) || 0;
+            const 세액 = parseFloat(row[5]) || 0;
+            supplyAmount += 공급가액;
+            taxAmount += 세액;
+          });
+        }
+
+        formData.append("amount", amount || 0);
+
+        break;
     }
 
     const cloneSheets = deepClone(sheets);
 
     cloneSheets[0].data = hots[0];
+    cloneSheets[1].data = hots[1];
 
+    formData.append("real_sheets", JSON.stringify(hots2));
     formData.append("sheets", JSON.stringify(cloneSheets));
     formData.append("file_ids", fileIds);
 
@@ -153,7 +208,6 @@ export default function CommonDocument() {
     formData.append("type", type);
     formData.append("sub_type", subType);
     formData.append("partner_id", form?.partner_id || "");
-    formData.append("amount", amount || 0);
     formData.append("supply_amount", supplyAmount || 0);
     formData.append("tax_amount", taxAmount || 0);
     formData.append("id", id || "");
@@ -168,17 +222,17 @@ export default function CommonDocument() {
       const res = await request.post("save_estimate", formData);
 
       if (!res?.ok) {
-        alert(res?.msg || `${subTypeKorean} 저장에 실패했습니다.`);
+        alert(res?.msg || "견적서 저장에 실패했습니다.");
         return;
       }
 
-      alert(`${subTypeKorean}가 성공적으로 저장되었습니다.`);
+      alert("견적서가 성공적으로 저장되었습니다.");
 
-      // if (res?.redirect_url) {
-      //   window.location.href = `${STATIC_URL}${res.redirect_url}`;
-      // }
+      if (res?.redirect_url) {
+        window.location.href = `${STATIC_URL}${res.redirect_url}`;
+      }
 
-      // window?.opener?.location.reload();
+      window?.opener?.location.reload();
     } catch (err) {
       console.error("업로드 실패:", err);
     } finally {
@@ -233,6 +287,9 @@ export default function CommonDocument() {
 
   // * 부가세 처리
   const handleVat = (e) => {
+    // * 견적서는 부가세 함수처리 안하고 백엔드에서 처리
+    if (subType === "G") return;
+
     const vatOption = e.target.value;
     const cloneSheets = deepClone(sheets);
 
@@ -293,9 +350,9 @@ export default function CommonDocument() {
         break;
     }
 
-    const data = cloneSheets[0].data;
+    const 견적서 = cloneSheets[0].data;
     let newAmount = 0;
-    data.forEach((row) => {
+    견적서.forEach((row) => {
       const 공급가액 = parseFloat(row[4]) || 0;
       const 세액 = parseFloat(row[5]) || 0;
       newAmount += 공급가액 + 세액;
@@ -313,7 +370,7 @@ export default function CommonDocument() {
         setLoading(true);
 
         if (id) {
-          // * 기존 ${subTypeKorean} 불러오기
+          // * 기존 견적서 불러오기
           await loadSaveExcelTemplate(id);
         } else {
           // * 초기 엑셀 템플릿 로드
@@ -322,6 +379,12 @@ export default function CommonDocument() {
 
         // * 거래처 목록 로드
         await loadPartnerList();
+
+        // * 시트 이벤트 등록 (한바퀴 돌아야 Formula 적용 가능)
+        if (sheets.length > 0) {
+          setActiveSheet(sheets[0].name);
+          // await registerSheetEvents();
+        }
       } catch (error) {
         alert("엑셀 템플릿 로드 중 오류가 발생했습니다.");
       } finally {
@@ -559,10 +622,159 @@ export default function CommonDocument() {
             <button
               type="button"
               onClick={() => {
-                hotRefs[subTypeKorean].alter(
-                  "insert_row_above",
-                  hotRefs[subTypeKorean].countRows()
-                );
+                console.log(hotRefs, hfInstance);
+                const hot = getActiveHotRef();
+                if (!hot || hot.isDestroyed) return;
+
+                const newRowIndex = hot.countRows();
+                // hot.alter("insert_row_above", newRowIndex);
+
+                // * 내역서에서 추가시 수식 적용
+                // * hotRefs 반복문 돌리면서 전부 insert_row_above 적용
+                Object.keys(hotRefs).forEach((sheetName) => {
+                  const hot = hotRefs[sheetName];
+                  if (!hot || hot.isDestroyed) return;
+                  if (hot.countRows() > 1) {
+                    hot.alter("insert_row_above", newRowIndex);
+
+                    if (sheetName === "내역서") {
+                      const rowNum = newRowIndex + 1; // 엑셀 행 번호 (1-based)
+
+                      // 컬럼 인덱스 정의
+                      const 비중ColIndex = 11;
+                      const 무게ColIndex = 12;
+                      const 재료비단가ColIndex = 13;
+                      const 재료비소계ColIndex = 14;
+                      const 외곽ColIndex = 15;
+                      const 홀탭ColIndex = 16;
+                      const 밴딩ColIndex = 17;
+                      const 후처리ColIndex = 20;
+                      const 가공비소계ColIndex = 22;
+                      const 이익ColIndex = 23;
+                      const 최종수량ColIndex = 24;
+                      const 최종단가ColIndex = 25;
+                      const 금액ColIndex = 26;
+
+                      // 수식 설정
+                      setTimeout(() => {
+                        // 재료비 섹션 수식
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          비중ColIndex,
+                          `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",7.93,IF(B${rowNum}="AL",2.8,7.85)))`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          무게ColIndex,
+                          `=IF(A${rowNum}="","",(C${rowNum}*D${rowNum}*E${rowNum}*L${rowNum})/1000000)`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          재료비단가ColIndex,
+                          `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",6500,IF(B${rowNum}="AL",7500,1600)))`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          재료비소계ColIndex,
+                          `=IF(A${rowNum}="","",ROUND(M${rowNum}*N${rowNum},0))`
+                        );
+
+                        // 가공비 섹션 수식
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          외곽ColIndex,
+                          `=IF(A${rowNum}="","",IF(E${rowNum}>=3,(C${rowNum}+D${rowNum})*2*E${rowNum},(C${rowNum}+D${rowNum})*5))`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          홀탭ColIndex,
+                          `=IF(A${rowNum}="","",IF(AND(F${rowNum}="",G${rowNum}=""),"",IF(E${rowNum}>=4,(F${rowNum}+(G${rowNum}*1.5))*300*1.5,(F${rowNum}+(G${rowNum}*1.5))*300)))`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          밴딩ColIndex,
+                          `=IF(H${rowNum}="","",IF(E${rowNum}>=4,H${rowNum}*I${rowNum}*3*1.5,H${rowNum}*I${rowNum}*3))`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          후처리ColIndex,
+                          `=IF(J${rowNum}="","",ROUND(IF(J${rowNum}="E",C${rowNum}*D${rowNum}*0.15,IF(J${rowNum}="N",C${rowNum}*D${rowNum}*0.12,IF(J${rowNum}="A",C${rowNum}*D${rowNum}*0.075,IF(J${rowNum}="P",C${rowNum}*D${rowNum}*0.025,C${rowNum}*D${rowNum}*0.04)))),0))`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          가공비소계ColIndex,
+                          `=IF(A${rowNum}="","",ROUND(SUM(P${rowNum}:V${rowNum}),0))`
+                        );
+
+                        // 기타 섹션 수식
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          이익ColIndex,
+                          `=IF(A${rowNum}="","",ROUND((W${rowNum}+O${rowNum})*0.15,0))`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          최종수량ColIndex,
+                          `=IF(K${rowNum}="","",K${rowNum})`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          최종단가ColIndex,
+                          `=IF(A${rowNum}="","",ROUNDUP(X${rowNum}+W${rowNum}+O${rowNum},-2))`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          금액ColIndex,
+                          `=IF(A${rowNum}="","",Z${rowNum}*Y${rowNum})`
+                        );
+                      }, 100);
+                    } else if (sheetName === "견적서") {
+                      const rowNum = newRowIndex + 1; // 엑셀 행 번호 (1-based)
+
+                      // 컬럼 인덱스 정의
+                      const 도면번호품명ColIndex = 0;
+                      const 소재ColIndex = 1;
+                      const 수량ColIndex = 2;
+                      const 단위ColIndex = 3;
+                      const 단가ColIndex = 4;
+                      const 금액ColIndex = 5;
+
+                      // 수식 설정 (내역서 참조)
+                      setTimeout(() => {
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          도면번호품명ColIndex,
+                          `=IF('내역서'!A${rowNum}="","",'내역서'!A${rowNum})`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          소재ColIndex,
+                          `=IF('내역서'!B${rowNum}="","",'내역서'!B${rowNum})`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          수량ColIndex,
+                          `='내역서'!Y${rowNum}`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          단위ColIndex,
+                          `=IF(A${rowNum}="","","EA")`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          단가ColIndex,
+                          `='내역서'!Z${rowNum}`
+                        );
+                        hot.setDataAtCell(
+                          newRowIndex,
+                          금액ColIndex,
+                          `='내역서'!AA${rowNum}`
+                        );
+                      }, 100);
+                    }
+                  }
+                });
               }}
               className="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition"
             >
@@ -574,10 +786,34 @@ export default function CommonDocument() {
             <button
               type="button"
               onClick={() => {
-                hotRefs[subTypeKorean].alter(
-                  "remove_row",
-                  hotRefs[subTypeKorean].countRows() - 1
-                );
+                // 모든 시트의 마지막 행 삭제
+                // hotRefs에서 내역서와 견적서 인스턴스 가져오기
+                const 내역서Instance = hotRefs["내역서"];
+                const 견적서Instance = hotRefs["견적서"];
+
+                // 내역서 행 삭제
+                if (
+                  내역서Instance &&
+                  !내역서Instance.isDestroyed &&
+                  내역서Instance.countRows() > 1
+                ) {
+                  내역서Instance.alter(
+                    "remove_row",
+                    내역서Instance.countRows() - 1
+                  );
+                }
+
+                // 견적서 행 삭제
+                if (
+                  견적서Instance &&
+                  !견적서Instance.isDestroyed &&
+                  견적서Instance.countRows() > 1
+                ) {
+                  견적서Instance.alter(
+                    "remove_row",
+                    견적서Instance.countRows() - 1
+                  );
+                }
               }}
               className="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition"
             >
@@ -589,13 +825,41 @@ export default function CommonDocument() {
         </div>
 
         <div className="border-2 border-black mx-[9px]">
+          {/* 시트 탭 */}
+          <div className="sheet-tabs flex border-b border-gray-300 bg-gray-100">
+            {sheets.map((sheet) => {
+              const currentTheme = {
+                base: "bg-gray-100 hover:bg-gray-200 text-gray-800",
+                active: "bg-white text-black border-gray-400",
+              };
+              return (
+                <button
+                  key={sheet.name}
+                  onClick={() => setActiveSheet(sheet.name)}
+                  type="button"
+                  className={`px-4 py-2 text-sm font-medium border-r border-gray-300 transition-colors ${
+                    activeSheet === sheet.name
+                      ? currentTheme.active
+                      : currentTheme.base
+                  }`}
+                >
+                  {sheet.name}
+                </button>
+              );
+            })}
+          </div>
+
           {/* 각 시트별 SheetSection 컴포넌트 */}
-          <NormalSheetSection
-            sheets={sheets}
-            vatType={form.vat_type}
-            setAmount={setAmount}
-            subType={subType}
-          />
+          {sheets.map((sheet) => (
+            <SheetSection
+              key={sheet.name}
+              sheetName={sheet.name}
+              sheet={sheet}
+              vatType={form.vat_type}
+              setAmount={setAmount}
+              subType={subType}
+            />
+          ))}
 
           {/* 하단 입력 테이블 */}
           <table className="w-full border-t-2 border-black text-black text-xs">

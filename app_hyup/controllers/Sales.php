@@ -1000,31 +1000,6 @@ class sales extends MY_Controller
         $this->file->download($file['file_path'], $file['file_name']);
     }
 
-    # 홈택스 자료수집
-    public function collect_hometax_sales_tax_invoice()
-    {
-
-        $res_array = [
-            'ok'    => true,
-            'msg'   => '홈택스 자료수집이 완료되었습니다.',
-            'data'  => [],
-        ];
-
-        // 전날
-        $start_date = date('Y-m-d', strtotime('-7 day'));
-        $end_date = date('Y-m-d');
-
-        try {
-
-            $this->hometax->전체자료수집($start_date, $end_date);
-        } catch (Exception $e) {
-            $res_array['ok'] = false;
-            $res_array['msg'] = $e->getMessage();
-        }
-
-        echo json_encode($res_array);
-    }
-
     # 견적서 상태 변경
     public function change_status()
     {

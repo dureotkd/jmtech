@@ -342,7 +342,7 @@
 
         $.ajax({
             type: "GET",
-            url: "/sales/collect_hometax_sales_tax_invoice",
+            url: "/sales_document/collect_hometax_sales_tax_invoice",
             dataType: "json",
             success: function(response) {
 

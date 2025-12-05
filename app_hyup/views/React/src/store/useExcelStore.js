@@ -33,7 +33,6 @@ export const useExcelStore = create((set, get) => ({
   // * 현재 활성화 시트 가져오기
   getActiveHotRef: () => {
     const { hotRefs, activeSheet } = get();
-    console.log("🚀 Debug: ~ hotRefs:", hotRefs);
     return hotRefs[activeSheet];
   },
 }));

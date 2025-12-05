@@ -113,10 +113,10 @@
                 </div>
             </div>
             <button
-                onclick="open_popup_default('<?= REACT_PATH ?>','견적서 등록',1000,820);"
+                onclick="open_popup_default('<?= REACT_PATH ?>?sub_type=S','수주서 등록',1000,820);"
                 type="button"
                 class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
-                견적서 등록 +
+                수주서 등록 +
             </button>
         </div>
     </div>

@@ -2,6 +2,7 @@ import React from "react";
 
 import "./App.css";
 import Loading from "./components/Loading";
+import EstimateDocument from "./pages/EstimateDocument";
 
 // 🔥 lazy load 적용
 const CommonDocument = React.lazy(() => import("./pages/CommonDocument"));
@@ -47,7 +48,7 @@ function App() {
 
   // 문서 매핑
   const components = {
-    G: CommonDocument,
+    G: EstimateDocument,
     S: CommonDocument,
     B: CommonDocument,
     MI: TranscationStatement,

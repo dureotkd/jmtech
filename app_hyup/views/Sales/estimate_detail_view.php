@@ -429,11 +429,11 @@ $datetime = date('YmdHis');
         <div class="flex items-center mt-2 !px-4 !py-1 !border-x-2 !border-b-2 !border-black justify-start">
             <span class="font-semibold mr-2">합&nbsp;&nbsp;계&nbsp;&nbsp;금&nbsp;&nbsp;액 : 일금 </span>
             <h2 class="!text-sm font-bold !ml-4">
-                <?= number_to_korean($estimate['amount']) ?>
-                (<?= number_format($estimate['amount']) ?>)
+                <?= number_to_korean($estimate['supply_amount']) ?>
+                <?= number_format($estimate['supply_amount']) ?>원
                 <?
                 $VAT_TYPE = unserialize(VAT_TYPE);
-                echo $VAT_TYPE[$estimate['vat_type']];
+                echo '(' . $VAT_TYPE[$estimate['vat_type']] . ')';
                 ?>
             </h2>
         </div>

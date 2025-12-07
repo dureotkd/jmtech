@@ -360,16 +360,16 @@ export default function EstimateDocument() {
         document.title = `${ESTIMATE_SUB_TYPE[subType]} 등록`;
         setLoading(true);
 
-        if (id) {
-          // * 기존 견적서 불러오기
-          await loadSaveExcelTemplate(id);
-        } else {
-          // * 초기 엑셀 템플릿 로드
-          await loadExcelTemplate();
-        }
+        // * 거래처 목록 로드는 다른 작업과 독립적이므로 병렬로 실행
+        const promises = [
+          id
+            ? loadSaveExcelTemplate(id) // * 기존 견적서 불러오기
+            : loadExcelTemplate(), // * 초기 엑셀 템플릿 로드
+          loadPartnerList(), // * 거래처 목록 로드
+        ];
 
-        // * 거래처 목록 로드
-        await loadPartnerList();
+        // * 병렬로 실행하여 속도 개선
+        await Promise.all(promises);
 
         // * 시트 이벤트 등록 (한바퀴 돌아야 Formula 적용 가능)
         if (sheets.length > 0) {

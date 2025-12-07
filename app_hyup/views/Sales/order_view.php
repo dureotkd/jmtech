@@ -14,7 +14,7 @@
 
         <div class="flex items-center gap-2 !text-xs">
 
-            <form id="searchForm" action="/sales/order" method="GET" class="flex items-center border border-gray-300 gap-2 rounded-sm overflow-hidden w-[330px] !text-xs">
+            <form id="searchForm" action="/sales/order" method="GET" class="flex items-center border border-gray-300 gap-2 rounded-sm overflow-hidden w-[330px]">
                 <input type="hidden" name="excel_yn" value="<?= $excel_yn ?>" />
                 <input type="hidden" name="page" value="<?= $page ?>" />
                 <input type="hidden" name="start_date" autocomplete="off" value="<?= $start_date ?>" />
@@ -79,11 +79,11 @@
     </div>
 
     <!-- 필터 영역 -->
-    <div class="flex items-center gap-2 mb-4 !text-sm">
+    <div class="flex items-center gap-2 mb-4 !text-xs">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
             <div class="flex items-center gap-2">
-                <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+                <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition"><input multiple="" type="file" style="display: none;">
                     삭제
                 </button>
 
@@ -115,7 +115,7 @@
             <button
                 onclick="open_popup_default('<?= REACT_PATH ?>?sub_type=S','수주서 등록',1000,820);"
                 type="button"
-                class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+                class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0] rounded-sm text-xs">
                 수주서 등록 +
             </button>
         </div>

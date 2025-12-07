@@ -149,6 +149,73 @@ class api extends MY_Controller
             $initialData[] = $row;
         }
 
+        array_push($initialData, [
+            '', // 도번
+            '', // 재질
+            // 재료비 섹션
+            '', // 가로
+            '', // 세로
+            '', // 두께
+            '', // 홀수
+            '', // 탭
+            '', // 절곡
+            '', // 길이
+            '', // 후
+            '', // 수량
+            '', // 비중 (수식으로 자동 설정됨)
+            '', // 무게 (수식으로 자동 설정됨)
+            '', // 단가 (수식으로 자동 설정됨)
+            '자재비', // 소계 (수식으로 자동 설정됨)
+            // 가공비 섹션
+            '절단비', // 외곽 (수식으로 자동 설정됨)
+            '홀/탭', // 홀탭 (수식으로 자동 설정됨)
+            '밴딩', // 밴딩 (수식으로 자동 설정됨)
+            '용접', // 용접
+            '연마', // 연마
+            '후처리', // 후처리 (수식으로 자동 설정됨)
+            '', // 기타 (수식으로 자동 설정됨)
+            '', // 소계 (수식으로 자동 설정됨)
+            // 기타
+            '', // 이익 (수식으로 자동 설정됨)
+            '', // 수량 (수식으로 자동 설정됨)
+            '', // 단가 (수식으로 자동 설정됨)
+            '합계금액', // 금액 (수식으로 자동 설정됨)
+            '', // 비고
+        ]);
+        array_push($initialData, [
+            '', // 도번
+            '', // 재질
+            // 재료비 섹션
+            '', // 가로
+            '', // 세로
+            '', // 두께
+            '', // 홀수
+            '', // 탭
+            '', // 절곡
+            '', // 길이
+            '', // 후
+            '', // 수량
+            '', // 비중 (수식으로 자동 설정됨)
+            '', // 무게 (수식으로 자동 설정됨)
+            '', // 단가 (수식으로 자동 설정됨)
+            '=SUMPRODUCT(K1:K3,O1:O3)', // 소계 (수식으로 자동 설정됨)
+            // 가공비 섹션
+            '=SUMPRODUCT(K1:K3,P1:P3)', // 외곽 (수식으로 자동 설정됨)
+            '=SUMPRODUCT(K1:K3,Q1:Q3)', // 홀탭 (수식으로 자동 설정됨)
+            '=SUMPRODUCT(K1:K3,R1:R3)', // 밴딩 (수식으로 자동 설정됨)
+            '=SUMPRODUCT(K1:K3,S1:S3)', // 용접 (수식으로 자동 설정됨)
+            '=SUMPRODUCT(K1:K3,T1:T3)', // 연마 (수식으로 자동 설정됨)
+            '=SUMPRODUCT(K1:K3,U1:U3)', // 후처리 (수식으로 자동 설정됨)
+            '', // 기타 (수식으로 자동 설정됨)
+            '', // 소계 (수식으로 자동 설정됨)
+            // 기타
+            '', // 이익 (수식으로 자동 설정됨)
+            '', // 수량 (수식으로 자동 설정됨)
+            '', // 단가 (수식으로 자동 설정됨)
+            '=SUM(AA1:AA3)', // 금액 (수식으로 자동 설정됨)
+            '', // 비고
+        ]);
+
         // 견적서 초기 데이터 템플릿
         $견적서RowTemplate = [
             '', // 도면번호/품명 (수식으로 자동 설정됨)
@@ -337,36 +404,36 @@ class api extends MY_Controller
                         '', // 금액 (빈 공간)
                         '', // 비고 (빈 공간)
                     ],
-                    // [
-                    //     'A',
-                    //     'B',
-                    //     'C',
-                    //     'D',
-                    //     'E',
-                    //     'F',
-                    //     'G',
-                    //     'H',
-                    //     'I',
-                    //     'J',
-                    //     'K',
-                    //     'L',
-                    //     'M',
-                    //     'N',
-                    //     'O',
-                    //     'P',
-                    //     'Q',
-                    //     'R',
-                    //     'S',
-                    //     'T',
-                    //     'U',
-                    //     'V',
-                    //     'W',
-                    //     'X',
-                    //     'Y',
-                    //     'Z',
-                    //     'AA',
-                    //     'AB'
-                    // ],
+                    [
+                        'A',
+                        'B',
+                        'C',
+                        'D',
+                        'E',
+                        'F',
+                        'G',
+                        'H',
+                        'I',
+                        'J',
+                        'K',
+                        'L',
+                        'M',
+                        'N',
+                        'O',
+                        'P',
+                        'Q',
+                        'R',
+                        'S',
+                        'T',
+                        'U',
+                        'V',
+                        'W',
+                        'X',
+                        'Y',
+                        'Z',
+                        'AA',
+                        'AB'
+                    ],
                 ],
                 'colWidths' => [
                     80,  // 도번
@@ -402,6 +469,7 @@ class api extends MY_Controller
                     100, // 비고
                 ],
                 'height' => 'auto',
+                'totalRowIndex' => count($initialData) - 1, // 마지막 행 인덱스 (배경색 적용, 고정 행)
             ],
             [
                 'name' => '견적서',
@@ -449,7 +517,7 @@ class api extends MY_Controller
                     ]
                 ],
                 'colWidths' => [220, 60, 60, 100, 140, 140, 80],
-                'height' => 300,
+                // 'height' => 300,
             ],
         ];
 
@@ -462,21 +530,21 @@ class api extends MY_Controller
     {
         $sub_type = $this->input->get('sub_type') ?? '';
 
-        $items = $this->service_model->get_item('all', [
-            "is_active = 1"
-        ]);
+        // $items = $this->service_model->get_item('all', [
+        //     "is_active = 1"
+        // ]);
 
-        $source = [];
+        // $source = [];
 
-        if (!empty($items)) {
-            foreach ($items as $item) {
-                $source[] = [
-                    'key'   => $item['id'],
-                    'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
-                    'title' => $item['item_name'],
-                ];
-            }
-        }
+        // if (!empty($items)) {
+        //     foreach ($items as $item) {
+        //         $source[] = [
+        //             'key'   => $item['id'],
+        //             'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
+        //             'title' => $item['item_name'],
+        //         ];
+        //     }
+        // }
 
         $sheets = [
             [
@@ -497,7 +565,7 @@ class api extends MY_Controller
                         'dateFormat' => 'YYYY-MM-DD', // 표시 포맷
                         'correctFormat' => true,      // 자동으로 형식 맞춰줌
                         'allowInvalid' => false,      // 잘못된 형식 입력 시 거부
-                        'defaultDate' => '2025-01-01', // 기본값 설정 (선택사항)
+                        'defaultDate' => date('Y-m-d'), // 기본값 설정 (선택사항)
                         'datePickerConfig' => [
                             'firstDay' => 0,
                             'i18n' => [
@@ -511,10 +579,10 @@ class api extends MY_Controller
                     ],
                     [
                         'title'     => '품목',
-                        'type'      => 'dropdown',
+                        // 'type'      => 'dropdown',
 
                         // ^ 드롭다운 샘플 데이터
-                        'source'    => $source,
+                        // 'source'    => $source,
                     ],
                     [
                         'title' => '규격',
@@ -577,21 +645,21 @@ class api extends MY_Controller
                 break;
         }
 
-        $items = $this->service_model->get_item('all', [
-            "is_active = 1"
-        ]);
+        // $items = $this->service_model->get_item('all', [
+        //     "is_active = 1"
+        // ]);
 
-        $source = [];
+        // $source = [];
 
-        if (!empty($items)) {
-            foreach ($items as $item) {
-                $source[] = [
-                    'key'   => $item['id'],
-                    'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
-                    'title' => $item['item_name'],
-                ];
-            }
-        }
+        // if (!empty($items)) {
+        //     foreach ($items as $item) {
+        //         $source[] = [
+        //             'key'   => $item['id'],
+        //             'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
+        //             'title' => $item['item_name'],
+        //         ];
+        //     }
+        // }
 
         $sheets = [
             [
@@ -607,10 +675,9 @@ class api extends MY_Controller
                 'columns' => [
                     [
                         'title'     => '품목',
-                        'type'      => 'dropdown',
-
+                        // 'type'      => 'dropdown',
                         // ^ 드롭다운 샘플 데이터
-                        'source'    => $source,
+                        // 'source'    => $source,
                     ],
                     [
                         'title' => '규격',
@@ -782,6 +849,145 @@ class api extends MY_Controller
             $res_array['msg'] = $e->getMessage();
         }
 
+        echo json_encode($res_array);
+    }
+
+    # 거래내역 불러오기 
+    # 
+    public function get_trade_history()
+    {
+        $company_name = $this->input->get('company_name') ?? '';
+
+        /**
+         * * 
+         * * 견적서
+         * * 수주서
+         * * 매입명세서
+         * * 매출명세서
+         * * 발주서
+         * * 세금계산서 전부 가져오기..
+         */
+        $res_array = [
+            'ok'    => true,
+            'msg'   => '',
+            'data'  => [],
+        ];
+
+        $where = [];
+
+        if (!empty($company_name)) {
+
+            $partner = $this->service_model->get_business_partner('row', [
+                "company_name = '{$company_name}'"
+            ]);
+
+            if (!empty($partner)) {
+
+                $where[] = "partner_id = '{$partner['id']}'";
+            }
+        }
+
+        $data = [];
+        $type_vo = [
+            'G' => '견적서',
+            'S' => '수주서',
+            'B' => '발주서',
+            'MI' => '매입명세서',
+            'MC' => '매출명세서',
+            'TAX_INVOICE' => '세금계산서',
+        ];
+
+        // * 수주서,발주서
+        $estimate_all = $this->service_model->get_estimate('all', array_merge($where, [
+            "sub_type != 'G'"
+        ]));
+
+        // * 매입명세서,매출명세서
+        $transcation_statement_all = $this->service_model->get_transcation_statement('all', array_merge($where, [
+            1
+        ]));
+
+        // // * 세금계산서
+        // $barobill_tax_invoice_all = $this->service_model->get_barobill_tax_invoice('all', array_merge($where, [
+        //     1
+        // ]));
+
+        if (!empty($estimate_all)) {
+
+            foreach ($estimate_all as $estimate) {
+
+                $sub_type = $estimate['sub_type'];
+                $estimate_date = $estimate['estimate_date'];
+                $partner_name = $estimate['partner_name'];
+                $sheets = !empty($estimate['sheets']) ? json_decode($estimate['sheets'], true) : [];
+
+                $data[] = [
+                    'id' => $estimate['id'],
+                    '구분' => $type_vo[$sub_type],
+                    '월일' => $estimate_date,
+                    '거래처명' => $partner_name,
+                    '공급가액' => $estimate['supply_amount'],
+                    '세액' => $estimate['tax_amount'],
+                    'sheets' => $sheets,
+                ];
+            }
+        }
+
+        if (!empty($transcation_statement_all)) {
+
+            foreach ($transcation_statement_all as $row) {
+
+                $sub_type = $row['sub_type'];
+                $estimate_date = $row['estimate_date'];
+                $partner_name = $row['partner_name'];
+                $supply_amount = $row['supply_amount'];
+                $tax_amount = $row['tax_amount'];
+                $sheets = !empty($row['sheets']) ? json_decode($row['sheets'], true) : [];
+
+                $data[] = [
+                    'id' => $row['id'],
+                    '구분' => $type_vo[$sub_type],
+                    '월일' => $estimate_date,
+                    '거래처명' => $partner_name,
+                    '공급가액' => $supply_amount,
+                    '세액' => $tax_amount,
+                    'sheets' => $sheets,
+                ];
+            }
+        }
+
+        // * estimate_date 기준으로 정렬
+
+        // PHP 내장 usort 사용해서 정렬 (월일 또는 estimate_date 기준)
+        usort($data, function ($a, $b) {
+            $dateA = $a['월일'] ?? $a['estimate_date'] ?? '';
+            $dateB = $b['월일'] ?? $b['estimate_date'] ?? '';
+            // 날짜가 동일하면 0, A가 작으면 -1, 크면 1
+
+            // * DESC
+            if ($dateA === $dateB) {
+                return 0;
+            }
+
+            if ($dateA > $dateB) {
+                return -1;
+            }
+
+            return 1;
+        });
+
+        /**
+         * 하나의 포맷으로 변환 해야함..
+         * * 월일 2025-01-01
+         * * 품목 SUS304 2P 8T 4X8
+         * * 규격
+         * * 수량 1 / SH
+         * * 단가 
+         * * 공급가액
+         * * 세액
+         * * 비고
+         */
+        $res_array['data'] = $data;
         echo json_encode($res_array);
     }
 

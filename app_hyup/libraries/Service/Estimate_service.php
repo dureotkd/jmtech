@@ -11,6 +11,7 @@ class Estimate_service
         $this->obj->load->library([
             "ajax",
             "file",
+            "php_ajax",
             "/Service/event_log_service",
         ]);
 
@@ -238,6 +239,58 @@ class Estimate_service
 
                 if (empty($su_estimate_row)) {
 
+                    $estimate_sheets = json_decode($estimate_row['sheets'], true);
+
+                    /**
+                     * * --------------- 수주전환할 경우 견적서 시트 데이터 복사 ----------------
+                     * * 허나 견적서랑 수주서랑 양식이 완전 다름..
+                     * * 따라서.. 견적서에서 받은 값을 수주서의 맞춰야함...
+                     */
+
+                    try {
+
+                        $new_sheets = $this->obj->php_ajax->get(도메인 . '/api/load_excel_template_v3', [
+                            'sub_type' => 'S'
+                        ]);
+
+                        /**
+                         * 순번	도면번호/품명	소재	수량	단위	단가	금액
+                         *               [0] => D111
+                    [1] => AL
+                    [2] => 1
+                    [3] => EA
+                    [4] => 49800
+                    [5] => 49800
+                    [6] => 
+                )
+
+                            품목 규격 수량 단가 공급가액 세액 비고
+                            0 1 2 3 4 5 6
+                         */
+                        $estimate_sheets_data = $estimate_sheets[0]['data'];
+                        $new_sheet_data = [];
+
+                        foreach ($estimate_sheets_data as $row) {
+
+                            $공급가액 = $row[4] * $row[2];
+                            $세액 = $공급가액 * 0.1;
+
+                            $new_sheet_data[] = [
+                                $row[0],    // 품목
+                                $row[3],    // 규격
+                                $row[2],    // 수량
+                                $row[4],    // 단가
+                                $공급가액,    // 공급가액
+                                $세액,    // 세액
+                                $row[6],    // 비고
+                            ];
+                        }
+
+                        $new_sheets[0]['data'] = $new_sheet_data;
+                    } catch (Exception $e) {
+                        throw new Exception("수주전환 중 오류가 발생했습니다.");
+                    }
+
                     $su_estimate_row = [
                         'type'              => $estimate_row['type'],
                         'no'                => $estimate_row['no'],
@@ -257,7 +310,7 @@ class Estimate_service
                         'tax_amount'        => $estimate_row['tax_amount'],
                         'etc_memo'          => $estimate_row['etc_memo'],
                         'vat_type'          => $estimate_row['vat_type'],
-                        'sheets'            => $estimate_row['sheets'],
+                        'sheets'            => json_encode($new_sheets),
                         'sub_type'          => 'S', // 수주서로 생성
                         'status2'           => '도면확인',
                     ];

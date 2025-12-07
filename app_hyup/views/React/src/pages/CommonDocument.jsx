@@ -594,7 +594,6 @@ export default function CommonDocument() {
             setAmount={setAmount}
             subType={subType}
           />
-
           {/* 하단 입력 테이블 */}
           <table className="w-full border-t-2 border-black text-black text-xs">
             <thead>

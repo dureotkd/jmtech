@@ -605,7 +605,7 @@ class sales extends MY_Controller
         $number_to_korean = number_to_korean($estimate_row['amount'] ?? 0);
         $number_amount = number_format($estimate_row['amount'] ?? 0);
         $vat_type = $VAT_TYPE[$estimate_row['vat_type']] ?? '';
-        $sheet->setCellValue("C{$합계금액_INDEX}", "합  계  금  액 : {$number_to_korean} 원정 (₩ {$number_amount}) {$vat_type}");
+        $sheet->setCellValue("C{$합계금액_INDEX}", "합  계  금  액 : {$number_to_korean} ￦ {$number_amount}원 ({$vat_type})");
         // $sheet->setCellValue("", $number_to_korean);
 
         foreach ($items as $index => $item) {

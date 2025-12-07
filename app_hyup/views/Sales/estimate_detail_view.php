@@ -430,7 +430,7 @@ $datetime = date('YmdHis');
             <span class="font-semibold mr-2">합&nbsp;&nbsp;계&nbsp;&nbsp;금&nbsp;&nbsp;액 : 일금 </span>
             <h2 class="!text-sm font-bold !ml-4">
                 <?= number_to_korean($estimate['supply_amount']) ?>
-                <?= number_format($estimate['supply_amount']) ?>원
+                ￦<?= number_format($estimate['supply_amount']) ?>원
                 <?
                 $VAT_TYPE = unserialize(VAT_TYPE);
                 echo '(' . $VAT_TYPE[$estimate['vat_type']] . ')';
@@ -498,7 +498,7 @@ $datetime = date('YmdHis');
                                 <?
                                 } else {
                                 ?>
-                                    <?= number_format($item[3]) ?>
+                                    <?= !empty($item[4]) ? number_format($item[4]) : '' ?>
                                 <?
                                 }
                                 ?>
@@ -563,15 +563,15 @@ $datetime = date('YmdHis');
             if (!empty($files)) {
                 foreach ($files as $file) {
             ?>
-                    <div
+                    <a
+                        href="/sales/download_file?id=<?= $file['id'] ?>"
                         class="flex items-center border border-gray-300 rounded !px-4 !py-2 gap-2 bg-gray-100">
                         <img src="<?= fileIcon($file['file_name']) ?>" class="w-4 h-4" />
-                        <a
-                            href="/sales/download_file?id=<?= $file['id'] ?>"
+                        <span
                             class="text-blue-600 hover:underline">
                             <?= $file['file_name'] ?>
-                        </a>
-                    </div>
+                        </span>
+                    </a>
                 <?
                 }
             } else {
@@ -685,7 +685,7 @@ $datetime = date('YmdHis');
 
             const a = document.createElement("a");
             a.href = url;
-            a.download = "견적서.xlsx"; // 원하는 파일명
+            a.download = "<?= $estimate['partner_name'] ?>_<?= $estimate['sub_type'] == 'G' ? '견적서' : '수주서' ?>.xlsx"; // 원하는 파일명
             a.click();
 
             window.URL.revokeObjectURL(url);

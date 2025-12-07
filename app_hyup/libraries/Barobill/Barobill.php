@@ -236,11 +236,15 @@ No	변수명	타입	길이	필수	설명
                'UserID' => $this->UserID,
                'TaxType' => $TaxType,
                'DateType' => $DateType,
-               'StartDate' => str_replace('-', '', $StartDate),
-               'EndDate' => str_replace('-', '', $EndDate),
+               // 'StartDate' => str_replace('-', '', $StartDate),
+               // 'EndDate' => str_replace('-', '', $EndDate),
+               'StartDate' => '20251203',
+               'EndDate' => '20251204',
                'CountPerPage' => $CountPerPage,
                'CurrentPage' => $CurrentPage,
           ];
+
+          printr($params);
 
           $Result = $this->BaroService_TI->GetPeriodTaxInvoiceSalesList($params)->GetPeriodTaxInvoiceSalesListResult;
           echo '<pre>';

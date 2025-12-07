@@ -23,7 +23,7 @@ const SheetSection = ({
   subType = "G",
 }) => {
   const hotRef = React.useRef(null);
-  const { activeSheet, setActiveSheet, registerHotRef, hfInstance } =
+  const { activeSheet, setActiveSheet, registerHotRef, hfInstance, hotRefs } =
     useExcelStore((state) => state);
 
   // 현재 시트가 활성화되어 있는지 확인
@@ -89,7 +89,20 @@ const SheetSection = ({
           }}
           afterChange={function (changes, source) {
             switch (subType) {
-              // case "G": // 일반
+              case "G": // 견적서
+                // * 금액의 합을 setAmount에 넣음
+                setTimeout(() => {
+                  const hotData = hotRefs["견적서"].getData();
+                  const sumAmount = hotData.reduce((acc, cur) => {
+                    const amountValue = parseFloat(cur[5]) || 0;
+                    return acc + amountValue;
+                  }, 0);
+                  setAmount((prev) => {
+                    return sumAmount;
+                  });
+                }, 500);
+
+                break;
               case "S": // 수주서
               case "B": // 발주서
                 if (source === "edit" && changes && sheetName === "견적서") {

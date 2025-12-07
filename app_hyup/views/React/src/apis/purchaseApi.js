@@ -1,6 +1,13 @@
 import request from "../utils/request";
 
 const purchaseApi = {
+  거래내역불러오기: async (company_name) => {
+    const res = await request.get("get_trade_history", {
+      params: { company_name },
+    });
+
+    return res;
+  },
   저장된엑셀템플릿: async (params) => {
     const res = await request.get("load_saved_excel_template", { params });
 

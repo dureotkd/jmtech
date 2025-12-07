@@ -146,8 +146,12 @@ class Purchase_service
             "id = '{$id}'"
         ]);
 
+        $sub_type = $statement_row['sub_type'] ?? '';
+
         // * MI:매입,MC:매출
         if ($sub_type === 'MI') {
+
+            $this->obj->event_log_service->매입거래명세표삭제($id);
         } else if ($sub_type === 'MC') {
 
             $this->obj->event_log_service->매출거래명세표삭제($id);

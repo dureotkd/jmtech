@@ -1,18 +1,16 @@
 import React from "react";
 
-import { ESTIMATE_SUB_TYPE } from "../../constants";
-
 import { useExcelStore } from "../store/useExcelStore";
-
-import request, { STATIC_URL } from "../utils/request";
+import { ESTIMATE_SUB_TYPE } from "../../constants";
 import purchaseApi from "../apis/purchaseApi";
+import request, { STATIC_URL } from "../utils/request";
 import { deepClone, empty, numberToKorean, wait } from "../utils/util";
+
 import Loading from "../components/Loading";
 import ExcelImportModal from "../components/ExcelImportModal";
 import SimpleAutocomplete from "../components/SimpleAutoComplete";
-import SheetSection from "../components/SheetSection";
 import NormalSheetSection from "../components/NormalSheetSection";
-
+import ComponentLoading from "../components/ComponentLoading";
 /**
  * ^ 거래명세표 페이지 컴포넌트
  * * [매입(거래명세표),매출(거래명세표)]
@@ -33,6 +31,13 @@ function TranscationStatement() {
     (state) => state
   );
   const [loading, setLoading] = React.useState(false);
+
+  const [tradeHistory, setTradeHistory] = React.useState([]);
+  const [tradeHistoryLoading, setTradeHistoryLoading] = React.useState(false);
+  const [tradeHistoryToggle, setTradeHistoryToggle] = React.useState(false);
+  const tradeHistoryRef = React.useRef(null);
+  const tradeHistoryButtonRef = React.useRef(null);
+
   const [form, setForm] = React.useState({
     parent_id: "",
     estimate_date: new Date().toISOString().slice(0, 10), // default 오늘날짜
@@ -50,8 +55,12 @@ function TranscationStatement() {
   const [files, setFiles] = React.useState([]);
   const [fileIds, setFileIds] = React.useState([]);
   const fileInputRef = React.useRef(null);
-  const [amount, setAmount] = React.useState(0);
+  const [amount, setAmount] = React.useState({
+    supply: 0,
+    tax: 0,
+  });
   const [partners, setPartners] = React.useState([]);
+  const [searchPartnerName, setSearchPartnerName] = React.useState("");
   const [sheets, setSheets] = React.useState([
     // * 모의 데이터 (템플릿은 PHP 서버에서 가져옴)
     {
@@ -86,28 +95,6 @@ function TranscationStatement() {
     },
   ]);
 
-  const { 공급가액합계, 세액합계 } = React.useMemo(() => {
-    let total1 = 0;
-    let total2 = 0;
-    const row = sheets[0];
-    if (row.data) {
-      row.data.forEach((row) => {
-        console.log(row);
-        const 공급가액 = parseFloat(row[5]) || 0;
-        const 세액 = parseFloat(row[6]) || 0; // ✅ 세액 컬럼도 더하기
-        total1 += 공급가액;
-        total2 += 세액;
-      });
-    }
-
-    return {
-      공급가액합계: total1,
-      세액합계: total2,
-    };
-  }, [JSON.stringify(sheets)]);
-
-  console.log(공급가액합계, 세액합계);
-
   // * 기존 견적서 불러오기
   const loadSaveExcelTemplate = async (id) => {
     const res = await purchaseApi.저장된엑셀템플릿({
@@ -140,7 +127,10 @@ function TranscationStatement() {
     setForm(cloneForm);
     setFiles(files);
     setFileIds(fileIds);
-    setAmount(statement.amount || 0);
+    setAmount({
+      supply: statement.supply_amount || 0,
+      tax: statement.tax_amount || 0,
+    });
     setSheets(statement.sheets || []);
   };
 
@@ -156,60 +146,16 @@ function TranscationStatement() {
     setPartners(res);
   };
 
-  // * 시트 이벤트 등록 (한바퀴 돌아야 Formula 적용 가능)
-  const registerSheetEvents = async () => {
-    if (!sheets.length) return;
-
-    // 순차 실행: 각 시트를 잠깐씩 활성화
-    let index = 0;
-
-    const interval = setInterval(() => {
-      const current = sheets[index];
-      if (current) {
-        setActiveSheet(current.name);
-        console.log(`🔹 Activated sheet: ${current.name}`);
-      }
-
-      index++;
-
-      // 모든 시트를 순회한 후 0번째 시트로 복귀
-      if (index >= sheets.length) {
-        setTimeout(() => {
-          setActiveSheet(sheets[0].name);
-          console.log(`✅ Returned to first sheet: ${sheets[0].name}`);
-        }, 200);
-        clearInterval(interval);
-      }
-    }, 200); // 시트간 딜레이 (ms 단위)
-
-    await wait(sheets.length * 250);
-
-    return () => clearInterval(interval);
-  };
-
   // * 견적서 저장 핸들러
   const handleFormSubmit = async (e) => {
-    e.preventDefault();
-
+    // * # form1
     setLoading(true);
 
-    const target = e.target;
-    const formData = new FormData(target);
-
-    console.log(hotRefs);
-
-    const hot1 = hotRefs["견적서"];
-    const hot2 = hotRefs["내역서"];
-
-    const hots = [hot1, hot2].map((hot) => hot.getData());
-
-    let supplyAmount = 공급가액합계;
-    let taxAmount = 세액합계;
+    const formData = new FormData(document.getElementById("form1"));
+    const hot = hotRefs[subTypeKorean].getData();
 
     const cloneSheets = deepClone(sheets);
-
-    cloneSheets[0].data = hots[0];
-    cloneSheets[1].data = hots[1];
+    cloneSheets[0].data = hot;
 
     formData.append("sheets", JSON.stringify(cloneSheets));
     formData.append("file_ids", fileIds);
@@ -218,9 +164,12 @@ function TranscationStatement() {
     formData.append("type", type);
     formData.append("sub_type", subType);
     formData.append("partner_id", form?.partner_id || "");
-    formData.append("amount", amount || 0);
-    formData.append("supply_amount", supplyAmount || 0);
-    formData.append("tax_amount", taxAmount || 0);
+    formData.append(
+      "amount",
+      parseInt(amount.supply) + parseInt(amount.tax) || 0
+    );
+    formData.append("supply_amount", parseInt(amount.supply) || 0);
+    formData.append("tax_amount", parseInt(amount.tax) || 0);
     formData.append("id", id || "");
 
     if (files && files.length > 0) {
@@ -247,6 +196,7 @@ function TranscationStatement() {
         window.location.href = `${STATIC_URL}${res.redirect_url}`;
       }
 
+      // * 부모 창 새로고침
       window?.opener?.location.reload();
     } catch (err) {
       console.error("업로드 실패:", err);
@@ -381,17 +331,57 @@ function TranscationStatement() {
     }
 
     const 견적서 = cloneSheets[0].data;
-    let newAmount = 0;
+    let supplyAmount = 0;
+    let taxAmount = 0;
     견적서.forEach((row) => {
       const 공급가액 = parseFloat(row[4]) || 0;
       const 세액 = parseFloat(row[5]) || 0;
-      newAmount += 공급가액 + 세액;
+      supplyAmount += 공급가액;
+      taxAmount += 세액;
     });
 
-    setAmount(newAmount);
+    setAmount({
+      supply: supplyAmount,
+      tax: taxAmount,
+    });
     setForm((prev) => ({ ...prev, vat_type: vatOption }));
     setSheets(cloneSheets);
   };
+
+  const fetchTradeHistory = async () => {
+    setTradeHistoryLoading(true);
+    try {
+      const res = await purchaseApi.거래내역불러오기(searchPartnerName);
+      setTradeHistory(res?.data || []);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setTradeHistoryLoading(false);
+    }
+  };
+
+  // * 전체거래처 div외에 다른 div 클릭시 tradeHistoryToggle 초기화
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        tradeHistoryToggle &&
+        tradeHistoryRef.current &&
+        tradeHistoryButtonRef.current &&
+        !tradeHistoryRef.current.contains(event.target) &&
+        !tradeHistoryButtonRef.current.contains(event.target)
+      ) {
+        setTradeHistoryToggle(false);
+      }
+    };
+
+    if (tradeHistoryToggle) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [tradeHistoryToggle]);
 
   React.useEffect(() => {
     (async () => {
@@ -410,7 +400,7 @@ function TranscationStatement() {
         // * 거래처 목록 로드
         await loadPartnerList();
       } catch (error) {
-        console.log("zz");
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -447,7 +437,7 @@ function TranscationStatement() {
         setSheets={setSheets}
         setAmount={setAmount}
       />
-      <form id="form1" onSubmit={handleFormSubmit}>
+      <form id="form1">
         <input type="hidden" name="id" value={id} />
         <h1 className="!text-md bg-[#4b5563] !text-white !font-sans  !px-4 !py-2 !mb-4">
           {ESTIMATE_SUB_TYPE[subType]} 등록{" "}
@@ -459,6 +449,149 @@ function TranscationStatement() {
               src={`https://www.jmtech.asia/assets/app_hyup/images/${ESTIMATE_SUB_TYPE[subType]}.png`}
               alt="견적서"
             />
+            <div className="absolute right-0 top-0">
+              <div
+                ref={tradeHistoryButtonRef}
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  setTradeHistoryToggle((prev) => !prev);
+
+                  if (tradeHistoryToggle) {
+                    return;
+                  }
+
+                  await fetchTradeHistory();
+                }}
+                className="px-2 py-1 text-xs cursor-pointer hover:underline"
+              >
+                거래내역 불러오기
+              </div>
+              {tradeHistoryToggle && (
+                <div
+                  ref={tradeHistoryRef}
+                  className="absolute top-[24px] w-[420px] right-0 z-10 bg-white border border-gray-900"
+                >
+                  <div className="border border-gray-300 rounded bg-white shadow-sm text-xs font-sans">
+                    {/* Filter bar */}
+                    <div className="flex items-center border-b border-gray-200 px-2 py-1 bg-gray-50">
+                      <div className="flex items-center gap-1">
+                        <select className="border border-gray-300 rounded px-1 py-0.5 text-xs h-[24px]">
+                          <option>최근 3개월</option>
+                        </select>
+                        <select className="border border-gray-300 rounded px-1 py-0.5 text-xs h-[24px]">
+                          <option>전체</option>
+                        </select>
+                      </div>
+                      <div className="ml-auto flex items-center">
+                        <input
+                          type="text"
+                          placeholder="거래처명"
+                          value={searchPartnerName}
+                          onChange={(e) => {
+                            setSearchPartnerName(e.target.value);
+                          }}
+                          className="border border-gray-300 rounded px-2 py-0.5 text-xs h-[24px] w-[200px]"
+                        />
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await fetchTradeHistory();
+                          }}
+                          className="bg-gray-200 border border-gray-400 h-[23px] px-2 text-xs"
+                        >
+                          🔍
+                        </button>
+                      </div>
+                    </div>
+                    {/* List */}
+                    <div className="max-h-[220px] overflow-y-auto">
+                      <ul className="divide-y divide-gray-100">
+                        {tradeHistoryLoading ? (
+                          <ComponentLoading className="!w-8 !h-8 mx-auto" />
+                        ) : tradeHistory.length > 0 ? (
+                          tradeHistory.map((item, index) => {
+                            return (
+                              <li
+                                onClick={async () => {
+                                  /**
+                                   * * List 클릭시 Excel 템플릿 로드
+                                   * * 거래처명, 거래처ID, 거래처 정보 표시
+                                   */
+                                  setForm((prev) => ({
+                                    ...prev,
+                                    partner_id: 1,
+                                    partner_name: item.거래처명,
+                                  }));
+                                  item.sheets[0]["name"] = subTypeKorean;
+
+                                  let supplyAmount = 0;
+                                  let taxAmount = 0;
+
+                                  /**
+                                   * * --------------------- 매출/매입 거래명세표에 맞게 FIELD 수정 -------------------------
+                                   */
+                                  item.sheets[0]["data"] = item.sheets[0][
+                                    "data"
+                                  ].map((item) => {
+                                    return [
+                                      new Date().toISOString().slice(0, 10),
+                                      ...item,
+                                    ];
+                                  });
+                                  item.sheets[0]["data"].forEach((row) => {
+                                    supplyAmount += parseFloat(row[5]) || 0;
+                                    taxAmount += parseFloat(row[6]) || 0;
+                                  });
+                                  const cloneSheets = deepClone(sheets);
+                                  cloneSheets[0]["data"] =
+                                    item.sheets[0]["data"];
+                                  setSheets(cloneSheets);
+                                  setAmount({
+                                    supply: supplyAmount,
+                                    tax: taxAmount,
+                                  });
+                                  setTradeHistoryToggle(false);
+                                }}
+                                key={`${index}-${item.구분}-${item.품목명}`}
+                                className="flex items-center px-2 space-x-4 py-1 hover:bg-gray-50 transition"
+                              >
+                                <div className="w-[70px] text-gray-400 font-mono">
+                                  {item.월일}
+                                </div>
+                                <div className="w-[80px] text-gray-700 text-[13px]">
+                                  {item.구분}
+                                </div>
+                                <div
+                                  title={item.거래처명}
+                                  className="flex-1 truncate px-1 text-gray-700"
+                                >
+                                  {item.거래처명}
+                                </div>
+                                <div className="w-[80px] text-right">
+                                  <span className="text-blue-500 font-semibold">
+                                    {item.공급가액 > 0
+                                      ? `${Number(
+                                          item.공급가액
+                                        ).toLocaleString()}원`
+                                      : "-"}
+                                  </span>
+                                </div>
+                              </li>
+                            );
+                          })
+                        ) : (
+                          <div className="flex items-center justify-center h-full !py-4">
+                            <div className="text-gray-500">
+                              거래내역이 없습니다.
+                            </div>
+                          </div>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 왼쪽 섹션 */}
@@ -478,6 +611,10 @@ function TranscationStatement() {
                       data={partners}
                       name="partner_name"
                       onChange={(id) => {
+                        const partner = partners.find(
+                          (partner) => partner.id === id
+                        );
+                        setSearchPartnerName(partner?.company_name || "");
                         setForm((prev) => ({ ...prev, partner_id: id }));
                       }}
                     />
@@ -639,7 +776,9 @@ function TranscationStatement() {
               type="text"
               name="amount"
               className="ml-1 border w-[150px] h-[24px]"
-              value={`₩ ${amount.toLocaleString()}`}
+              value={`₩ ${Number(
+                parseInt(amount.supply) + parseInt(amount.tax)
+              ).toLocaleString()}`}
               readOnly
             />
           </h2>
@@ -662,7 +801,6 @@ function TranscationStatement() {
             <button
               type="button"
               onClick={() => {
-                console.log(hotRefs);
                 const hot = hotRefs[subTypeKorean];
                 if (!hot || hot.isDestroyed) return;
                 hot.alter("insert_row_above", hot.countRows());
@@ -719,7 +857,13 @@ function TranscationStatement() {
                   합계
                 </th>
                 <th className="border-t" colSpan={6}>
-                  {`(공급가액 ${공급가액합계.toLocaleString()} + 세액 ${세액합계.toLocaleString()}) = 총 합계 ${amount.toLocaleString()} 원`}
+                  {`(공급가액 ${parseInt(
+                    amount.supply
+                  ).toLocaleString()} + 세액 ${parseInt(
+                    amount.tax
+                  ).toLocaleString()}) = 총 합계 ${Number(
+                    parseInt(amount.supply) + parseInt(amount.tax)
+                  ).toLocaleString()} 원`}
                 </th>
               </tr>
             </thead>
@@ -825,7 +969,11 @@ function TranscationStatement() {
         </div>
 
         <div className="w-full !px-2 !text-[13px] flex justify-center items-center gap-1.5 font-sans font-300 !my-2">
-          <button className="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+          <button
+            type="button"
+            onClick={handleFormSubmit}
+            className="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]"
+          >
             저장
           </button>
 

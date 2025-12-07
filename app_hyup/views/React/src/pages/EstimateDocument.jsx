@@ -1,6 +1,7 @@
 import React from "react";
 
 import Loading from "../components/Loading";
+import ComponentLoading from "../components/ComponentLoading";
 import SheetSection from "../components/SheetSection";
 import ExcelImportModal from "../components/ExcelImportModal";
 import SimpleAutocomplete from "../components/SimpleAutoComplete";
@@ -32,6 +33,7 @@ export default function EstimateDocument() {
   const { hotRefs, getActiveHotRef, setActiveSheet, activeSheet, hfInstance } =
     useExcelStore((state) => state);
   const [loading, setLoading] = React.useState(false);
+  const [buttonLoading, setButtonLoading] = React.useState(false);
   const [form, setForm] = React.useState({
     parent_id: "",
     estimate_date: new Date().toISOString().slice(0, 10), // default 오늘날짜
@@ -51,6 +53,7 @@ export default function EstimateDocument() {
   const fileInputRef = React.useRef(null);
   const [amount, setAmount] = React.useState(0);
   const [partners, setPartners] = React.useState([]);
+  const [lastRowIndex, setLastRowIndex] = React.useState(3);
   const [sheets, setSheets] = React.useState([
     // * 모의 데이터 (템플릿은 PHP 서버에서 가져옴)
     {
@@ -128,18 +131,6 @@ export default function EstimateDocument() {
   const loadPartnerList = async () => {
     const res = await estimateApi.거래처목록();
     setPartners(res);
-  };
-
-  // * 시트 이벤트 등록 (한바퀴 돌아야 Formula 적용 가능)
-  const registerSheetEvents = async () => {
-    if (!sheets.length) return;
-
-    for (let i = 0; i < sheets.length; i++) {
-      setActiveSheet(sheets[i].name);
-      await wait(500);
-    }
-
-    setActiveSheet(sheets[0].name);
   };
 
   // * 견적서 저장 핸들러
@@ -393,6 +384,18 @@ export default function EstimateDocument() {
     })();
   }, []);
 
+  // * 내역서의 마지막 행 고정 설정
+  React.useEffect(() => {
+    if (hotRefs["내역서"] && !hotRefs["내역서"].isDestroyed) {
+      setTimeout(() => {
+        const 내역서Instance = hotRefs["내역서"];
+        if (내역서Instance && !내역서Instance.isDestroyed) {
+          내역서Instance.updateSettings({ fixedRowsBottom: 1 });
+        }
+      }, 500);
+    }
+  }, [hotRefs]);
+
   return (
     <>
       {loading && <Loading />}
@@ -621,25 +624,33 @@ export default function EstimateDocument() {
 
             <button
               type="button"
-              onClick={() => {
-                console.log(hotRefs, hfInstance);
-                const hot = getActiveHotRef();
-                if (!hot || hot.isDestroyed) return;
+              onClick={async () => {
+                setButtonLoading((prev) => !prev);
+                if (buttonLoading) return;
 
-                const newRowIndex = hot.countRows();
-                // hot.alter("insert_row_above", newRowIndex);
+                const 내역서Instance = hotRefs["내역서"];
+                const 견적서Instance = hotRefs["견적서"];
 
-                // * 내역서에서 추가시 수식 적용
-                // * hotRefs 반복문 돌리면서 전부 insert_row_above 적용
-                Object.keys(hotRefs).forEach((sheetName) => {
-                  const hot = hotRefs[sheetName];
-                  if (!hot || hot.isDestroyed) return;
-                  if (hot.countRows() > 1) {
-                    hot.alter("insert_row_above", newRowIndex);
+                if (!내역서Instance || 내역서Instance.isDestroyed) return;
+                if (!견적서Instance || 견적서Instance.isDestroyed) return;
 
-                    if (sheetName === "내역서") {
-                      const rowNum = newRowIndex + 1; // 엑셀 행 번호 (1-based)
+                // * 두 시트의 행 수가 같아야 하므로, 내역서를 기준으로 행 수 확인
+                if (내역서Instance.countRows() > 1) {
+                  // 마지막 행 전에 추가
+                  const rowNum = lastRowIndex + 1; // 엑셀 행 번호 (1-based)
 
+                  // 두 시트 모두 같은 위치에 행 추가
+                  내역서Instance.alter("insert_row_above", lastRowIndex);
+                  견적서Instance.alter("insert_row_above", lastRowIndex);
+
+                  // * 수식 설정 함수
+                  const setFormulas = (
+                    instance,
+                    rowIndex,
+                    rowNum,
+                    is내역서
+                  ) => {
+                    if (is내역서) {
                       // 컬럼 인덱스 정의
                       const 비중ColIndex = 11;
                       const 무게ColIndex = 12;
@@ -655,83 +666,118 @@ export default function EstimateDocument() {
                       const 최종단가ColIndex = 25;
                       const 금액ColIndex = 26;
 
-                      // 수식 설정
-                      setTimeout(() => {
-                        // 재료비 섹션 수식
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          비중ColIndex,
-                          `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",7.93,IF(B${rowNum}="AL",2.8,7.85)))`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          무게ColIndex,
-                          `=IF(A${rowNum}="","",(C${rowNum}*D${rowNum}*E${rowNum}*L${rowNum})/1000000)`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          재료비단가ColIndex,
-                          `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",6500,IF(B${rowNum}="AL",7500,1600)))`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          재료비소계ColIndex,
-                          `=IF(A${rowNum}="","",ROUND(M${rowNum}*N${rowNum},0))`
-                        );
+                      // 재료비 섹션 수식
+                      instance.setDataAtCell(
+                        rowIndex,
+                        비중ColIndex,
+                        `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",7.93,IF(B${rowNum}="AL",2.8,7.85)))`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        무게ColIndex,
+                        `=IF(A${rowNum}="","",(C${rowNum}*D${rowNum}*E${rowNum}*L${rowNum})/1000000)`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        재료비단가ColIndex,
+                        `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",6500,IF(B${rowNum}="AL",7500,1600)))`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        재료비소계ColIndex,
+                        `=IF(A${rowNum}="","",ROUND(M${rowNum}*N${rowNum},0))`
+                      );
 
-                        // 가공비 섹션 수식
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          외곽ColIndex,
-                          `=IF(A${rowNum}="","",IF(E${rowNum}>=3,(C${rowNum}+D${rowNum})*2*E${rowNum},(C${rowNum}+D${rowNum})*5))`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          홀탭ColIndex,
-                          `=IF(A${rowNum}="","",IF(AND(F${rowNum}="",G${rowNum}=""),"",IF(E${rowNum}>=4,(F${rowNum}+(G${rowNum}*1.5))*300*1.5,(F${rowNum}+(G${rowNum}*1.5))*300)))`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          밴딩ColIndex,
-                          `=IF(H${rowNum}="","",IF(E${rowNum}>=4,H${rowNum}*I${rowNum}*3*1.5,H${rowNum}*I${rowNum}*3))`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          후처리ColIndex,
-                          `=IF(J${rowNum}="","",ROUND(IF(J${rowNum}="E",C${rowNum}*D${rowNum}*0.15,IF(J${rowNum}="N",C${rowNum}*D${rowNum}*0.12,IF(J${rowNum}="A",C${rowNum}*D${rowNum}*0.075,IF(J${rowNum}="P",C${rowNum}*D${rowNum}*0.025,C${rowNum}*D${rowNum}*0.04)))),0))`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          가공비소계ColIndex,
-                          `=IF(A${rowNum}="","",ROUND(SUM(P${rowNum}:V${rowNum}),0))`
-                        );
+                      // 가공비 섹션 수식
+                      instance.setDataAtCell(
+                        rowIndex,
+                        외곽ColIndex,
+                        `=IF(A${rowNum}="","",IF(E${rowNum}>=3,(C${rowNum}+D${rowNum})*2*E${rowNum},(C${rowNum}+D${rowNum})*5))`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        홀탭ColIndex,
+                        `=IF(A${rowNum}="","",IF(AND(F${rowNum}="",G${rowNum}=""),"",IF(E${rowNum}>=4,(F${rowNum}+(G${rowNum}*1.5))*300*1.5,(F${rowNum}+(G${rowNum}*1.5))*300)))`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        밴딩ColIndex,
+                        `=IF(H${rowNum}="","",IF(E${rowNum}>=4,H${rowNum}*I${rowNum}*3*1.5,H${rowNum}*I${rowNum}*3))`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        후처리ColIndex,
+                        `=IF(J${rowNum}="","",ROUND(IF(J${rowNum}="E",C${rowNum}*D${rowNum}*0.15,IF(J${rowNum}="N",C${rowNum}*D${rowNum}*0.12,IF(J${rowNum}="A",C${rowNum}*D${rowNum}*0.075,IF(J${rowNum}="P",C${rowNum}*D${rowNum}*0.025,C${rowNum}*D${rowNum}*0.04)))),0))`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        가공비소계ColIndex,
+                        `=IF(A${rowNum}="","",ROUND(SUM(P${rowNum}:V${rowNum}),0))`
+                      );
 
-                        // 기타 섹션 수식
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          이익ColIndex,
-                          `=IF(A${rowNum}="","",ROUND((W${rowNum}+O${rowNum})*0.15,0))`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          최종수량ColIndex,
-                          `=IF(K${rowNum}="","",K${rowNum})`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          최종단가ColIndex,
-                          `=IF(A${rowNum}="","",ROUNDUP(X${rowNum}+W${rowNum}+O${rowNum},-2))`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          금액ColIndex,
-                          `=IF(A${rowNum}="","",Z${rowNum}*Y${rowNum})`
-                        );
-                      }, 100);
-                    } else if (sheetName === "견적서") {
-                      const rowNum = newRowIndex + 1; // 엑셀 행 번호 (1-based)
+                      // 기타 섹션 수식
+                      instance.setDataAtCell(
+                        rowIndex,
+                        이익ColIndex,
+                        `=IF(A${rowNum}="","",ROUND((W${rowNum}+O${rowNum})*0.15,0))`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        최종수량ColIndex,
+                        `=IF(K${rowNum}="","",K${rowNum})`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        최종단가ColIndex,
+                        `=IF(A${rowNum}="","",ROUNDUP(X${rowNum}+W${rowNum}+O${rowNum},-2))`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        금액ColIndex,
+                        `=IF(A${rowNum}="","",Z${rowNum}*Y${rowNum})`
+                      );
 
-                      // 컬럼 인덱스 정의
+                      /**
+                       *    const 재료비소계ColIndex = 14;
+                      const 외곽ColIndex = 15;
+                      const 홀탭ColIndex = 16;
+                      const 밴딩ColIndex = 17;
+                      const 후처리ColIndex = 20;
+                   
+                       */
+                      instance.setDataAtCell(
+                        rowIndex + 2,
+                        재료비소계ColIndex,
+                        `=SUMPRODUCT(K1:K${rowIndex + 1},O1:O${rowIndex + 1})`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex + 2,
+                        외곽ColIndex,
+                        `=SUMPRODUCT(K1:K${rowIndex + 1},P1:P${rowIndex + 1})`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex + 2,
+                        홀탭ColIndex,
+                        `=SUMPRODUCT(K1:K${rowIndex + 1},Q1:Q${rowIndex + 1})`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex + 2,
+                        밴딩ColIndex,
+                        `=SUMPRODUCT(K1:K${rowIndex + 1},R1:R${rowIndex + 1})`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex + 2,
+                        후처리ColIndex,
+                        `=SUMPRODUCT(K1:K${rowIndex + 1},U1:U${rowIndex + 1})`
+                      );
+
+                      instance.setDataAtCell(
+                        rowIndex + 2,
+                        금액ColIndex,
+                        `=SUM(AA1:AA${rowIndex + 1})`
+                      );
+                    } else {
+                      // 견적서 수식 설정 (내역서 참조)
                       const 도면번호품명ColIndex = 0;
                       const 소재ColIndex = 1;
                       const 수량ColIndex = 2;
@@ -739,81 +785,68 @@ export default function EstimateDocument() {
                       const 단가ColIndex = 4;
                       const 금액ColIndex = 5;
 
-                      // 수식 설정 (내역서 참조)
-                      setTimeout(() => {
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          도면번호품명ColIndex,
-                          `=IF('내역서'!A${rowNum}="","",'내역서'!A${rowNum})`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          소재ColIndex,
-                          `=IF('내역서'!B${rowNum}="","",'내역서'!B${rowNum})`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          수량ColIndex,
-                          `='내역서'!Y${rowNum}`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          단위ColIndex,
-                          `=IF(A${rowNum}="","","EA")`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          단가ColIndex,
-                          `='내역서'!Z${rowNum}`
-                        );
-                        hot.setDataAtCell(
-                          newRowIndex,
-                          금액ColIndex,
-                          `='내역서'!AA${rowNum}`
-                        );
-                      }, 100);
+                      instance.setDataAtCell(
+                        rowIndex,
+                        도면번호품명ColIndex,
+                        `=IF('내역서'!A${rowNum}="","",'내역서'!A${rowNum})`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        소재ColIndex,
+                        `=IF('내역서'!B${rowNum}="","",'내역서'!B${rowNum})`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        수량ColIndex,
+                        `='내역서'!Y${rowNum}`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        단위ColIndex,
+                        `=IF(A${rowNum}="","","EA")`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        단가ColIndex,
+                        `='내역서'!Z${rowNum}`
+                      );
+                      instance.setDataAtCell(
+                        rowIndex,
+                        금액ColIndex,
+                        `='내역서'!AA${rowNum}`
+                      );
                     }
-                  }
-                });
+                  };
+
+                  // * alter 후 즉시 수식 설정 (Handsontable이 내부적으로 처리하므로 바로 설정 가능)
+                  setFormulas(내역서Instance, lastRowIndex, rowNum, true);
+                  setFormulas(견적서Instance, lastRowIndex, rowNum, false);
+                  setLastRowIndex((prev) => prev + 1);
+                }
+
+                await wait(500);
+                setButtonLoading((prev) => !prev);
               }}
               className="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition"
             >
               <span className="text-blue-600 !text-xl !font-bold !mb-1 leading-none">
-                +
+                {buttonLoading ? <ComponentLoading className="w-4" /> : "+"}
               </span>
             </button>
 
             <button
               type="button"
               onClick={() => {
-                // 모든 시트의 마지막 행 삭제
-                // hotRefs에서 내역서와 견적서 인스턴스 가져오기
                 const 내역서Instance = hotRefs["내역서"];
                 const 견적서Instance = hotRefs["견적서"];
 
-                // 내역서 행 삭제
-                if (
-                  내역서Instance &&
-                  !내역서Instance.isDestroyed &&
-                  내역서Instance.countRows() > 1
-                ) {
-                  내역서Instance.alter(
-                    "remove_row",
-                    내역서Instance.countRows() - 1
-                  );
-                }
+                if (!내역서Instance || 내역서Instance.isDestroyed) return;
+                if (!견적서Instance || 견적서Instance.isDestroyed) return;
 
-                // 견적서 행 삭제
-                if (
-                  견적서Instance &&
-                  !견적서Instance.isDestroyed &&
-                  견적서Instance.countRows() > 1
-                ) {
-                  견적서Instance.alter(
-                    "remove_row",
-                    견적서Instance.countRows() - 1
-                  );
-                }
+                if (내역서Instance.countRows() == 3) return;
+                내역서Instance.alter("remove_row", lastRowIndex - 1, 1);
+                견적서Instance.alter("remove_row", lastRowIndex - 1, 1);
+                setLastRowIndex((prev) => prev - 1);
               }}
               className="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition"
             >

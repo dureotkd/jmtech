@@ -78,11 +78,11 @@
     </div>
 
     <!-- 필터 영역 -->
-    <div class="flex items-center gap-2 mb-4 !text-sm">
+    <div class="flex items-center gap-2 mb-4 !text-xs">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
             <div class="flex items-center gap-2">
-                <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+                <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition"><input multiple="" type="file" style="display: none;">
                     삭제
                 </button>
 
@@ -112,9 +112,9 @@
                 </div>
             </div>
             <button
-                onclick="open_popup_default('<?= REACT_PATH ?>','견적서 등록',1000,820);"
+                onclick="open_popup_default('<?= REACT_PATH ?>','견적서 등록',3000,1820);"
                 type="button"
-                class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+                class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0] rounded-sm">
                 견적서 등록 +
             </button>
         </div>
@@ -215,8 +215,8 @@
                                     <button
                                         onclick="event.stopPropagation(); open_popup_default(`/sales/estimate_detail?id=<?= $estimate['su_estimate_id'] ?>`, '수주서 상세', 1000, 820);"
                                         type="button"
-                                        class="sm-btn bg-primary !m-0 text-xs !min-w-[90px]">
-                                        수주서 확인
+                                        class="sm-btn bg-primary !m-0 text-xs !min-w-[62px]">
+                                        수주서
                                     </button>
                                 <?
                                 }
@@ -230,7 +230,7 @@
                 <? endforeach;
             else : ?>
                 <tr>
-                    <td colspan="9" class="text-center py-4">등록된 가 없습니다.</td>
+                    <td colspan="9" class="text-center py-4">등록된 데이터가 없습니다.</td>
                 </tr>
             <? endif; ?>
 

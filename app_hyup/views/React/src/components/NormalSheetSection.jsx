@@ -96,9 +96,7 @@ const NormalSheetSection = ({
             registerHotRef(activeSheet, instance);
           }
         }}
-        beforeChange={function (changes, source) {
-          console.log("beforeChange");
-        }}
+        beforeChange={function (changes, source) {}}
         afterChange={function (changes, source) {
           switch (subType) {
             case "S": // 수주서
@@ -107,14 +105,6 @@ const NormalSheetSection = ({
                 // * 0번쨰 품목 수정시
                 if (changes[0][3]?.key) {
                   changes.forEach(([row, prop, oldValue, newValue]) => {
-                    console.log(
-                      "🚀 Debug: ~ NormalSheetSection ~ oldValue:",
-                      oldValue
-                    );
-                    console.log(
-                      "🚀 Debug: ~ NormalSheetSection ~ newValue:",
-                      newValue
-                    );
                     if (prop === 0 && oldValue.value !== newValue.value) {
                       this.setDataAtCell(
                         row,
@@ -127,8 +117,6 @@ const NormalSheetSection = ({
 
                 changes.forEach(([row, prop, oldValue, newValue]) => {
                   if (prop === 2 || prop === 3) {
-                    console.log(row, prop, newValue, vatType);
-
                     let targetValue = "";
 
                     // * 수량
@@ -154,7 +142,6 @@ const NormalSheetSection = ({
                       case "N": // 부가세 별도
                         supply = total;
                         tax = Math.round(supply * 0.1);
-                        console.log("🚀 Debug: ~ SheetSection ~ tax:", tax);
                         break;
 
                       case "X": // 면세
@@ -171,10 +158,6 @@ const NormalSheetSection = ({
 
                     setTimeout(() => {
                       const hotData = hotRef.current.hotInstance.getData();
-                      console.log(
-                        "🚀 Debug: ~ SheetSection ~ hotData:",
-                        hotData
-                      );
                       const sumAmount = hotData.reduce((acc, cur) => {
                         const supplyValue = parseFloat(cur[4]) || 0;
                         const taxValue = parseFloat(cur[5]) || 0;
@@ -204,8 +187,6 @@ const NormalSheetSection = ({
 
                 changes.forEach(([row, prop, oldValue, newValue]) => {
                   if (prop === 3 || prop === 4) {
-                    console.log(row, prop, newValue, vatType);
-
                     let targetValue = "";
 
                     // * 수량
@@ -231,7 +212,6 @@ const NormalSheetSection = ({
                       case "N": // 부가세 별도
                         supply = total;
                         tax = Math.round(supply * 0.1);
-                        console.log("🚀 Debug: ~ SheetSection ~ tax:", tax);
                         break;
 
                       case "X": // 면세
@@ -248,19 +228,25 @@ const NormalSheetSection = ({
 
                     setTimeout(() => {
                       const hotData = hotRef.current.hotInstance.getData();
-                      console.log(
-                        "🚀 Debug: ~ SheetSection ~ hotData:",
-                        hotData
-                      );
-                      const sumAmount = hotData.reduce((acc, cur) => {
+                      // 공급가액과 세액 각각 합산
+                      const sumSupplyAmount = hotData.reduce((acc, cur) => {
                         const supplyValue = parseFloat(cur[5]) || 0;
+                        return acc + supplyValue;
+                      }, 0);
+                      const sumTaxAmount = hotData.reduce((acc, cur) => {
                         const taxValue = parseFloat(cur[6]) || 0;
-                        return acc + supplyValue + taxValue;
+                        return acc + taxValue;
                       }, 0);
 
                       setAmount((prev) => {
-                        return sumAmount;
+                        return {
+                          supply: sumSupplyAmount,
+                          tax: sumTaxAmount,
+                        };
                       });
+                      // setAmount((prev) => {
+                      //   return sumAmount;
+                      // });
                     }, 500);
                   }
                 });

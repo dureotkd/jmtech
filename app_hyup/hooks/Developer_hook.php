@@ -25,7 +25,7 @@ function develope_handler()
     if (!empty($is_show)) {
 
         // * output profiler on
-        // $CI->output->enable_profiler(true);
+        $CI->output->enable_profiler(true);
     }
 
     // $_SESSION['uid'] = 1;

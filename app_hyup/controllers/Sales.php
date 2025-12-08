@@ -622,15 +622,15 @@ class sales extends MY_Controller
 
                 $sheet->setCellValue("F{$row_num}", $item[1]); // 소재
 
-                $sheet->setCellValue("G{$row_num}", number_format($item[2])); // 수량
+                $sheet->setCellValue("G{$row_num}", !empty($item[2]) ? number_format($item[2]) : ''); // 수량
 
                 $sheet->setCellValue("H{$row_num}", $item[3]); // 단위
                 $sheet->mergeCells("H{$row_num}:I{$row_num}"); // H+I 병합
 
-                $sheet->setCellValue("J{$row_num}", number_format($item[4])); // 단가
+                $sheet->setCellValue("J{$row_num}", !empty($item[4]) ? number_format($item[4]) : ''); // 단가
                 $sheet->mergeCells("J{$row_num}:K{$row_num}"); // J+K 병합
 
-                $sheet->setCellValue("L{$row_num}", number_format($item[5])); // 금액
+                $sheet->setCellValue("L{$row_num}", !empty($item[5]) ? number_format($item[5]) : ''); // 금액
                 $sheet->mergeCells("L{$row_num}:O{$row_num}"); // L+M+N+O 병합
 
                 $sheet->setCellValue("P{$row_num}", $item[6]); // 비고
@@ -769,6 +769,7 @@ class sales extends MY_Controller
 
         $sheet->getStyle('E14')->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+
             ->getStartColor()->setARGB('D9D9D9');
 
         $sheet->getStyle('F14')->getFill()

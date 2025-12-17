@@ -23,7 +23,7 @@ function develope_handler()
 
     if ($is_show) {
         // * output profiler on
-        // $CI->output->enable_profiler(true);
+        $CI->output->enable_profiler(true);
     }
 
 

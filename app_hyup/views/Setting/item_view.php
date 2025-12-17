@@ -1,44 +1,53 @@
-<div class="p-4 bg-white font-sans text-sm text-gray-800">
+<div class="p-4 bg-white font-sans text-xs text-gray-800">
 
     <h1 class="!text-xl !border-b !font-sans !border-gray-300 !pb-3">
         품목관리
     </h1>
 
     <!-- 필터 영역 -->
-    <div class="flex items-center gap-2 mb-4 !text-sm">
+    <div class="flex items-center gap-2 mb-4 !text-xs">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
-            <button onclick="delete_item(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+            <button onclick="delete_item(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-xs"><input multiple="" type="file" style="display: none;">
                 삭제
             </button>
-            <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button">
+            <div class="relative">
+                <div
+                    class="custom-dropdown-wrapper"
+                    data-dropdown-id="item-dropdown"
+                    style="display: inline-block;">
                     <button
-                        onclick="open_popup_default('/setting/item/create','품목 등록',1000,820);"
                         type="button"
-                        class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+                        class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]"
+                        onclick="toggleCustomDropdown(event, 'item-dropdown')">
                         품목 등록 +
-
                     </button>
                 </div>
-                <ul
-                    tabindex="-1"
-                    class="!min-w-[210px] !border !border-gray-300 !bg-white !mt-2 items-center justify-center font-sans menu dropdown-content z-1 mt-4 w-52 shadow-sm">
-
+                <div
+                    data-dropdown-menu="item-dropdown"
+                    class="custom-dropdown-menu hidden absolute right-0 mt-2 !min-w-[210px] !bg-white rounded-box shadow-sm z-10 py-4 px-4 font-sans"
+                    style="min-width:210px;">
                     <div class="w-full flex flex-col justify-start !text-xs">
-
-                        <!-- 내정보수정 -->
-                        <button onclick="open_popup_default('/setting/item/create','물품 등록',500,580);"
-                            class="!text-left border-b-1 border-gray-300 !p-4 sm-hover" type="button">
+                        <button
+                            onclick="open_popup_default('/setting/item/create','품목 등록',1000,820);"
+                            class="!text-left flex items-center gap-2 border-b-1 border-gray-300 !p-4 sm-hover w-full"
+                            type="button">
+                            단일등록
+                        </button>
+                        <button
+                            onclick="open_popup_default('/setting/item/bulk_create','일괄 등록',1000,820);"
+                            class="!text-left flex items-center gap-2 border-b-1 border-gray-300 !p-4 sm-hover w-full"
+                            type="button">
                             일괄등록
                         </button>
-
-                        <!-- 로그아웃 버튼 -->
-                        <button class="!text-left !p-4 sm-hover" onclick="show_excel_upload_modal();" type="button">
+                        <button
+                            onclick="show_excel_upload_modal();"
+                            class="!text-left flex items-center gap-2 !p-4 sm-hover w-full"
+                            type="button">
                             엑셀등록
                         </button>
                     </div>
-                </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -173,7 +182,7 @@
                 <div class="w-full !px-2 !text-xs font-sans font-300 !py-6">
                     <form id="excelForm" class="flex items-center justify-center gap-4">
                         <div class="p-5 space-y-4">
-                            <div class="flex justify-end text-sm text-gray-700 items-center !mb-4"><a href="#" class="flex items-center text-xs hover:underline">품목 양식<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1">
+                            <div class="flex justify-end text-xs text-gray-700 items-center !mb-4"><a href="#" class="flex items-center text-xs hover:underline">품목 양식<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1">
                                         <path d="M12 15V3"></path>
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                         <path d="m7 10 5 5 5-5"></path>

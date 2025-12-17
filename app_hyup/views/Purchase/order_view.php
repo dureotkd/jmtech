@@ -5,7 +5,7 @@
     }
 </style>
 
-<div class="p-4 bg-white font-sans text-sm text-gray-800">
+<div class="p-4 bg-white font-sans text-xs text-gray-800">
     <div class="flex items-center !border-b !font-sans !border-gray-300 !pb-3 justify-between">
         <h1 class="!text-xl">
             <?= $title ?>
@@ -76,11 +76,11 @@
     </div>
 
     <!-- 필터 영역 -->
-    <div class="flex items-center gap-2 mb-4 !text-sm">
+    <div class="flex items-center gap-2 mb-4 !text-xs">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
             <div class="flex items-center gap-2">
-                <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+                <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-xs"><input multiple="" type="file" style="display: none;">
                     삭제
                 </button>
 
@@ -215,7 +215,7 @@
                 </button>
             </div>
 
-            <div class="border border-gray-300 !p-4 w-full !text-xs bg-white rounded text-sm">
+            <div class="border border-gray-300 !p-4 w-full !text-xs bg-white rounded text-xs">
                 <div class="flex items-center gap-2 !mb-2">
                     <span>기준연도</span>
                     <select id="yearSelect" class="border border-gray-300 rounded px-1 py-0.5">

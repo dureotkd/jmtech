@@ -1,3 +1,38 @@
+// 전역 클릭 시 모든 드롭다운 닫기
+document.addEventListener("click", function (event) {
+  document.querySelectorAll(".custom-dropdown-menu").forEach(function (menu) {
+    menu.classList.add("hidden");
+  });
+});
+
+// ESC 누르면 모든 드롭다운 닫기
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Escape") {
+    document.querySelectorAll(".custom-dropdown-menu").forEach(function (menu) {
+      menu.classList.add("hidden");
+    });
+  }
+});
+
+// 공통 드롭다운 함수 (여러 컴포넌트/드롭다운에서 재사용 가능)
+function toggleCustomDropdown(event, dropdownId) {
+  event.stopPropagation();
+  // 모든 활성화된 메뉴 닫기
+  document.querySelectorAll(".custom-dropdown-menu").forEach(function (menu) {
+    menu.classList.add("hidden");
+  });
+
+  const wrapper = document.querySelector(
+    '[data-dropdown-id="' + dropdownId + '"]'
+  );
+  const menu = document.querySelector(
+    '[data-dropdown-menu="' + dropdownId + '"]'
+  );
+  if (menu) {
+    menu.classList.toggle("hidden");
+  }
+}
+
 $("#all-agree").on("change", function () {
   const isChecked = $(this).is(":checked");
   $(".accent-black").prop("checked", isChecked);

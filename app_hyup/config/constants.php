@@ -249,35 +249,18 @@ define('MENU', serialize([
             ],
 
             'withdraw' => [
-                'name'            => '매입증빙',
+                'name'            => '매입현황',
                 'path'            => '/point/withdraw_list',
                 'sub'             => [
-                    'withdraw_req'          => [
-                        'name'            => '출금신청',
-                        'path'            => '/point/withdraw_req',
-                        'auth_level'    => [11]
+                    'tax_invoice' => [
+                        'name' => '매입세금계산서(현영)',
+                        'path' => '/purchase/tax_invoice',
                     ],
-                    'withdraw_suc'          => [
-                        'name'            => '출금완료',
-                        'path'            => '/point/withdraw_suc',
-                        'auth_level'    => [11]
-                    ],
-                    'withdraw_hold'          => [
-                        'name'            => '출금보류',
-                        'path'            => '/point/withdraw_hold',
-                        'auth_level'    => [11]
+                    'partner_report' => [
+                        'name' => '매입처현황',
+                        'path' => '/purchase/partner_report',
                     ],
                 ]
-            ],
-            'cash_receipt_list'       => [
-                'name'            => '현금영수증 신청내역',
-                'path'            => '/point/cash_receipt_list',
-                'auth_level'    => [11]
-            ],
-            'credit_list'           => [
-                'name'            => '전체 충전내역',
-                'path'            => '/point/credit_list',
-                'auth_level'    => [11]
             ],
         ],
         'auth_level'    => [11, 10]

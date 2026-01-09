@@ -256,27 +256,32 @@ class Estimate_service
                         /**
                          * 순번	도면번호/품명	소재	수량	단위	단가	금액
                          *               [0] => D111
-                    [1] => AL
-                    [2] => 1
-                    [3] => EA
-                    [4] => 49800
-                    [5] => 49800
-                    [6] => 
-                )
-
-                            품목 규격 수량 단가 공급가액 세액 비고
-                            0 1 2 3 4 5 6
+                  [0] => Array
+        (
+            [0] => s 도면번호
+            [1] => al 소재
+            [2] => 2 수량
+            [3] => EA 단위
+            [4] => 378700 단가
+            [5] => 757400 금액
+            [6] => 비고
+        )
                          */
                         $estimate_sheets_data = $estimate_sheets[0]['data'];
                         $new_sheet_data = [];
 
                         foreach ($estimate_sheets_data as $row) {
 
-                            $공급가액 = $row[4] * $row[2];
+                            $공급가액 = $row[5];
+
+                            if (empty($공급가액)) {
+                                continue;
+                            }
+
                             $세액 = $공급가액 * 0.1;
 
                             $new_sheet_data[] = [
-                                $row[0],    // 품목
+                                $row[0] . ' & ' . $row[1],    // 품목
                                 $row[3],    // 규격
                                 $row[2],    // 수량
                                 $row[4],    // 단가

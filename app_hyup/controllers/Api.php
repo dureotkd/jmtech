@@ -1343,7 +1343,6 @@ class api extends MY_Controller
     {
 
         $excel_file = $_FILES['excel_file'] ?? null;
-
         $sheet_name = $this->input->post('sheet_name') ?? '';
 
         $res_array = [
@@ -1366,36 +1365,19 @@ class api extends MY_Controller
             return;
         }
 
+        if ($sheet_name != '내역서') {
+            $res_array['ok'] = false;
+            $res_array['msg'] = '현재 내역서만 엑셀 불러오기가 가능합니다.';
+            echo json_encode($res_array);
+            return;
+        }
+
         if (!$excel_file || $excel_file['error'] !== UPLOAD_ERR_OK) {
             $res_array['ok'] = false;
             $res_array['msg'] = '엑셀 파일 업로드 중 오류가 발생했습니다.';
             echo json_encode($res_array);
             return;
         }
-
-        $excel_base_thead = [
-            '견적서'    => [
-                '품목코드',
-                '품목명',
-                '규격',
-                '창고',
-                '수량',
-                '단위',
-                '단가',
-                '공급가',
-                '부가세',
-                '비고'
-            ],
-            '내역서'    => [
-                '품목명',
-                '규격',
-                '수량',
-                '단가',
-                '공급가',
-                '부가세',
-                '비고'
-            ],
-        ];
 
         // * Excel Upload 후 데이터 파싱
         try {
@@ -1404,45 +1386,130 @@ class api extends MY_Controller
             $sheet = $spreadsheet->getActiveSheet();
             $rows = $sheet->toArray(null, true, true, true);
 
-            // 첫 번째 행(헤더) 기준으로 파싱
-            $header = array_shift($rows);
+            $first_header = $rows[3] ?? [];
+            $second_header = $rows[4] ?? [];
 
-            foreach ($excel_base_thead[$sheet_name] as $index => $expected_header) {
-                $column_letter = chr(65 + $index); // A, B, C, ...
-                if (!isset($header[$column_letter]) || trim($header[$column_letter]) !== $expected_header) {
-                    throw new Exception("엑셀 파일의 헤더가 올바르지 않습니다. 예상 헤더: '{$expected_header}'");
+            if (empty($first_header) || empty($second_header)) {
+                throw new Exception("엑셀 파일의 헤더가 올바르지 않습니다.\nERROR_CODE: 1001");
+            }
+
+            // 첫 번째 헤더 필수 컬럼 검증
+            $first_required_columns = ['NO', '도번', '재질', '재료비', '가공비', '이익', '수량', '단가', '금액', '비고'];
+            $first_header_values = array_map(function ($val) {
+                return trim(str_replace(' ', '', $val ?? ''));
+            }, array_values($first_header));
+
+            foreach ($first_required_columns as $required_col) {
+                $normalized_required = str_replace(' ', '', $required_col);
+                $found = false;
+                foreach ($first_header_values as $header_val) {
+                    if ($header_val === $normalized_required) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    throw new Exception("엑셀 파일의 첫 번째 헤더에 필수 컬럼 '{$required_col}'이 없습니다.\nERROR_CODE: 1002");
                 }
             }
 
-            if (empty($rows)) {
-                throw new Exception('엑셀 파일에 데이터가 없습니다.');
+            // 두 번째 헤더 필수 컬럼 검증
+            $second_required_columns = ['가로', '세로', '두께', '홀수', '탭', '절곡', '길이', '후', '수량', '비중', '무게', '단가', '소계', '외곽', '홀/탭', '밴딩', '용접', '연마', '후처리', '기타'];
+            $second_header_values = array_map(function ($val) {
+                return trim($val ?? '');
+            }, array_values($second_header));
+
+            // 소계는 두 번 나타나므로 별도 검증
+            $sogye_count = 0;
+            foreach ($second_header_values as $header_val) {
+                if ($header_val === '소계') {
+                    $sogye_count++;
+                }
+            }
+            if ($sogye_count < 2) {
+                throw new Exception("엑셀 파일의 두 번째 헤더에 '소계' 컬럼이 2개 이상 필요합니다.\nERROR_CODE: 1003");
+            }
+
+            foreach ($second_required_columns as $required_col) {
+                if ($required_col === '소계') continue; // 소계는 위에서 별도 검증
+                $found = false;
+                foreach ($second_header_values as $header_val) {
+                    if ($header_val === $required_col) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    throw new Exception("엑셀 파일의 두 번째 헤더에 필수 컬럼 '{$required_col}'이 없습니다.\nERROR_CODE: 1004");
+                }
             }
 
             /**
-             *                     ['철판', 'SS400', 10, 15000, '=D1*E1', "='내역서'!D1", ''],
-                    ['볼트', 'M10', 20, 500, '=D2*E2', '=F2*0.1', ''],
-                    ['너트', 'M10', 20, 400, '=D3*E3', '=F3*0.1', ''],
-                    ['용접봉', '6013', 5, 10000, '=D4*E4', '=F4*0.1', ''],
-                    ['기타', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
-                    ['합계', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
+             * * 함수가 안걸린 애들만 프론트로 던져주면됌.
+             * * 도번 B, 재질 C, 가로 D, 세로 E, 두께 F, 홀수 G, 탭 H, 절곡 I, 길이 J, 후 K
+             * * 용접 T, 연마 U, 기타 W, 수량 Z, 비고 AC
              */
-            foreach ($rows as $row) {
 
-                $품목코드 = trim($row['A']); // 품목코드
-                $품목명   = trim($row['B']); // 품목명
-                $규격     = trim($row['C']); // 규격
-                $창고     = trim($row['D']); // 창고
-                $수량     = (int)trim($row['E']); // 수량
-                $단위     = trim($row['F']); // 단위
-                $단가     = trim($row['G']); // 단가
-                $부가세   = trim($row['I']); // 부가세
-                $비고     = trim($row['J']); // 비고
+            // 헤더 행 제외하고 데이터 행만 처리 (5번째 행부터)
+            // $rows의 5번째 키부터 시작되게 추출
 
-                $단가 = (int)preg_replace('/[^0-9]/u', '', $단가); // 숫자만 남김
-                $공급가  = !empty($단가) ? (int)$단가 * $수량 : 0; // 공급가 계산
-                $부가세 = !empty($공급가) ? (int)($공급가 * 0.1) : 0; // 부가세 계산
+            // 추출할 컬럼 정의 (컬럼명 => 컬럼 인덱스)
+            $extract_columns = [
+                '도번' => 'B',
+                '재질' => 'C',
+                '가로' => 'D',
+                '세로' => 'E',
+                '두께' => 'F',
+                '홀수' => 'G',
+                '탭' => 'H',
+                '절곡' => 'I',
+                '길이' => 'J',
+                '후' => 'K',
+                '용접' => 'T',
+                '연마' => 'U',
+                '기타' => 'W',
+                '수량' => 'Z',
+                '비고' => 'AC'
+            ];
 
-                $res_array['data'][] = [$품목명, $규격, $수량, $단가, $공급가, $부가세, $비고];
+            foreach ($rows as $row_num => $row) {
+
+                if ($row_num < 5) {
+                    continue;
+                }
+
+                // NO 컬럼이 비어있으면 데이터 행이 아님
+                if (empty(trim($row['A'] ?? ''))) {
+                    continue;
+                }
+
+                $row_data = [];
+
+                foreach ($extract_columns as $column_name => $column_letter) {
+                    $cell_value = $row[$column_letter] ?? '';
+
+                    // 셀의 원본 값을 확인하여 수식인지 체크
+                    try {
+                        $cell = $sheet->getCell($column_letter . $row_num);
+                        $cell_value_raw = $cell->getValue();
+
+                        // 수식이 아닌 경우만 값 추출 (수식은 '='로 시작)
+                        if (!is_string($cell_value_raw) || substr($cell_value_raw, 0, 1) !== '=') {
+                            $row_data[$column_name] = trim($cell_value);
+                        } else {
+                            // 수식인 경우 빈 값으로 처리
+                            $row_data[$column_name] = '';
+                        }
+                    } catch (Exception $e) {
+                        // 셀 읽기 실패 시 계산된 값 사용
+                        $row_data[$column_name] = trim($cell_value);
+                    }
+                }
+
+                // 모든 값이 비어있지 않은 경우만 추가
+                if (!empty(array_filter($row_data))) {
+                    $res_array['data'][] = $row_data;
+                }
             }
         } catch (Throwable $e) {
             $res_array['ok'] = false;
@@ -1457,7 +1524,7 @@ class api extends MY_Controller
     {
         $this->load->helper('download');
 
-        $file_path = FCPATH . "assets/app_hyup/excel/estimate_batch_excel.xls";
+        $file_path = FCPATH . "assets/app_hyup/excel/estimate_batch_excel.xlsx";
 
         if (!file_exists($file_path)) {
             echo "Not Found" . $file_path;

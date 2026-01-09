@@ -130,7 +130,13 @@ export default function EstimateDocument() {
   // * 거래처 목록 로드
   const loadPartnerList = async () => {
     const res = await estimateApi.거래처목록();
-    setPartners(res);
+    // 즐겨찾기된 거래처를 맨 위로 정렬
+    const sortedPartners = [...res].sort((a, b) => {
+      const aBookmark = (a.bookmark_yn || "N") === "Y" ? 1 : 0;
+      const bBookmark = (b.bookmark_yn || "N") === "Y" ? 1 : 0;
+      return bBookmark - aBookmark; // 즐겨찾기가 있는 것이 위로
+    });
+    setPartners(sortedPartners);
   };
 
   // * 견적서 저장 핸들러

@@ -394,9 +394,10 @@ export default function EstimateDocument() {
   React.useEffect(() => {
     if (hotRefs["내역서"] && !hotRefs["내역서"].isDestroyed) {
       setTimeout(() => {
+        console.log("너때메니??");
         const 내역서Instance = hotRefs["내역서"];
         if (내역서Instance && !내역서Instance.isDestroyed) {
-          내역서Instance.updateSettings({ fixedRowsBottom: 1 });
+          내역서Instance.updateSettings({ fixedRowsBottom: 2 });
         }
       }, 500);
     }
@@ -889,9 +890,13 @@ export default function EstimateDocument() {
           </div>
 
           {/* 각 시트별 SheetSection 컴포넌트 */}
-          {sheets.map((sheet) => (
+          {sheets.map((sheet, idx) => (
             <SheetSection
-              key={sheet.name}
+              key={
+                sheet._forceUpdate
+                  ? `${sheet.name}_${sheet._forceUpdate}`
+                  : `${sheet.name}_${idx}_${JSON.stringify(sheet.data).length}`
+              }
               sheetName={sheet.name}
               sheet={sheet}
               vatType={form.vat_type}

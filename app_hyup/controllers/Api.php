@@ -57,6 +57,7 @@ class api extends MY_Controller
     # Handsontable Excel 템플릿 Load Init (견적서)
     public function load_excel_template()
     {
+        $rows = (int)($this->input->get('rows') ?? 30);
 
         /**
          * * columns 컬럼 정보
@@ -118,9 +119,9 @@ class api extends MY_Controller
         $최종단가ColIndex = 25; // 최종 단가 컬럼 인덱스 (AA열)
         $금액ColIndex = 26; // 금액 컬럼 인덱스 (AB열)
 
-        // 초기 데이터 생성 (3행)
+        // 초기 데이터 생성 ($rows행)
         $initialData = [];
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < $rows; $i++) {
             $row = $rowTemplate;
             // 각 행의 비중 컬럼에 수식 설정
             // Handsontable은 0부터 시작, Excel은 5행부터 시작 (헤더 2행 포함)
@@ -198,21 +199,21 @@ class api extends MY_Controller
             '', // 비중 (수식으로 자동 설정됨)
             '', // 무게 (수식으로 자동 설정됨)
             '', // 단가 (수식으로 자동 설정됨)
-            '=SUMPRODUCT(K1:K3,O1:O3)', // 소계 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},O1:O{$rows})", // 소계 (수식으로 자동 설정됨)
             // 가공비 섹션
-            '=SUMPRODUCT(K1:K3,P1:P3)', // 외곽 (수식으로 자동 설정됨)
-            '=SUMPRODUCT(K1:K3,Q1:Q3)', // 홀탭 (수식으로 자동 설정됨)
-            '=SUMPRODUCT(K1:K3,R1:R3)', // 밴딩 (수식으로 자동 설정됨)
-            '=SUMPRODUCT(K1:K3,S1:S3)', // 용접 (수식으로 자동 설정됨)
-            '=SUMPRODUCT(K1:K3,T1:T3)', // 연마 (수식으로 자동 설정됨)
-            '=SUMPRODUCT(K1:K3,U1:U3)', // 후처리 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},P1:P{$rows})", // 외곽 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},Q1:Q{$rows})", // 홀탭 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},R1:R{$rows})", // 밴딩 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},S1:S{$rows})", // 용접 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},T1:T{$rows})", // 연마 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},U1:U{$rows})", // 후처리 (수식으로 자동 설정됨)
             '', // 기타 (수식으로 자동 설정됨)
             '', // 소계 (수식으로 자동 설정됨)
             // 기타
             '', // 이익 (수식으로 자동 설정됨)
             '', // 수량 (수식으로 자동 설정됨)
             '', // 단가 (수식으로 자동 설정됨)
-            '=SUM(AA1:AA3)', // 금액 (수식으로 자동 설정됨)
+            "=SUM(AA1:AA{$rows})", // 금액 (수식으로 자동 설정됨)
             '', // 비고
         ]);
 
@@ -229,7 +230,7 @@ class api extends MY_Controller
 
         // 견적서 초기 데이터 생성 (3행)
         $견적서InitialData = [];
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < $rows; $i++) {
             $row = $견적서RowTemplate;
             // Handsontable은 0부터 시작, Excel은 5행부터 시작
             $rowNum = $i + 1;
@@ -468,7 +469,7 @@ class api extends MY_Controller
                     100, // 금액
                     100, // 비고
                 ],
-                'height' => 'auto',
+                'height' => $rows < 10 ? 'auto' : 500,
                 'totalRowIndex' => count($initialData) - 1, // 마지막 행 인덱스 (배경색 적용, 고정 행)
             ],
             [
@@ -517,7 +518,8 @@ class api extends MY_Controller
                     ]
                 ],
                 'colWidths' => [220, 60, 60, 100, 140, 140, 80],
-                // 'height' => 300,
+                // 'height' => $rows < 10 ? 'auto' : 300,
+                // 'height' => 100,
             ],
         ];
 
@@ -1339,6 +1341,7 @@ class api extends MY_Controller
     }
 
     # 엑셀 불러오기 
+    // TODO: Excel import 처리
     public function estimate_excel_load()
     {
 
@@ -1465,6 +1468,7 @@ class api extends MY_Controller
                 '절곡' => 'I',
                 '길이' => 'J',
                 '후' => 'K',
+                '수량1' => 'L',
                 '용접' => 'T',
                 '연마' => 'U',
                 '기타' => 'W',

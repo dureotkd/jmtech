@@ -22,6 +22,8 @@ const SheetSection = ({
   theme = "light",
   subType = "G",
 }) => {
+  console.log("🚀 Debug: ~ SheetSection ~ sheet:", sheet);
+
   const hotRef = React.useRef(null);
   const { activeSheet, setActiveSheet, registerHotRef, hfInstance, hotRefs } =
     useExcelStore((state) => state);
@@ -56,6 +58,7 @@ const SheetSection = ({
       <div style={{ display: isActive ? "block" : "none" }}>
         <HotTable
           ref={hotRef}
+          key={sheetName}
           themeName="ht-theme-main"
           className={`hot-table-theme-${theme}`}
           columns={sheet?.columns || []}

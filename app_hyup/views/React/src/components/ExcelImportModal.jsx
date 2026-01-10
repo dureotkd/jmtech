@@ -71,8 +71,6 @@ export default function ExcelImportModal({
     document.querySelector("#select-vat").value = "N"; // 부가세 별도 초기화
 
     const file = fileInputRef.current?.files?.[0];
-    console.log("🚀 Debug: ~ handleExcelForm ~ file:", file);
-
     const sheetName = e.target.sheet_select.value;
 
     if (!file) {
@@ -94,16 +92,19 @@ export default function ExcelImportModal({
         return;
       }
 
-      const data = res.data;
+      const convertedExcelData = res.data;
+      const resExcelTemplate =
+        convertedExcelData.length > 3
+          ? await estimateApi.견적서초기엑셀템플릿({
+              rows: convertedExcelData.length,
+            })
+          : deepClone(sheets);
 
-      const merged = [...data];
       const hotRefs = getHotRef();
       const activeHotRef = hotRefs[sheetName];
 
-      const cloneSheets = deepClone(sheets);
-
-      cloneSheets[0].data = cloneSheets[0].data.map((item, index) => {
-        const 매칭ITEM = data[index];
+      resExcelTemplate[0].data = resExcelTemplate[0].data.map((item, index) => {
+        const 매칭ITEM = convertedExcelData[index];
 
         if (!매칭ITEM) {
           return item;
@@ -151,7 +152,7 @@ export default function ExcelImportModal({
           }
 
           if (key == 10) {
-            value = 매칭ITEM["수량"];
+            value = 매칭ITEM["수량1"];
           }
 
           if (key == 18) {
@@ -174,31 +175,10 @@ export default function ExcelImportModal({
         });
       });
 
-      // let options = {
-      //   height: "auto",
-      // };
-
-      // if (merged.length > 20) {
-      //   options.height = 500;
-      // }
-
       activeHotRef.loadData([]); // 기존 데이터 초기화
 
-      // // ^ 공급가액 + 세액 합계 계산
-      // const amount = resData.reduce(
-      //   (acc, row) => acc + (row[4] || 0) + (row[5] || 0),
-      //   0
-      // );
-      // console.log(amount);
-      // setAmount(amount);
-
       // ^ 시트 데이터 업데이트
-      setSheets(cloneSheets);
-      // setSheets((prevSheets) =>
-      //   prevSheets.map((sheet) =>
-      //     sheet.name === sheetName ? { ...sheet, ...options } : sheet
-      //   )
-      // );
+      setSheets(resExcelTemplate);
 
       onClose();
     } catch (error) {

@@ -253,6 +253,21 @@ class Estimate_service
                             'sub_type' => 'S'
                         ]);
 
+                        // JSON 문자열인 경우 다시 파싱
+                        if (is_string($new_sheets)) {
+                            $new_sheets = json_decode($new_sheets, true);
+                        }
+
+                        // 배열이 아니거나 비어있는 경우 에러 처리
+                        if (!is_array($new_sheets) || empty($new_sheets)) {
+                            throw new Exception("템플릿 데이터를 불러올 수 없습니다.");
+                        }
+
+                        // $new_sheets[0]이 배열인지 확인하고, 없으면 초기화
+                        if (!isset($new_sheets[0]) || !is_array($new_sheets[0])) {
+                            $new_sheets[0] = [];
+                        }
+
                         /**
                          * 순번	도면번호/품명	소재	수량	단위	단가	금액
                          *               [0] => D111
@@ -291,6 +306,10 @@ class Estimate_service
                             ];
                         }
 
+                        // $new_sheets[0]이 배열인지 다시 확인 후 데이터 할당
+                        if (!is_array($new_sheets[0])) {
+                            $new_sheets[0] = [];
+                        }
                         $new_sheets[0]['data'] = $new_sheet_data;
                     } catch (Exception $e) {
                         throw new Exception("수주전환 중 오류가 발생했습니다.");

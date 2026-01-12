@@ -23,6 +23,7 @@ function redirect_handler()
 
         if (
             strpos($currentPath, '/login') === false
+            && strpos($currentPath, '/api') === false
         ) {
             header('Location: /login');
         }

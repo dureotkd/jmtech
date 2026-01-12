@@ -192,6 +192,11 @@ export default function EstimateDocument() {
         break;
     }
 
+    if (supplyAmount <= 0) {
+      alert("공급가액이 없습니다 견적서를 다시 확인해주세요.");
+      return;
+    }
+
     const cloneSheets = deepClone(sheets);
 
     cloneSheets[0].data = hots[0];

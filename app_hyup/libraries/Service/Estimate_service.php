@@ -303,6 +303,10 @@ class Estimate_service
 
                         @$new_sheets[0]['data'] = $new_sheet_data;
                     } catch (Exception $e) {
+
+                        echo $e->getMessage();
+                        exit;
+
                         throw new Exception("수주전환 중 오류가 발생했습니다.");
                     }
 

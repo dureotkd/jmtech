@@ -263,11 +263,6 @@ class Estimate_service
                             throw new Exception("템플릿 데이터를 불러올 수 없습니다.");
                         }
 
-                        // $new_sheets[0]이 배열인지 확인하고, 없으면 초기화
-                        if (!isset($new_sheets[0]) || !is_array($new_sheets[0])) {
-                            $new_sheets[0] = [];
-                        }
-
                         /**
                          * 순번	도면번호/품명	소재	수량	단위	단가	금액
                          *               [0] => D111
@@ -306,11 +301,7 @@ class Estimate_service
                             ];
                         }
 
-                        // $new_sheets[0]이 배열인지 다시 확인 후 데이터 할당
-                        if (!is_array($new_sheets[0])) {
-                            $new_sheets[0] = [];
-                        }
-                        $new_sheets[0]['data'] = $new_sheet_data;
+                        @$new_sheets[0]['data'] = $new_sheet_data;
                     } catch (Exception $e) {
                         throw new Exception("수주전환 중 오류가 발생했습니다.");
                     }

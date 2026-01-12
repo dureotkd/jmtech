@@ -301,11 +301,27 @@ class Estimate_service
                             ];
                         }
 
+                        /**
+                         * Array
+(
+    [0] => Array
+        (
+            [0] => s & al
+            [1] => EA
+            [2] => 11
+            [3] => 240600
+            [4] => 2646600
+            [5] => 264660
+            [6] => 
+        )
+
+)
+                         */
+                        printr($new_sheet_data);
+                        exit;
+
                         @$new_sheets[0]['data'] = $new_sheet_data;
                     } catch (Exception $e) {
-
-                        echo $e->getMessage();
-                        exit;
 
                         throw new Exception("수주전환 중 오류가 발생했습니다.");
                     }

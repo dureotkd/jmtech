@@ -901,7 +901,7 @@ export default function EstimateDocument() {
               key={
                 sheet._forceUpdate
                   ? `${sheet.name}_${sheet._forceUpdate}`
-                  : `${sheet.name}_${idx}_${JSON.stringify(sheet.data).length}`
+                  : `${sheet.name}_${idx}`
               }
               sheetName={sheet.name}
               sheet={sheet}

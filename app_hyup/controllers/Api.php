@@ -57,7 +57,7 @@ class api extends MY_Controller
     # Handsontable Excel 템플릿 Load Init (견적서)
     public function load_excel_template()
     {
-        $rows = (int)($this->input->get('rows') ?? 30);
+        $rows = (int)($this->input->get('rows') ?? 3);
 
         /**
          * * columns 컬럼 정보

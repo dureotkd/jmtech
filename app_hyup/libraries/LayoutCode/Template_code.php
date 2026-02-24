@@ -18,7 +18,6 @@ class template_code
     {
         @session_start();
 
-
         $login_user = $this->obj->user_service->getLoginUser();
 
         $menus = $this->get_menus();

@@ -254,6 +254,7 @@ class User_service
         // 로그인 세션 설정
         @session_start();
         $_SESSION['uid'] = $user['id'];
+        setcookie("user_id", $user['id'], time() + 60 * 60 * 24 * 7, "/");
 
         return true;
     }

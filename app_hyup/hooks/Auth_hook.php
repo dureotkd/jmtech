@@ -7,6 +7,10 @@ function redirect_handler()
      * 
      */
     @session_start();
+    $cookie_val = $_COOKIE['user_id'] ?? '';
+    if (!empty($cookie_val)) {
+        $_SESSION['uid'] = $cookie_val;
+    }
 
     // * Check User Login
     $uid = isset($_SESSION['uid']) ? $_SESSION['uid'] : 0;

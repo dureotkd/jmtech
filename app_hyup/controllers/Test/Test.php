@@ -30,47 +30,63 @@ class test extends MY_Controller
         $this->layout->view('/Api/Auth/Callback/naver_view', $view_data);
     }
 
+    public function upload_excel12()
+    {
+        $users = [
+            [
+                'user_id' => 'jeonym1096',
+                'name'    => '전용문',
+                'password' => 'tech123',
+            ],
+            [
+                'user_id' => 'parkjy1096',
+                'name'    => '정석문',
+                'password' => 'tech123',
+            ],
+        ];
+
+        try {
+            foreach ($users as $user) {
+                $this->service_model->insert_user(DEBUG, [
+                    'user_id'   => $user['user_id'],
+                    'name'      => $user['name'],
+                    'password'  => password_hash($user['password'], PASSWORD_BCRYPT),
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+            echo '✅ ' . count($users) . '명 회원 등록 완료';
+        } catch (Exception $e) {
+            echo '❌ 오류: ' . $e->getMessage();
+        }
+    }
+
+
     // * https://jmtech.test/api/test/upload_excel1 (EXCEL 업로드 테스트)
     public function upload_excel1()
     {
-
-        // * Phpspreadsheet 라이브러리 로드
-        $this->load->library('phpspreadsheet');
-
-        echo 'zz';
-        exit;
-
-
-        // * C드라이브 파일 경로
-        $filePath = 'C:/tttt.xlsx';  // 또는 Windows 서버라면 '\\' 대신 '/' 사용
+        $users = [
+            [
+                'user_id' => 'jeonym1096',
+                'name'    => '전용문',
+                'password' => 'tech123',
+            ],
+            [
+                'user_id' => 'parkjy1096',
+                'name'    => '정석문',
+                'password' => 'tech123',
+            ],
+        ];
 
         try {
-            $spreadsheet = $this->phpspreadsheet->loadExcelFile($filePath);
-            $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-
-            foreach ($sheetData as $key => $row) {
-                if ($key === 1) {
-                    // 헤더 행 건너뛰기
-                    continue;
-                }
-
-                $name = $row['A']; // A열
-                $user_id = $row['B']; // B열
-                $phone = $row['D']; // D열
-                $team = $row['E']; // E열
-                $employment_type = $row['F']; // F열
-                $auth_type = $row['H']; // H열
-
+            foreach ($users as $user) {
                 $this->service_model->insert_user(DEBUG, [
-                    'user_id' => $user_id,
-                    'name' => $name,
-                    'password' => password_hash('123', PASSWORD_BCRYPT),
-                    'phone' => $phone,
-                    'team' => $team,
-                    'employment_type' => $employment_type,
-                    'auth_type' => $auth_type,
+                    'user_id'   => $user['user_id'],
+                    'name'      => $user['name'],
+                    'password'  => password_hash($user['password'], PASSWORD_BCRYPT),
+                    'created_at' => date('Y-m-d H:i:s'),
                 ]);
             }
+            echo '✅ ' . count($users) . '명 회원 등록 완료';
         } catch (Exception $e) {
             echo '❌ 오류: ' . $e->getMessage();
         }

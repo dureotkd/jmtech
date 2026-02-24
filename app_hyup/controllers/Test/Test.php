@@ -13,7 +13,8 @@ class test extends MY_Controller
         $this->load->library([
             'layout',
             'barobill',
-            'moneypin'
+            'moneypin',
+            '/Service/partner_service'
         ]);
 
         $this->load->model('/Page/service_model');
@@ -59,7 +60,6 @@ class test extends MY_Controller
             echo '❌ 오류: ' . $e->getMessage();
         }
     }
-
 
     // * https://jmtech.test/api/test/upload_excel1 (EXCEL 업로드 테스트)
     public function upload_excel1()
@@ -148,7 +148,7 @@ class test extends MY_Controller
         }
     }
 
-    // * https://jmtech.test/test/test/upload_excel3 (EXCEL 업로드 테스트)
+    // * https://jmtech.test/test/test/upload_excel3 (거래처 엑셀 일괄 등록)
     public function upload_excel3()
     {
 
@@ -156,114 +156,57 @@ class test extends MY_Controller
         $this->load->library('phpspreadsheet');
 
         // * C드라이브 파일 경로
-        $filePath = 'C:/ttttttttt.xls';  // 또는 Windows 서버라면 '\\' 대신 '/' 사용
+        $filePath = 'C:/company_list.xls';
 
         try {
             $spreadsheet = $this->phpspreadsheet->loadExcelFile($filePath);
             $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-            $company_nums = [];
-            /**
-             * 
-    [26] => Array
-        (
-            [A] => 0000000023
-            [B] => sts 304 양P/S(레) 판 1.5t*1219*2438
-            [C] => 
-            [D] => 156,150
-            [E] => 0
-            [F] => 
-        )
 
-             */
+            $success_count = 0;
+            $skip_count = 0;
+            $error_rows = [];
+
             foreach ($sheetData as $key => $row) {
-                if ($key < 3) {
-                    // 헤더 행 건너뛰기
+                if ($key <= 3) {
+                    // 1행: 제목, 2행: 빈행, 3행: 헤더(거래처명, 등록번호, 대표자명)
                     continue;
                 }
 
-                $사업자번호 = $row['B'];
+                $company_name = trim($row['A'] ?? '');
+                $company_num = trim($row['B'] ?? '');
+                $ceo_name = trim($row['C'] ?? '');
 
-                if (empty($사업자번호)) {
+                if (empty($company_name) || empty($company_num)) {
+                    $skip_count++;
                     continue;
                 }
 
-                $사업자번호 = str_replace('-', '', $사업자번호);
-
-                if (strlen($사업자번호) != 10) {
-                    continue;
+                try {
+                    $this->partner_service->create([
+                        'type'         => 'business',
+                        'company_name' => $company_name,
+                        'company_num'  => $company_num,
+                        'ceo_name'     => $ceo_name,
+                    ]);
+                    $success_count++;
+                } catch (Exception $e) {
+                    $error_rows[] = "행 {$key} ({$company_name}): " . $e->getMessage();
                 }
-
-                $company_nums[] = $사업자번호;
             }
 
-            $response = $this->moneypin->searchCompany(['3128624947']);
-
-            printr($response);
-            exit;
-
-
-            // * company_nums 10개씩 배열로 나누기
-
-            /**
-             *             [0] => 3128209915
-            [1] => 3128624947
-            [2] => 1278651448
-            [3] => 1238161895
-            [4] => 3128137073
-            [5] => 3128158684
-            [6] => 1198108663
-            [7] => 5048124750
-            [8] => 3128139751
-            [9] => 1238625837
-             */
-            $company_nums = array_chunk($company_nums, 10);
-
-            foreach ($company_nums as $index => $company_num_chunk) {
-
-                echo '==== ' . ($index) . '번째 호출 ==== <br>';
-
-                $response = $this->moneypin->searchCompany($company_num_chunk);
-
-                $test_tmp = 0;
-
-                foreach ($response as $res) {
-
-                    $test_tmp++;
-
-                    echo '----' . $test_tmp . '----<br>';
-
-                    $info = $res['info'];
-
-                    $bizNo = $info['bizNo'];
-                    $bizName = $info['bizName'];
-                    $ceoName = $info['ceoName'];
-                    $address = $info['address'];
-                    $bizStatus = $info['bizStatus'];
-                    $taxType = $info['taxType'];
-                    $simplifiedTaxTypeDate = $info['simplifiedTaxTypeDate'];
-                    $closingDate = $info['closingDate'];
-
-                    $this->service_model->insert_moneypin_biz_info(DEBUG, [
-                        'biz_no' => $bizNo,
-                        'biz_name' => $bizName,
-                        'ceo_name' => $ceoName,
-                        'address' => $address,
-                        'biz_status' => $bizStatus,
-                        'tax_type' => $taxType,
-                        'simplified_tax_type_date' => $simplifiedTaxTypeDate,
-                        'closing_date' => $closingDate,
-                        'created_at' => date('Y-m-d H:i:s'),
-                        'updated_at' => date('Y-m-d H:i:s'),
-                    ]);
-                }
-
-                sleep(1); // * 1초 대기
-
+            echo "✅ 거래처 등록 완료: {$success_count}건\n";
+            if ($skip_count > 0) {
+                echo "⏭ 건너뜀: {$skip_count}건" . PHP_EOL;
+            }
+            if (!empty($error_rows)) {
+                echo "❌ 오류: " . implode("\n", $error_rows);
             }
         } catch (Exception $e) {
             echo '❌ 오류: ' . $e->getMessage();
         }
     }
+
+
 
     public function mig()
     {

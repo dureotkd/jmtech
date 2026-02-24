@@ -27,62 +27,55 @@
                     class="flex-1 px-2 py-2 outline-none placeholder-gray-400" />
             </form>
 
-            <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button">
-                    <button type="button" class="!px-2 py-1 !border-1 !border-gray-300 hover:bg-gray-100">
+            <div class="relative">
+                <div
+                    class="custom-dropdown-wrapper"
+                    data-dropdown-id="estimate-dropdown"
+                    style="display: inline-block;">
+                    <button
+                        type="button"
+                        class="!px-2 py-1 !border-1 !border-gray-300 hover:bg-gray-100"
+                        onclick="toggleCustomDropdown(event, 'estimate-dropdown')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
                             <path d="M4 5h16" />
                             <path d="M4 12h16" />
                             <path d="M4 19h16" />
                         </svg>
                     </button>
-
-                </div>
-                <ul
-                    tabindex="-1"
-                    class="!min-w-[210px] !border !border-gray-300 !bg-white !mt-2 items-center justify-center font-sans menu dropdown-content z-1 mt-4 w-52 shadow-sm">
-
-                    <div class="w-full flex flex-col justify-start !text-xs">
-
+                    <div
+                        class="custom-dropdown-menu hidden absolute right-0 !min-w-[210px] !border !border-gray-300 !bg-white mt-2 flex flex-col justify-start font-sans z-10 w-52 shadow-sm !text-xs"
+                        data-dropdown-menu="estimate-dropdown"
+                        style="transition:opacity 0.15s;">
                         <button onclick="download_excel();"
-                            class="!text-left flex items-center gap-2 border-b-1 border-gray-300 !p-4 sm-hover" type="button">
-
+                            class="!text-left flex items-center gap-2 border-b border-gray-300 !p-4 hover:bg-gray-50" type="button">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download">
                                 <path d="M12 15V3" />
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                 <path d="m7 10 5 5 5-5" />
                             </svg>
-
-                            <span>
-                                엑셀파일 다운로드
-                            </span>
+                            <span>엑셀파일 다운로드</span>
                         </button>
-
-                        <button class="flex items-center gap-2 !text-left !p-4 sm-hover" onclick="show_prints();" type="button">
-
+                        <button class="flex items-center gap-2 !text-left !p-4 hover:bg-gray-50" onclick="show_prints();" type="button">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer-icon lucide-printer">
                                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
                                 <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" />
                                 <rect x="6" y="14" width="12" height="8" rx="1" />
                             </svg>
-
-                            <span>
-                                견적서 인쇄
-                            </span>
+                            <span>견적서 인쇄</span>
                         </button>
                     </div>
-                </ul>
+                </div>
             </div>
-        </div>
 
+        </div>
     </div>
 
     <!-- 필터 영역 -->
-    <div class="flex items-center gap-2 mb-4 !text-sm">
+    <div class="flex items-center gap-2 mb-4 !text-xs">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
             <div class="flex items-center gap-2">
-                <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+                <button onclick="delete_estimate(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition"><input multiple="" type="file" style="display: none;">
                     삭제
                 </button>
 
@@ -112,9 +105,9 @@
                 </div>
             </div>
             <button
-                onclick="open_popup_default('<?= REACT_PATH ?>','견적서 등록',1000,820);"
+                onclick="open_popup_default('<?= REACT_PATH ?>','견적서 등록',3000,1820);"
                 type="button"
-                class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0]">
+                class="px-2 py-1 bg-[#4b8edc] text-white hover:bg-[#3d7ac0] rounded-sm">
                 견적서 등록 +
             </button>
         </div>
@@ -174,7 +167,7 @@
                                             <?
                                             foreach ($file_name_array as $index => $file_name) {
                                             ?>
-                                                <div onclick="file_download(<?= $file_id_array[$index] ?>)" class="flex items-center gap-3 !p-2 hover:bg-gray-100 cursor-pointer">
+                                                <div onclick="file_download(<?= $file_id_array[$index] ?>)" class="min-w-[200px] flex items-center gap-3 !p-2 hover:bg-gray-100 cursor-pointer">
                                                     <img src="<?= fileIcon($file_name) ?>" class="w-4 h-4" />
                                                     <span class="text-sm text-gray-800 truncate">
                                                         <?= $file_name ?>
@@ -215,8 +208,8 @@
                                     <button
                                         onclick="event.stopPropagation(); open_popup_default(`/sales/estimate_detail?id=<?= $estimate['su_estimate_id'] ?>`, '수주서 상세', 1000, 820);"
                                         type="button"
-                                        class="sm-btn bg-primary !m-0 text-xs !min-w-[90px]">
-                                        수주서 확인
+                                        class="sm-btn bg-primary !m-0 text-xs !min-w-[62px]">
+                                        수주서
                                     </button>
                                 <?
                                 }
@@ -230,7 +223,7 @@
                 <? endforeach;
             else : ?>
                 <tr>
-                    <td colspan="9" class="text-center py-4">등록된 가 없습니다.</td>
+                    <td colspan="9" class="text-center py-4">등록된 데이터가 없습니다.</td>
                 </tr>
             <? endif; ?>
 

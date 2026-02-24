@@ -129,6 +129,31 @@ class Partner_service
         }
     }
 
+    public function toggleBookmark($id, $bookmark_yn)
+    {
+
+        if (empty($id)) {
+            throw new Exception("거래처 ID가 누락되었습니다.");
+        }
+
+        if (!in_array($bookmark_yn, ['Y', 'N'])) {
+            throw new Exception("잘못된 즐겨찾기 값입니다.");
+        }
+
+        $res = $this->obj->service_model->update_business_partner(DEBUG, [
+            'bookmark_yn' => $bookmark_yn,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ], [
+            sprintf("id = '%s'", $id)
+        ]);
+
+        if (!$res) {
+            throw new Exception("즐겨찾기 업데이트에 실패했습니다.");
+        }
+
+        return true;
+    }
+
     public function update($params = []) {}
 
     public function delete($params = []) {}

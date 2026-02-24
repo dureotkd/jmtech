@@ -7,8 +7,11 @@ class sales_document extends MY_Controller
     {
         parent::__construct();
 
-        $this->load->library("layout");
-        $this->load->library("/Service/user_service");
+        $this->load->library([
+            "layout",
+            "hometax",
+            "/Service/user_service"
+        ]);
 
         $this->load->model('/Page/service_model');
     }
@@ -25,6 +28,32 @@ class sales_document extends MY_Controller
 
         $this->layout->view('/Sales/report_view', $view_data);
     }
+
+    # 홈택스 자료수집
+    public function collect_hometax_sales_tax_invoice()
+    {
+
+        $res_array = [
+            'ok'    => true,
+            'msg'   => '홈택스 자료수집이 완료되었습니다.',
+            'data'  => [],
+        ];
+
+        // 전날
+        $start_date = date('Y-m-d', strtotime('-7 day'));
+        $end_date = date('Y-m-d');
+
+        try {
+
+            $this->hometax->전체자료수집($start_date, $end_date);
+        } catch (Exception $e) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = $e->getMessage();
+        }
+
+        echo json_encode($res_array);
+    }
+
 
     # 매출세금계산서(현영/기타)
     public function tax_bill()

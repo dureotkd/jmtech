@@ -429,11 +429,11 @@ $datetime = date('YmdHis');
         <div class="flex items-center mt-2 !px-4 !py-1 !border-x-2 !border-b-2 !border-black justify-start">
             <span class="font-semibold mr-2">합&nbsp;&nbsp;계&nbsp;&nbsp;금&nbsp;&nbsp;액 : 일금 </span>
             <h2 class="!text-sm font-bold !ml-4">
-                <?= number_to_korean($estimate['amount']) ?>
-                (<?= number_format($estimate['amount']) ?>)
+                <?= number_to_korean($estimate['supply_amount']) ?>
+                ￦<?= number_format($estimate['supply_amount']) ?>원
                 <?
                 $VAT_TYPE = unserialize(VAT_TYPE);
-                echo $VAT_TYPE[$estimate['vat_type']];
+                echo '(' . $VAT_TYPE[$estimate['vat_type']] . ')';
                 ?>
             </h2>
         </div>
@@ -444,14 +444,31 @@ $datetime = date('YmdHis');
         <table class="estimate">
             <thead>
                 <tr>
-                    <th>순번</th>
-                    <th>품목</th>
-                    <th>규격</th>
-                    <th>수량</th>
-                    <th>단가</th>
-                    <th>공급가액</th>
-                    <th>세액</th>
-                    <th>비고</th>
+                    <?
+                    if ($estimate['sub_type'] == 'G') {
+                    ?>
+                        <th>순번</th>
+                        <th>도면번호/품명</th>
+                        <th>소재</th>
+                        <th>수량</th>
+                        <th>단위</th>
+                        <th>단가</th>
+                        <th>금액</th>
+                        <th>비고</th>
+                    <?
+                    } else {
+                    ?>
+                        <th>순번</th>
+                        <th>품목</th>
+                        <th>규격</th>
+                        <th>수량</th>
+                        <th>단가</th>
+                        <th>공급가액</th>
+                        <th>세액</th>
+                        <th>비고</th>
+                    <?
+                    }
+                    ?>
                 </tr>
             </thead>
             <tbody>
@@ -474,7 +491,17 @@ $datetime = date('YmdHis');
                                 <?= $item[2] ?>
                             </td>
                             <td class="!text-right">
-                                <?= !empty($item[3]) ? number_format($item[3]) : '' ?>
+                                <?
+                                if ($estimate['sub_type'] == 'G') {
+                                ?>
+                                    <?= $item[3] ?>
+                                <?
+                                } else {
+                                ?>
+                                    <?= !empty($item[4]) ? number_format($item[4]) : '' ?>
+                                <?
+                                }
+                                ?>
                             </td>
                             <td class="!text-right">
                                 <?= !empty($item[4]) ? number_format($item[4]) : '' ?>
@@ -511,7 +538,7 @@ $datetime = date('YmdHis');
                 <tr>
                     <td class="tg-0pky !text-xs !border-1 text-center th-bg">유효일자</td>
                     <td class="tg-0pky !text-xs !border-1 w-[400px]">
-                        <?= $estimate['valid_at'] ?>
+                        <?= $estimate['valid_at'] === '0000-00-00' ? '' : $estimate['valid_at'] ?>
                     </td>
                     <td class="tg-0pky !text-xs !border-1 th-bg !w-[100px] !text-center">결제조건</td>
                     <td class="tg-0pky !text-xs !border-1">
@@ -536,15 +563,15 @@ $datetime = date('YmdHis');
             if (!empty($files)) {
                 foreach ($files as $file) {
             ?>
-                    <div
+                    <a
+                        href="/sales/download_file?id=<?= $file['id'] ?>"
                         class="flex items-center border border-gray-300 rounded !px-4 !py-2 gap-2 bg-gray-100">
                         <img src="<?= fileIcon($file['file_name']) ?>" class="w-4 h-4" />
-                        <a
-                            href="/sales/download_file?id=<?= $file['id'] ?>"
+                        <span
                             class="text-blue-600 hover:underline">
                             <?= $file['file_name'] ?>
-                        </a>
-                    </div>
+                        </span>
+                    </a>
                 <?
                 }
             } else {
@@ -584,6 +611,13 @@ $datetime = date('YmdHis');
 </div>
 
 <script>
+    /**
+     * * 접근시 팝업 사이즈를 1000, 820로 조정
+     */
+    $(document).ready(function() {
+        window.resizeTo(1000, 820);
+    });
+
     const handle_delete = (e) => {
         if (confirm('정말로 삭제하시겠습니까? \n삭제된 견적서는 복구할 수 없습니다.\n(관련된 수주서도 함께 삭제됩니다.)')) {
             window.location.href = '/sales/delete_estimate?id=<?= $estimate['id'] ?>';
@@ -592,9 +626,7 @@ $datetime = date('YmdHis');
 
     const handle_copy = (e) => {
 
-
         window.location.href = `<?= REACT_PATH ?>?tab=copy&id=<?= $estimate['id'] ?>&sub_type=<?= $estimate['sub_type'] ?>`;
-
     }
 
     const eventId = '<?= $estimate['id'] ?>';
@@ -653,7 +685,7 @@ $datetime = date('YmdHis');
 
             const a = document.createElement("a");
             a.href = url;
-            a.download = "견적서.xlsx"; // 원하는 파일명
+            a.download = "<?= $estimate['partner_name'] ?>_<?= $estimate['sub_type'] == 'G' ? '견적서' : '수주서' ?>.xlsx"; // 원하는 파일명
             a.click();
 
             window.URL.revokeObjectURL(url);

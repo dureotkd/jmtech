@@ -5,7 +5,7 @@
     }
 </style>
 
-<div class="p-4 bg-white font-sans text-sm text-gray-800">
+<div class="p-4 bg-white font-sans text-xs text-gray-800">
     <div class="flex items-center !border-b !font-sans !border-gray-300 !pb-3 justify-between">
         <h1 class="!text-xl">
             <?= $title ?>
@@ -26,62 +26,63 @@
                     class="flex-1 px-2 py-2 outline-none placeholder-gray-400" />
             </form>
 
-            <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button">
-                    <button type="button" class="!px-2 py-1 !border-1 !border-gray-300 hover:bg-gray-100">
+            <div class="relative">
+                <div
+                    class="custom-dropdown-wrapper"
+                    data-dropdown-id="tax-bill-dropdown"
+                    style="display: inline-block;">
+                    <button
+                        type="button"
+                        class="!px-2 py-1 !border-1 !border-gray-300 hover:bg-gray-100"
+                        onclick="toggleCustomDropdown(event, 'tax-bill-dropdown')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
                             <path d="M4 5h16" />
                             <path d="M4 12h16" />
                             <path d="M4 19h16" />
                         </svg>
                     </button>
-
                 </div>
-                <ul
-                    tabindex="-1"
-                    class="!min-w-[210px] !border !border-gray-300 !bg-white !mt-2 items-center justify-center font-sans menu dropdown-content z-1 mt-4 w-52 shadow-sm">
-
+                <div
+                    data-dropdown-menu="tax-bill-dropdown"
+                    class="custom-dropdown-menu hidden absolute right-0 mt-2 !min-w-[210px] !bg-white rounded-box shadow-sm z-10 py-4 px-4 font-sans"
+                    style="min-width:210px;">
                     <div class="w-full flex flex-col justify-start !text-xs">
-
-                        <button onclick="open_popup_default('/setting/item/create','물품 등록',500,580);"
-                            class="!text-left flex items-center gap-2 border-b-1 border-gray-300 !p-4 sm-hover" type="button">
+                        <button onclick="download_excel();"
+                            class="!text-left flex items-center gap-2 border-b-1 border-gray-300 !p-4 sm-hover w-full" type="button">
 
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download">
                                 <path d="M12 15V3" />
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                 <path d="m7 10 5 5 5-5" />
                             </svg>
-
                             <span>
                                 엑셀파일 다운로드
                             </span>
                         </button>
-
-                        <button class="flex items-center gap-2 !text-left !p-4 sm-hover" onclick="show_excel_upload_modal();" type="button">
-
+                        <button class="flex items-center gap-2 !text-left !p-4 sm-hover w-full" onclick="show_prints();" type="button">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer-icon lucide-printer">
                                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
                                 <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" />
                                 <rect x="6" y="14" width="12" height="8" rx="1" />
                             </svg>
-
                             <span>
                                 <?= $title ?> 인쇄
                             </span>
                         </button>
                     </div>
-                </ul>
+                </div>
             </div>
+
         </div>
 
     </div>
 
     <!-- 필터 영역 -->
-    <div class="flex items-center gap-2 mb-4 !text-sm">
+    <div class="flex items-center gap-2 mb-4 !text-xs">
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
-            <div class="flex items-center gap-2">
-                <button onclick="delete_transcation_statement(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+            <div class="flex items-center gap-2 !text-xs">
+                <button onclick="delete_transcation_statement(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-xs"><input multiple="" type="file" style="display: none;">
                     삭제
                 </button>
 
@@ -115,7 +116,7 @@
                 <button
                     type="button"
                     onclick="collect_hometax(event);"
-                    class="flex h-[28px] items-center gap-1 bg-[#2ea3eb] text-white px-4">
+                    class="flex h-[24px] items-center gap-1 bg-[#2ea3eb] text-white px-4">
                     <img src="/assets/app_hyup/images/hometax.png" alt="hometax" class="w-12" />
                     홈택스 자료수집
                 </button>
@@ -204,7 +205,7 @@
                 </button>
             </div>
 
-            <div class="border border-gray-300 !p-4 w-full !text-xs bg-white rounded text-sm">
+            <div class="border border-gray-300 !p-4 w-full !text-xs bg-white rounded text-xs">
                 <div class="flex items-center gap-2 !mb-2">
                     <span>기준연도</span>
                     <select id="yearSelect" class="border border-gray-300 rounded px-1 py-0.5">
@@ -342,7 +343,7 @@
 
         $.ajax({
             type: "GET",
-            url: "/sales/collect_hometax_sales_tax_invoice",
+            url: "/sales_document/collect_hometax_sales_tax_invoice",
             dataType: "json",
             success: function(response) {
 

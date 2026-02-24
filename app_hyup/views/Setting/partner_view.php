@@ -1,14 +1,24 @@
-<div class="p-4 bg-white font-sans text-sm text-gray-800">
+<div class="p-4 bg-white font-sans text-xs text-gray-800">
 
-    <h1 class="!text-xl !border-b !font-sans !border-gray-300 !pb-3">
-        거래처관리
-    </h1>
+    <form id="searchForm" class="flex items-center !border-b !font-sans !border-gray-300 !pb-3 justify-between">
+        <h1 class="!text-xl">
+            거래처관리
+        </h1>
+
+        <div class="flex items-center gap-2">
+            <input type="text" name="search_text" value="<?= htmlspecialchars($search_text) ?>" placeholder="거래처명을 입력해주세요" class="flex-1 px-2 py-2 rounded-sm !text-xs outline-none placeholder-gray-400 !w-[300px]" />
+            <button type="submit" class="px-2 !text-xs py-2 bg-[#4b8edc] text-white hover:bg-[#3d7ac0] rounded-sm">검색</button>
+            <input type="hidden" name="page" id="page" value="<?= $page ?>">
+        </div>
+
+    </form>
 
     <!-- 필터 영역 -->
-    <div class="flex items-center gap-2 mb-4 !text-sm">
+    <div class="flex items-center gap-2 mb-4 !text-xs">
+
 
         <div class="ml-auto flex w-full items-center gap-2 justify-between">
-            <button onclick="delete_partner(event);" type="button" class="!my-2  flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-sm"><input multiple="" type="file" style="display: none;">
+            <button onclick="delete_partner(event);" type="button" class="!my-2 !text-xs flex items-center gap-1 border border-gray-300 rounded h-7 !px-3 bg-white hover:bg-gray-50 transition text-xs"><input multiple="" type="file" style="display: none;">
                 삭제
             </button>
             <button
@@ -20,8 +30,8 @@
         </div>
     </div>
 
-    <form id="searchFrm">
-        <input type="hidden" name="page" id="page" value="<?= $page ?>">
+    <div id="searchFrm">
+
         <!-- 테이블 -->
         <table class="w-full border border-gray-300">
             <thead>
@@ -63,6 +73,21 @@
                                         <path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" />
                                     </svg>
                                     <?= $partner['company_name'] ?>
+                                    <button
+                                        type="button"
+                                        onclick="toggle_bookmark(event, '<?= $partner['id'] ?>');"
+                                        class="bookmark-btn ml-1 p-0.5 hover:opacity-70 transition"
+                                        data-bookmark-yn="<?= $partner['bookmark_yn'] ?? 'N' ?>">
+                                        <?php if (($partner['bookmark_yn'] ?? 'N') === 'Y'): ?>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star">
+                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                            </svg>
+                                        <?php else: ?>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star">
+                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                            </svg>
+                                        <?php endif; ?>
+                                    </button>
                                 </div>
                             </td>
                             <td class="" data-label="등록번호"><?= $partner['company_num'] ?></td>
@@ -145,13 +170,57 @@
 
         </div>
 
-    </form>
+    </div>
 
 </div>
 
 <script>
     function go_detail(estimate_id) {
         // open_popup_default(`/sales/estimate_detail?id=${estimate_id}`, '견적서 상세', 1000, 820);
+    }
+
+    function toggle_bookmark(event, partner_id) {
+        event.stopPropagation(); // 행 클릭 이벤트 방지
+
+        const btn = event.currentTarget;
+        const current_bookmark_yn = btn.getAttribute('data-bookmark-yn');
+        const new_bookmark_yn = current_bookmark_yn === 'Y' ? 'N' : 'Y';
+
+        start_loading();
+
+        $.ajax({
+            type: "POST",
+            url: "/setting/partner/toggle_bookmark",
+            data: {
+                id: partner_id,
+                bookmark_yn: new_bookmark_yn
+            },
+            dataType: "json",
+            success: function(response) {
+                if (response.ok) {
+                    // 아이콘 업데이트
+                    btn.setAttribute('data-bookmark-yn', new_bookmark_yn);
+                    const svg = btn.querySelector('svg');
+                    const polygon = svg.querySelector('polygon');
+
+                    if (new_bookmark_yn === 'Y') {
+                        svg.setAttribute('fill', '#fbbf24');
+                        svg.setAttribute('stroke', '#fbbf24');
+                    } else {
+                        svg.setAttribute('fill', 'none');
+                        svg.setAttribute('stroke', '#9ca3af');
+                    }
+                } else {
+                    alert(response.msg || '즐겨찾기 업데이트에 실패했습니다.');
+                }
+            },
+            error: function(xhr, status, error) {
+                alert("에러가 발생했습니다: " + error);
+            },
+            complete: function() {
+                stop_loading();
+            }
+        });
     }
 
     function handle_select(event) {

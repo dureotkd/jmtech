@@ -516,28 +516,6 @@ $datetime = date('YmdHis');
                             </h2>
                         </div>
                     </div>
-
-                    <div class="!space-x-1 !mt-2">
-                        <?
-                        if (!empty($phone_number)) {
-                        ?>
-                            <span>
-                                전&nbsp;&nbsp;화&nbsp;&nbsp;번&nbsp;&nbsp;호 : <?= $statement['phone_number'] ?>
-                            </span>
-                        <?
-                        }
-                        ?>
-
-                        <?
-                        if (!empty($phone_number)) {
-                        ?>
-                            <span>
-                                팩&nbsp;&nbsp;스&nbsp;&nbsp;번&nbsp;&nbsp;호 : <?= $statement['fax_number'] ?>
-                            </span>
-                        <?
-                        }
-                        ?>
-                    </div>
                 </div>
             </div>
 
@@ -896,9 +874,7 @@ $datetime = date('YmdHis');
 
             <div class="flex">
                 <!-- 왼쪽: 견적 정보 -->
-                <div class="w-[42%] relative flex-1 !pr-3">
-                    <div class="!space-y-2 relative">
-                    </div>
+                <div class="w-[50%] relative flex-1 !pr-3 flex flex-col justify-between">
 
                     <div class="!gap-4">
                         <div class="flex flex-col gap-3 !mt-2">
@@ -933,7 +909,7 @@ $datetime = date('YmdHis');
                                     주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소 :
                                 </label>
                                 <p class="!ml-6">
-                                    <?= $statement['partner_name'] ?>
+                                    <?= $statement['partner_address'] ?>
                                 </p>
                             </div>
                             <div class="flex">
@@ -954,41 +930,21 @@ $datetime = date('YmdHis');
                                     </p>
                                 </div>
                             </div>
-
-                            <div class="flex justify-between items-center !mt-[17px] <?= $table_theme ?> !px-2 !py-1.5 !text-[15px] font-semibold">
-                                <h2 class=" <?= $text_theme ?>">합계금액 : </h2>
-                                <h2>
-                                    <?= number_format($statement['amount']) ?>
-                                </h2>
-                            </div>
                         </div>
 
-                        <div class="!space-x-1 !mt-2">
-                            <?
-                            if (!empty($phone_number)) {
-                            ?>
-                                <span>
-                                    전&nbsp;&nbsp;화&nbsp;&nbsp;번&nbsp;&nbsp;호 : <?= $statement['phone_number'] ?>
-                                </span>
-                            <?
-                            }
-                            ?>
+                    </div>
 
-                            <?
-                            if (!empty($phone_number)) {
-                            ?>
-                                <span>
-                                    팩&nbsp;&nbsp;스&nbsp;&nbsp;번&nbsp;&nbsp;호 : <?= $statement['fax_number'] ?>
-                                </span>
-                            <?
-                            }
-                            ?>
-                        </div>
+
+                    <div class="flex justify-between items-center !mt-[17px] <?= $table_theme ?> !px-2 !py-1.5 !text-[15px] font-semibold">
+                        <h2 class=" <?= $text_theme ?>">합계금액 : </h2>
+                        <h2>
+                            <?= number_format($statement['amount']) ?>
+                        </h2>
                     </div>
                 </div>
 
                 <!-- 오른쪽: 공급자 정보 -->
-                <div class="w-[58%]">
+                <div class="w-[50%]">
                     <table class="w-full border-collapse text-sm <?= $table_theme ?>">
                         <col style="width: 35px">
                         <col style="width: 82px">

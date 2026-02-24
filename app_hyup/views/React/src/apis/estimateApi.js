@@ -13,8 +13,16 @@ const estimateApi = {
     return res;
   },
 
-  초기엑셀템플릿: async () => {
-    const res = await request.get("load_excel_template");
+  견적서초기엑셀템플릿: async (params = {}) => {
+    const res = await request.get("load_excel_template", { params });
+
+    return res;
+  },
+
+  초기엑셀템플릿: async (subType) => {
+    const res = await request.get("load_excel_template_v3", {
+      params: { sub_type: subType },
+    });
 
     return res;
   },

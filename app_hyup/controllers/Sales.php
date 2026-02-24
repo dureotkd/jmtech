@@ -248,6 +248,15 @@ class sales extends MY_Controller
             "target_id = {$id}"
         ]);
 
+        /**
+         *   [0] => D111
+            [1] => AL
+            [2] => 1
+            [3] => EA
+            [4] => 49800
+            [5] => 49800
+            [6] => 
+         */
         $view_data =  [
             'id'            => $id,
             'estimate'      => $estimate,
@@ -596,7 +605,7 @@ class sales extends MY_Controller
         $number_to_korean = number_to_korean($estimate_row['amount'] ?? 0);
         $number_amount = number_format($estimate_row['amount'] ?? 0);
         $vat_type = $VAT_TYPE[$estimate_row['vat_type']] ?? '';
-        $sheet->setCellValue("C{$합계금액_INDEX}", "합  계  금  액 : {$number_to_korean} 원정 (₩ {$number_amount}) {$vat_type}");
+        $sheet->setCellValue("C{$합계금액_INDEX}", "합  계  금  액 : {$number_to_korean} ￦ {$number_amount}원 ({$vat_type})");
         // $sheet->setCellValue("", $number_to_korean);
 
         foreach ($items as $index => $item) {
@@ -604,26 +613,53 @@ class sales extends MY_Controller
             $row_num = $insertAt + $index;
             $tmp_index = $count - $index;
 
-            $sheet->setCellValue("C{$row_num}", $tmp_index); // 순번
-            $sheet->mergeCells("C{$row_num}:D{$row_num}"); // C+D 병합
+            if ($sub_type === 'G') {
 
-            $sheet->setCellValue("E{$row_num}", $item[0]); // 품목
+                $sheet->setCellValue("C{$row_num}", $tmp_index);     // 순번
+                $sheet->mergeCells("C{$row_num}:D{$row_num}"); // C+D 병합
 
-            $sheet->setCellValue("F{$row_num}", $item[1]); // 규격
+                $sheet->setCellValue("E{$row_num}", $item[0]); //  도면번호/품명
 
-            $sheet->setCellValue("G{$row_num}", $item[2]); // 수량
+                $sheet->setCellValue("F{$row_num}", $item[1]); // 소재
 
-            $sheet->setCellValue("H{$row_num}", !empty($item[3]) ? number_format($item[3]) : ''); // 단가
-            $sheet->mergeCells("H{$row_num}:I{$row_num}"); // H+I 병합
+                $sheet->setCellValue("G{$row_num}", !empty($item[2]) ? number_format($item[2]) : ''); // 수량
 
-            $sheet->setCellValue("J{$row_num}", !empty($item[4]) ? number_format($item[4]) : ''); // 공급가액
-            $sheet->mergeCells("J{$row_num}:K{$row_num}"); // J+K 병합
+                $sheet->setCellValue("H{$row_num}", $item[3]); // 단위
+                $sheet->mergeCells("H{$row_num}:I{$row_num}"); // H+I 병합
 
-            $sheet->setCellValue("L{$row_num}", !empty($item[5]) ? number_format($item[5]) : ''); // 세액
-            $sheet->mergeCells("L{$row_num}:O{$row_num}"); // L+M+N+O 병합
+                $sheet->setCellValue("J{$row_num}", !empty($item[4]) ? number_format($item[4]) : ''); // 단가
+                $sheet->mergeCells("J{$row_num}:K{$row_num}"); // J+K 병합
 
-            $sheet->setCellValue("P{$row_num}", $item[6]); // 비고
-            $sheet->mergeCells("P{$row_num}:U{$row_num}"); // P 병합
+                $sheet->setCellValue("L{$row_num}", !empty($item[5]) ? number_format($item[5]) : ''); // 금액
+                $sheet->mergeCells("L{$row_num}:O{$row_num}"); // L+M+N+O 병합
+
+                $sheet->setCellValue("P{$row_num}", $item[6]); // 비고
+                $sheet->mergeCells("P{$row_num}:U{$row_num}"); // P 병합
+
+            } else {
+
+                $sheet->setCellValue("C{$row_num}", $tmp_index); // 순번
+                $sheet->mergeCells("C{$row_num}:D{$row_num}"); // C+D 병합
+
+                $sheet->setCellValue("E{$row_num}", $item[0]); // 품목
+
+                $sheet->setCellValue("F{$row_num}", $item[1]); // 규격
+
+                $sheet->setCellValue("G{$row_num}", $item[2]); // 수량
+
+                $sheet->setCellValue("H{$row_num}", !empty($item[3]) ? number_format($item[3]) : ''); // 단가
+                $sheet->mergeCells("H{$row_num}:I{$row_num}"); // H+I 병합
+
+                $sheet->setCellValue("J{$row_num}", !empty($item[4]) ? number_format($item[4]) : ''); // 공급가액
+                $sheet->mergeCells("J{$row_num}:K{$row_num}"); // J+K 병합
+
+                $sheet->setCellValue("L{$row_num}", !empty($item[5]) ? number_format($item[5]) : ''); // 세액
+                $sheet->mergeCells("L{$row_num}:O{$row_num}"); // L+M+N+O 병합
+
+                $sheet->setCellValue("P{$row_num}", $item[6]); // 비고
+                $sheet->mergeCells("P{$row_num}:U{$row_num}"); // P 병합
+            }
+
 
             $합계_INDEX++;
         }
@@ -733,6 +769,7 @@ class sales extends MY_Controller
 
         $sheet->getStyle('E14')->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+
             ->getStartColor()->setARGB('D9D9D9');
 
         $sheet->getStyle('F14')->getFill()
@@ -962,31 +999,6 @@ class sales extends MY_Controller
 
 
         $this->file->download($file['file_path'], $file['file_name']);
-    }
-
-    # 홈택스 자료수집
-    public function collect_hometax_sales_tax_invoice()
-    {
-
-        $res_array = [
-            'ok'    => true,
-            'msg'   => '홈택스 자료수집이 완료되었습니다.',
-            'data'  => [],
-        ];
-
-        // 전날
-        $start_date = date('Y-m-d', strtotime('-7 day'));
-        $end_date = date('Y-m-d');
-
-        try {
-
-            $this->hometax->전체자료수집($start_date, $end_date);
-        } catch (Exception $e) {
-            $res_array['ok'] = false;
-            $res_array['msg'] = $e->getMessage();
-        }
-
-        echo json_encode($res_array);
     }
 
     # 견적서 상태 변경

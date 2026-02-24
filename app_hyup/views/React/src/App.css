@@ -834,7 +834,8 @@ aside {
   background: #fff;
   position: absolute;
   z-index: 10;
-  width: 100%;
+  /* width: 100%; */
+  width: 500px;
   height: 250px;
   margin-top: 2px;
   overflow-y: scroll;

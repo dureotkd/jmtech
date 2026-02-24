@@ -11,7 +11,7 @@ function setup()
     // ]);
 
     // mobile인지 PC인지 구분
-    if (strpos($_SERVER['HTTP_USER_AGENT'], 'Mobile') !== false) {
+    if (strpos(@$_SERVER['HTTP_USER_AGENT'], 'Mobile') !== false) {
         define('IS_MOBILE', true);
     } else {
         define('IS_MOBILE', false);

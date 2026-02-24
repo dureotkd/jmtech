@@ -14,52 +14,54 @@
 
         <div class="flex items-center gap-2 !text-xs">
 
-            <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button">
-                    <button type="button" class="!px-2 py-1 !border-1 !border-gray-300 hover:bg-gray-100">
+            <div class="relative">
+                <div
+                    class="custom-dropdown-wrapper"
+                    data-dropdown-id="partner-report-dropdown"
+                    style="display: inline-block;">
+                    <button
+                        type="button"
+                        class="!px-2 py-1 !border-1 !border-gray-300 hover:bg-gray-100"
+                        onclick="toggleCustomDropdown(event, 'partner-report-dropdown')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
                             <path d="M4 5h16" />
                             <path d="M4 12h16" />
                             <path d="M4 19h16" />
                         </svg>
                     </button>
-
                 </div>
-                <ul
-                    tabindex="-1"
-                    class="!min-w-[210px] !border !border-gray-300 !bg-white !mt-2 items-center justify-center font-sans menu dropdown-content z-1 mt-4 w-52 shadow-sm">
-
+                <div
+                    data-dropdown-menu="partner-report-dropdown"
+                    class="custom-dropdown-menu hidden absolute right-0 mt-2 !min-w-[210px] !bg-white rounded-box shadow-sm z-10 py-4 px-4 font-sans"
+                    style="min-width:210px;">
                     <div class="w-full flex flex-col justify-start !text-xs">
-
-                        <button onclick="open_popup_default('/setting/item/create','물품 등록',500,580);"
-                            class="!text-left flex items-center gap-2 border-b-1 border-gray-300 !p-4 sm-hover" type="button">
-
+                        <button onclick="download_excel();"
+                            class="!text-left flex items-center gap-2 border-b-1 border-gray-300 !p-4 sm-hover w-full" type="button">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download">
                                 <path d="M12 15V3" />
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                 <path d="m7 10 5 5 5-5" />
                             </svg>
-
                             <span>
                                 엑셀파일 다운로드
                             </span>
                         </button>
-
-                        <button class="flex items-center gap-2 !text-left !p-4 sm-hover" onclick="show_excel_upload_modal();" type="button">
-
+                        <button class="flex items-center gap-2 !text-left !p-4 sm-hover w-full"
+                            onclick="show_prints();"
+                            type="button">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer-icon lucide-printer">
                                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
                                 <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" />
                                 <rect x="6" y="14" width="12" height="8" rx="1" />
                             </svg>
-
                             <span>
                                 매출처현황 인쇄
                             </span>
                         </button>
                     </div>
-                </ul>
+                </div>
             </div>
+
         </div>
 
     </div>

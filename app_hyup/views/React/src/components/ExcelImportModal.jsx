@@ -4,6 +4,7 @@ import Loading from "./Loading";
 
 import estimateApi from "../apis/estimateApi";
 import { useExcelStore } from "../store/useExcelStore";
+import { deepClone } from "../utils/util";
 
 export default function ExcelImportModal({
   sheets = [],
@@ -32,13 +33,44 @@ export default function ExcelImportModal({
   };
 
   // * 엑셀 불러오기 처리
+
+  /**
+   * 
+   * @param {Array
+(
+    [ok] => 1
+    [msg] => 
+    [data] => Array
+        (
+            [0] => Array
+                (
+                    [도번] => s
+                    [재질] => al
+                    [가로] => 1219
+                    [세로] => 2438
+                    [두께] => 3
+                    [홀수] => 1.0
+                    [탭] => 2.0
+                    [절곡] => 3.0
+                    [길이] => 4.0
+                    [후] => 5.0
+                    [용접] => 
+                    [연마] => 
+                    [기타] => 1
+                    [수량] => 2
+                    [비고] => 
+                )
+
+        )
+
+)} e 
+   * @returns 
+   */
   const handleExcelForm = async (e) => {
     e.preventDefault();
     document.querySelector("#select-vat").value = "N"; // 부가세 별도 초기화
 
     const file = fileInputRef.current?.files?.[0];
-    console.log("🚀 Debug: ~ handleExcelForm ~ file:", file);
-
     const sheetName = e.target.sheet_select.value;
 
     if (!file) {
@@ -60,64 +92,93 @@ export default function ExcelImportModal({
         return;
       }
 
-      const data = res.data;
-      const merged = [...data];
+      const convertedExcelData = res.data;
+      const resExcelTemplate =
+        convertedExcelData.length > 3
+          ? await estimateApi.견적서초기엑셀템플릿({
+              rows: convertedExcelData.length,
+            })
+          : deepClone(sheets);
+
       const hotRefs = getHotRef();
       const activeHotRef = hotRefs[sheetName];
 
-      let options = {
-        data: merged,
-        height: "auto",
-      };
+      resExcelTemplate[0].data = resExcelTemplate[0].data.map((item, index) => {
+        const 매칭ITEM = convertedExcelData[index];
 
-      if (merged.length > 20) {
-        options.height = 500;
-      }
+        if (!매칭ITEM) {
+          return item;
+        }
 
-      /**
-       * * A [0] : 품명
-       * * B [1] : 규격
-       * * C [2] : 수량
-       * * D [3] : 단가
-       * * E [4] : 공급가액
-       * * F [5] : 세액
-       * * G [6] : 비고
-       */
-      const resData = merged.map((row) => {
-        const 품명 = row[0] || "";
-        const 규격 = row[1] || "";
-        const 수량 = row[2] || 0;
-        const 단가 = row[3] || 0;
-        const 공급가액 = 수량 * 단가;
-        const 세액 = Math.round(공급가액 * 0.1);
+        return item.map((value, key) => {
+          if (key == 0) {
+            value = 매칭ITEM["도번"];
+          }
 
-        return [
-          품명,
-          규격,
-          수량,
-          단가,
-          공급가액,
-          세액,
-          "", // 비고
-        ];
+          if (key == 1) {
+            value = 매칭ITEM["재질"];
+          }
+
+          if (key == 2) {
+            value = 매칭ITEM["가로"];
+          }
+
+          if (key == 3) {
+            value = 매칭ITEM["세로"];
+          }
+
+          if (key == 4) {
+            value = 매칭ITEM["두께"];
+          }
+
+          if (key == 5) {
+            value = 매칭ITEM["홀수"];
+          }
+
+          if (key == 6) {
+            value = 매칭ITEM["탭"];
+          }
+
+          if (key == 7) {
+            value = 매칭ITEM["절곡"];
+          }
+
+          if (key == 8) {
+            value = 매칭ITEM["길이"];
+          }
+
+          if (key == 9) {
+            value = 매칭ITEM["후"];
+          }
+
+          if (key == 10) {
+            value = 매칭ITEM["수량1"];
+          }
+
+          if (key == 18) {
+            value = 매칭ITEM["용접"];
+          }
+
+          if (key == 19) {
+            value = 매칭ITEM["연마"];
+          }
+
+          if (key == 21) {
+            value = 매칭ITEM["기타"];
+          }
+
+          if (key == 27) {
+            value = 매칭ITEM["비고"];
+          }
+
+          return value;
+        });
       });
 
       activeHotRef.loadData([]); // 기존 데이터 초기화
 
-      // ^ 공급가액 + 세액 합계 계산
-      const amount = resData.reduce(
-        (acc, row) => acc + (row[4] || 0) + (row[5] || 0),
-        0
-      );
-      console.log(amount);
-      setAmount(amount);
-
       // ^ 시트 데이터 업데이트
-      setSheets((prevSheets) =>
-        prevSheets.map((sheet) =>
-          sheet.name === sheetName ? { ...sheet, ...options } : sheet
-        )
-      );
+      setSheets(resExcelTemplate);
 
       onClose();
     } catch (error) {

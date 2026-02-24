@@ -11,6 +11,7 @@ class Estimate_service
         $this->obj->load->library([
             "ajax",
             "file",
+            "php_ajax",
             "/Service/event_log_service",
         ]);
 
@@ -42,6 +43,7 @@ class Estimate_service
         $valid_at = $payloads['valid_at'] ?? '';
         $payment_type = $payloads['payment_type'] ?? '';
         $etc_memo = $payloads['etc_memo'] ?? '';
+        $real_sheets = $payloads['real_sheets'] ?? [];
 
         $no = $this->makeUniqueNo();
 
@@ -89,6 +91,17 @@ class Estimate_service
         ]);
 
         if ($sub_type === 'G') {
+
+            /**
+             * * 견적서 시트 저장
+             */
+            if (!empty($real_sheets)) {
+                $this->obj->service_model->insert_estimate_sheet(DEBUG, [
+                    'estimate_id' => $res,
+                    'sheets'      => $real_sheets,
+                ]);
+            }
+
             $this->obj->event_log_service->견적서등록($res);
         } else if ($sub_type === 'S') {
             $this->obj->event_log_service->수주서등록($res);
@@ -109,14 +122,44 @@ class Estimate_service
             return;
         }
 
-        $res = $this->obj->service_model->update_estimate(DEBUG, $update_data, [
+        $res = $this->obj->service_model->update_estimate(DEBUG, [
+            // 기존의 업데이트 데이터에서 real_sheets만 새 값으로 바꿔서 전체 배열로 전달
+            'partner_id'     => $update_data['partner_id'] ?? null,
+            'estimate_date'  => $update_data['estimate_date'] ?? null,
+            'phone_number'   => $update_data['phone_number'] ?? null,
+            'fax_number'     => $update_data['fax_number'] ?? null,
+            'title'          => $update_data['title'] ?? null,
+            'location'       => $update_data['location'] ?? null,
+            'amount'         => $update_data['amount'] ?? null,
+            'supply_amount'  => $update_data['supply_amount'] ?? null,
+            'tax_amount'     => $update_data['tax_amount'] ?? null,
+            'vat_type'       => $update_data['vat_type'] ?? null,
+            'sheets'         => $update_data['sheets'] ?? null,
+            'due_at'         => $update_data['due_at'] ?? null,
+            'valid_at'       => $update_data['valid_at'] ?? null,
+            'payment_type'   => $update_data['payment_type'] ?? null,
+            'etc_memo'       => $update_data['etc_memo'] ?? null,
+            'updated_at'     => date('Y-m-d H:i:s'),
+        ], [
             "id = '{$id}'"
         ]);
 
         if ($estimate_row['sub_type'] === 'G') {
+
+            if (!empty($update_data['real_sheets'])) {
+
+                // * 견적서 시트 수정
+                $this->obj->service_model->update_estimate_sheet(DEBUG, [
+                    'sheets'      => $update_data['real_sheets'],
+                ], [
+                    "estimate_id = '{$id}'"
+                ]);
+            }
+
+
             $this->obj->event_log_service->견적서수정($id);
         } else if ($estimate_row['sub_type'] === 'S') {
-            $this->obj->event_log_service->수주서등록($id);
+            $this->obj->event_log_service->수주서수정($id);
         }
 
         return $res;
@@ -141,6 +184,11 @@ class Estimate_service
         ]);
 
         if ($estimate_row['sub_type'] === 'G') {
+
+            // * 견적서 시트 삭제
+            $this->obj->service_model->delete_estimate_sheet(DEBUG, [
+                "estimate_id = '{$id}'"
+            ]);
 
             // * 관련된 수주서도 함께 삭제
             $this->obj->service_model->delete_estimate(DEBUG, [
@@ -191,6 +239,74 @@ class Estimate_service
 
                 if (empty($su_estimate_row)) {
 
+                    $estimate_sheets = json_decode($estimate_row['sheets'], true);
+
+                    /**
+                     * * --------------- 수주전환할 경우 견적서 시트 데이터 복사 ----------------
+                     * * 허나 견적서랑 수주서랑 양식이 완전 다름..
+                     * * 따라서.. 견적서에서 받은 값을 수주서의 맞춰야함...
+                     */
+
+                    try {
+
+                        $new_sheets = $this->obj->php_ajax->get(도메인 . '/api/load_excel_template_v3', [
+                            'sub_type' => 'S'
+                        ]);
+
+                        // JSON 문자열인 경우 다시 파싱
+                        if (is_string($new_sheets)) {
+                            $new_sheets = json_decode($new_sheets, true);
+                        }
+
+                        // 배열이 아니거나 비어있는 경우 에러 처리
+                        if (!is_array($new_sheets) || empty($new_sheets)) {
+                            throw new Exception("템플릿 데이터를 불러올 수 없습니다.");
+                        }
+
+                        /**
+                         * 순번	도면번호/품명	소재	수량	단위	단가	금액
+                         *               [0] => D111
+                  [0] => Array
+        (
+            [0] => s 도면번호
+            [1] => al 소재
+            [2] => 2 수량
+            [3] => EA 단위
+            [4] => 378700 단가
+            [5] => 757400 금액
+            [6] => 비고
+        )
+                         */
+                        $estimate_sheets_data = $estimate_sheets[0]['data'];
+                        $new_sheet_data = [];
+
+                        foreach ($estimate_sheets_data as $row) {
+
+                            $공급가액 = $row[5];
+
+                            if (empty($공급가액)) {
+                                continue;
+                            }
+
+                            $세액 = $공급가액 * 0.1;
+
+                            $new_sheet_data[] = [
+                                $row[0] . ' & ' . $row[1],    // 품목
+                                $row[3],    // 규격
+                                $row[2],    // 수량
+                                $row[4],    // 단가
+                                $공급가액,    // 공급가액
+                                $세액,    // 세액
+                                $row[6],    // 비고
+                            ];
+                        }
+
+                        $new_sheets[0]['data'] = $new_sheet_data;
+                    } catch (Exception $e) {
+
+                        throw new Exception("수주전환 중 오류가 발생했습니다.");
+                    }
+
                     $su_estimate_row = [
                         'type'              => $estimate_row['type'],
                         'no'                => $estimate_row['no'],
@@ -210,7 +326,7 @@ class Estimate_service
                         'tax_amount'        => $estimate_row['tax_amount'],
                         'etc_memo'          => $estimate_row['etc_memo'],
                         'vat_type'          => $estimate_row['vat_type'],
-                        'sheets'            => $estimate_row['sheets'],
+                        'sheets'            => json_encode($new_sheets),
                         'sub_type'          => 'S', // 수주서로 생성
                         'status2'           => '도면확인',
                     ];

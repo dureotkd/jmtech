@@ -10,6 +10,17 @@ class file
         'bmp',
         'webp',
 
+        // 3D
+        'dxf',
+        'stl',
+        'obj',
+        'ply',
+        '3ds',
+        'dae',
+        'fbx',
+        'glb',
+        'gltf',
+
         // 문서
         'pdf',
         'hwp',

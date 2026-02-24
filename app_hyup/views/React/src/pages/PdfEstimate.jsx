@@ -5,7 +5,6 @@ import {
   View,
   Document,
   StyleSheet,
-  PDFDownloadLink,
   Font,
   Image,
   PDFViewer,
@@ -168,8 +167,10 @@ const getStyles = (subType) => {
 
 const COL_WIDTHS = {
   no: 60, // 순번
-  item: 340, // 품목
+  item: 340, // 도면번호/품명
+  material: 100, // 소재
   qty: 100, // 수량
+  unitMeasure: 100, // 단위
   unit: 120, // 단가
   supply: 140, // 공급가액
   tax: 140, // 세액
@@ -660,9 +661,9 @@ const PdfPage = ({ subType, data }) => {
         <Text>
           합계금액 : 일금&nbsp;
           <Text style={{ fontWeight: "semibold" }}>
-            {numberToKorean(data?.amount)} (￦{" "}
-            {Number(data?.amount).toLocaleString()}) ({VAT_TYPE[data?.vat_type]}
-            )
+            {numberToKorean(data?.supply_amount)} ￦
+            {Number(data?.supply_amount).toLocaleString()}원 (
+            {VAT_TYPE[data?.vat_type]})
           </Text>
         </Text>
       </View>
@@ -697,7 +698,16 @@ const PdfPage = ({ subType, data }) => {
                   { width: COL_WIDTHS.item },
                 ]}
               >
-                품목
+                도면번호/품명
+              </Text>
+              <Text
+                style={[
+                  styles.cell,
+                  styles.headerCell,
+                  { width: COL_WIDTHS.material },
+                ]}
+              >
+                소재
               </Text>
               <Text
                 style={[
@@ -707,6 +717,15 @@ const PdfPage = ({ subType, data }) => {
                 ]}
               >
                 수량
+              </Text>
+              <Text
+                style={[
+                  styles.cell,
+                  styles.headerCell,
+                  { width: COL_WIDTHS.unitMeasure },
+                ]}
+              >
+                단위
               </Text>
               <Text
                 style={[
@@ -724,16 +743,7 @@ const PdfPage = ({ subType, data }) => {
                   { width: COL_WIDTHS.supply },
                 ]}
               >
-                공급가액
-              </Text>
-              <Text
-                style={[
-                  styles.cell,
-                  styles.headerCell,
-                  { width: COL_WIDTHS.tax },
-                ]}
-              >
-                세액
+                금액
               </Text>
               <Text
                 style={[
@@ -782,6 +792,16 @@ const PdfPage = ({ subType, data }) => {
                   style={[
                     styles.itemCell,
                     styles.rightAlign,
+                    { width: COL_WIDTHS.material },
+                  ]}
+                >
+                  {row[2]}
+                </Text>
+
+                <Text
+                  style={[
+                    styles.itemCell,
+                    styles.rightAlign,
                     { width: COL_WIDTHS.qty },
                   ]}
                 >
@@ -792,17 +812,17 @@ const PdfPage = ({ subType, data }) => {
                   style={[
                     styles.itemCell,
                     styles.rightAlign,
-                    { width: COL_WIDTHS.unit },
+                    { width: COL_WIDTHS.unitMeasure },
                   ]}
                 >
-                  {row[4].toLocaleString()}
+                  {row[4]}
                 </Text>
 
                 <Text
                   style={[
                     styles.itemCell,
                     styles.rightAlign,
-                    { width: COL_WIDTHS.supply },
+                    { width: COL_WIDTHS.unit },
                   ]}
                 >
                   {row[5].toLocaleString()}
@@ -812,7 +832,7 @@ const PdfPage = ({ subType, data }) => {
                   style={[
                     styles.itemCell,
                     styles.rightAlign,
-                    { width: COL_WIDTHS.tax },
+                    { width: COL_WIDTHS.supply },
                   ]}
                 >
                   {row[6].toLocaleString()}
@@ -841,18 +861,13 @@ const PdfPage = ({ subType, data }) => {
           >
             <Text
               style={[
-                {
-                  width: 140,
-                  borderColor: "#000",
-                },
-              ]}
-            ></Text>
-
-            <Text
-              style={[
                 styles.bottomCell,
                 {
-                  width: 260,
+                  width:
+                    COL_WIDTHS.no +
+                    COL_WIDTHS.item +
+                    COL_WIDTHS.material +
+                    COL_WIDTHS.qty,
                   borderRightWidth: 1,
                   borderColor: "#000",
                 },
@@ -864,7 +879,7 @@ const PdfPage = ({ subType, data }) => {
                 styles.bottomCell,
                 styles.bottomHeader,
                 {
-                  width: 220,
+                  width: COL_WIDTHS.unitMeasure + COL_WIDTHS.unit,
                   borderRightWidth: 1,
                   borderColor: "#000",
                 },
@@ -887,20 +902,6 @@ const PdfPage = ({ subType, data }) => {
               {data?.supply_amount
                 ? Number(data.supply_amount).toLocaleString()
                 : ""}
-            </Text>
-
-            <Text
-              style={[
-                styles.bottomCell,
-                styles.rightAlign,
-                {
-                  width: COL_WIDTHS.tax,
-                  borderRightWidth: 1,
-                  borderColor: "#000",
-                },
-              ]}
-            >
-              {data?.tax_amount ? Number(data.tax_amount).toLocaleString() : ""}
             </Text>
 
             <Text

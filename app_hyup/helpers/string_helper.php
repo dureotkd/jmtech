@@ -24,6 +24,12 @@ function fileIcon($file_name)
 {
     $ext = explode('.', $file_name);
     $ext = end($ext);
+
+    // * ext가 이미지 확장자인지 체크
+    if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'])) {
+        $ext = 'image';
+    }
+
     return "/assets/app_hyup/icons/" . $ext . ".png";
 }
 

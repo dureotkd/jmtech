@@ -14,7 +14,6 @@
 
     <meta name="keywords" content="">
     <meta name="description" content="<?= $meta_description ?>">
-    <meta name="naver-site-verification" content="a0f1a1dd0172994547138d3ee2da6321ee38d4d2" />
 
     <meta property="og:type" content="website">
     <meta property="og:title" content="<?= $title ?>">
@@ -51,25 +50,10 @@
         href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap"
         rel="stylesheet" />
 
-    <!-- pretendard CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.8/dist/web/variable/pretendardvariable-dynamic-subset.css" />
-
-    <!-- Swiper CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-
-    <!-- Toastify CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-
     <?
     $current_path = $_SERVER['REQUEST_URI'];
     ?>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-    <link
-        rel="stylesheet" type="text/css"
-        href="https://cdn.jsdelivr.net/gh/loadingio/ldbutton@latest/dist/index.min.css" />
     <link rel="stylesheet" href="/assets/app_hyup/common/reset.css" />
     <link rel="stylesheet" href="/assets/app_hyup/common/base.css" />
 
@@ -82,22 +66,10 @@
     <link rel="apple-touch-icon" href="/assets/app_hyup/pwa/pwa-icon-192.png">
 
     <link rel="stylesheet" href="/assets/app_hyup/common/loading.css" />
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <!-- <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script> -->
 
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-migrate-3.5.2.js" integrity="sha256-ThFcNr/v1xKVt5cmolJIauUHvtXFOwwqiTP7IbgP8EU=" crossorigin="anonymous"></script>
 
-    <!-- Spin.js (Ladda 내부 의존) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.min.js"></script>
-
-    <!-- Ladda JS -->
-    <script src="https://lab.hakim.se/ladda/dist/ladda.min.js"></script>
-
-    <!-- Toastify JS -->
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy-bundle.umd.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -107,33 +79,11 @@
 
     <script src="/assets/app_hyup/common/ajaxsetup.js"></script>
     <script src="/assets/app_hyup/common/header.js"></script>
-
-    <script src="/assets/app_hyup/common/lamba.js"></script>
-
     <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-
-    <!-- AOS JS -->
-    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker@2.0.11/dist/css/litepicker.css">
 
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
-    <!-- ✅ CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-
-    <!-- ✅ JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/litepicker@2.0.11/dist/litepicker.js"></script>
-
-
 </head>
 
 <body>
@@ -289,15 +239,13 @@
                 </div>
 
                 <div class="!mr-4">
-                    <div class="dropdown dropdown-end">
-                        <div tabindex="0" role="button">
+                    <div class="relative inline-block text-left">
+                        <button type="button" onclick="toggleCustomDropdown(event, 'user-dropdown')" class="focus:outline-none">
                             <img class="w-[32px] rounded-sm cursor-pointer" src="/assets/app_hyup/images/default_profile.png" alt="기본이미지">
-                        </div>
-                        <ul
-                            tabindex="-1"
-                            class="!p-4 !min-w-[280px] !bg-white !mt-2 items-center justify-center font-sans menu dropdown-content rounded-box z-1 mt-4 w-52 p-2 shadow-sm ">
+                        </button>
+                        <div data-dropdown-menu="user-dropdown" class="custom-dropdown-menu hidden absolute right-0 mt-2 !min-w-[280px] !bg-white rounded-box shadow-sm z-10 py-4 px-4 font-sans">
                             <!-- 프로필 이미지 -->
-                            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center !mb-3">
+                            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-3 mx-auto">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 12c2.67 0 8 1.34 8 4v4H4v-4c0-2.66 5.33-4 8-4z" />
                                     <circle cx="12" cy="7" r="4" />
@@ -305,25 +253,25 @@
                             </div>
 
                             <!-- 이름 -->
-                            <p class="text-gray-800 text-base font-medium">
+                            <p class="text-gray-800 text-base font-medium text-center">
                                 <?= $login_user['name'] ?? '' ?>
                             </p>
 
                             <!-- 이메일 -->
-                            <p class="text-gray-500 text-sm !mb-4">
+                            <p class="text-gray-500 text-sm mb-4 text-center">
                                 <?= $login_user['user_id'] ?? '' ?>
                             </p>
 
                             <!-- 내정보수정 -->
-                            <button type="button" onclick="show_my_info_modal(event);" class="flex !mb-4 items-center gap-1 text-gray-700 hover:text-blue-600 text-sm !mb-2">
+                            <button type="button" onclick="show_my_info_modal(event);" class="flex items-center gap-1 text-gray-700 hover:text-blue-600 text-sm w-full justify-center mb-4">
                                 내정보수정
                             </button>
 
                             <!-- 로그아웃 버튼 -->
-                            <button onclick="window.location.href = '/login/logout'" class="w-full btn-sm text-white py-2 rounded-md transition">
+                            <button onclick="window.location.href = '/login/logout'" class="w-full btn-sm text-white py-2 rounded-md transition bg-[#4b8edc] hover:bg-[#3d7ac0]">
                                 로그아웃
                             </button>
-                        </ul>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -437,7 +385,6 @@
     <script src="/assets/app_hyup/common/common.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/common.js') ?>"></script>
     <script src="/assets/app_hyup/common/pwa.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/pwa.js') ?>"></script>
     <script src="/assets/app_hyup/common/transition.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/transition.js') ?>"></script>
-    <script src="/assets/app_hyup/common/toast.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/toast.js') ?>"></script>
     <script src="/assets/app_hyup/common/loading.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/loading.js') ?>"></script>
     <script>
         AOS.init({

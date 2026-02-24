@@ -1,6 +1,13 @@
 import request from "../utils/request";
 
 const purchaseApi = {
+  거래내역불러오기: async (company_name) => {
+    const res = await request.get("get_trade_history", {
+      params: { company_name },
+    });
+
+    return res;
+  },
   저장된엑셀템플릿: async (params) => {
     const res = await request.get("load_saved_excel_template", { params });
 
@@ -13,8 +20,10 @@ const purchaseApi = {
     return res;
   },
 
-  초기엑셀템플릿: async () => {
-    const res = await request.get("load_excel_template_v2");
+  초기엑셀템플릿: async (subType) => {
+    const res = await request.get("load_excel_template_v2", {
+      params: { sub_type: subType },
+    });
 
     return res;
   },

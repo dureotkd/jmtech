@@ -155,17 +155,17 @@ class report extends MY_Controller
         if (is_array($id)) {
             foreach ($id as $statement_id) {
                 $this->purchase_service->delete($statement_id);
-
-                echo json_encode([
-                    'ok'    => true,
-                    'msg'   => '명세표가 삭제되었습니다',
-                ]);
             }
         } else {
             $this->purchase_service->delete($id);
 
             alert_close('명세표가 삭제되었습니다');
         }
+
+        echo json_encode([
+            'ok'    => true,
+            'msg'   => '명세표가 삭제되었습니다',
+        ]);
     }
 
     # 명세표 PDF 다운로드

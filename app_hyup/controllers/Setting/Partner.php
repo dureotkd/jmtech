@@ -25,16 +25,23 @@ class partner extends MY_Controller
         $page                       = !empty($_REQUEST['page']) ? $_REQUEST['page'] : 1;
         $row_num                    = !empty($_REQUEST['row_num']) ? $_REQUEST['row_num'] : 15;
         $block_num                  = !empty($_REQUEST['block_num']) ? $_REQUEST['block_num'] : 10;
+        $search_text = $_REQUEST['search_text'] ?? '';
 
-        $partner_count      = $this->service_model->get_business_partner('one', [1]);
+        $where = [1];
+
+        if (!empty($search_text)) {
+            $where[] = "company_name LIKE '%{$search_text}%'";
+        }
+
+        $partner_count      = $this->service_model->get_business_partner('one', $where);
         $page_data          = $this->site_pagination->getPageNaviGationData($page, $partner_count, $row_num, $block_num);
         $limit              = $page_data['res_limit'];
 
-        $partner_list = $this->service_model->get_business_partner('all', [1], $limit);
+        $partner_list = $this->service_model->get_business_partner('all', $where, $limit);
 
         $view_data =  [
             'page' => $page,
-
+            'search_text' => $search_text,
             'partner_list'   => $partner_list,
             'page_data'     => $page_data,
             'layout_data'   => $this->layout_config('partner', '거래처 관리'),
@@ -130,6 +137,31 @@ class partner extends MY_Controller
         try {
 
             $this->partner_service->deletePartner($id);
+        } catch (Exception $e) {
+
+            $res_array = [
+                'ok' => false,
+                'msg' => $e->getMessage(),
+            ];
+        }
+
+        echo json_encode($res_array);
+    }
+
+    public function toggle_bookmark()
+    {
+
+        $id = $_POST['id'] ?? '';
+        $bookmark_yn = $_POST['bookmark_yn'] ?? 'N';
+
+        $res_array = [
+            'ok' => true,
+            'msg' => '즐겨찾기가 업데이트되었습니다.',
+        ];
+
+        try {
+
+            $this->partner_service->toggleBookmark($id, $bookmark_yn);
         } catch (Exception $e) {
 
             $res_array = [

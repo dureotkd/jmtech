@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * TODO: 복사 기능
+ * TODO: 발주서,수주서 확인
+ * TODO: PDF 및 엑셀 확인
+ * TODO: 세금계산서 발행 확인
+ * TODO: supply_amount, tax_amount 확인
+ */
 class api extends MY_Controller
 {
 
@@ -47,25 +54,10 @@ class api extends MY_Controller
         echo json_encode($user);
     }
 
-    # Excel 템플릿 Load Init
+    # Handsontable Excel 템플릿 Load Init (견적서)
     public function load_excel_template()
     {
-
-        $items = $this->service_model->get_item('all', [
-            "is_active = 1"
-        ]);
-
-        $source = [];
-
-        if (!empty($items)) {
-            foreach ($items as $item) {
-                $source[] = [
-                    'key'   => $item['id'],
-                    'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
-                    'title' => $item['item_name'],
-                ];
-            }
-        }
+        $rows = (int)($this->input->get('rows') ?? 3);
 
         /**
          * * columns 컬럼 정보
@@ -127,35 +119,132 @@ class api extends MY_Controller
         $최종단가ColIndex = 25; // 최종 단가 컬럼 인덱스 (AA열)
         $금액ColIndex = 26; // 금액 컬럼 인덱스 (AB열)
 
-        // 초기 데이터 생성 (3행)
+        // 초기 데이터 생성 ($rows행)
         $initialData = [];
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < $rows; $i++) {
             $row = $rowTemplate;
             // 각 행의 비중 컬럼에 수식 설정
             // Handsontable은 0부터 시작, Excel은 5행부터 시작 (헤더 2행 포함)
             $rowNum = $i + 1;
 
-            // 재료비 섹션 수식
+            // 재료비 섹션 수식 (0일 때 빈 문자열 반환)
             $row[$비중ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(B{$rowNum}=\"SUS\",7.93,IF(B{$rowNum}=\"AL\",2.8,7.85)))";
-            $row[$무게ColIndex] = "=IF(A{$rowNum}=\"\",\"\",(C{$rowNum}*D{$rowNum}*E{$rowNum}*L{$rowNum})/1000000)";
+            $row[$무게ColIndex] = "=IF(OR(A{$rowNum}=\"\",(C{$rowNum}*D{$rowNum}*E{$rowNum}*L{$rowNum})/1000000=0),\"\",(C{$rowNum}*D{$rowNum}*E{$rowNum}*L{$rowNum})/1000000)";
             $row[$재료비단가ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(B{$rowNum}=\"SUS\",6500,IF(B{$rowNum}=\"AL\",7500,1600)))";
-            $row[$재료비소계ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUND(M{$rowNum}*N{$rowNum},0))";
+            $row[$재료비소계ColIndex] = "=IF(OR(A{$rowNum}=\"\",ROUND(M{$rowNum}*N{$rowNum},0)=0),\"\",ROUND(M{$rowNum}*N{$rowNum},0))";
 
-            // 가공비 섹션 수식
-            $row[$외곽ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(E{$rowNum}>=3,(C{$rowNum}+D{$rowNum})*2*E{$rowNum},(C{$rowNum}+D{$rowNum})*5))";
-            $row[$홀탭ColIndex] = "=IF(A{$rowNum}=\"\",\"\",IF(AND(F{$rowNum}=\"\",G{$rowNum}=\"\"),\"\",IF(E{$rowNum}>=4,(F{$rowNum}+(G{$rowNum}*1.5))*300*1.5,(F{$rowNum}+(G{$rowNum}*1.5))*300)))";
-            $row[$밴딩ColIndex] = "=IF(H{$rowNum}=\"\",\"\",IF(E{$rowNum}>=4,H{$rowNum}*I{$rowNum}*3*1.5,H{$rowNum}*I{$rowNum}*3))";
+            // 가공비 섹션 수식 (0일 때 빈 문자열 반환)
+            $row[$외곽ColIndex] = "=IF(OR(A{$rowNum}=\"\",IF(E{$rowNum}>=3,(C{$rowNum}+D{$rowNum})*2*E{$rowNum},(C{$rowNum}+D{$rowNum})*5)=0),\"\",IF(E{$rowNum}>=3,(C{$rowNum}+D{$rowNum})*2*E{$rowNum},(C{$rowNum}+D{$rowNum})*5))";
+            $row[$홀탭ColIndex] = "=IF(OR(A{$rowNum}=\"\",AND(F{$rowNum}=\"\",G{$rowNum}=\"\")),\"\",IF(IF(E{$rowNum}>=4,(F{$rowNum}+(G{$rowNum}*1.5))*300*1.5,(F{$rowNum}+(G{$rowNum}*1.5))*300)=0,\"\",IF(E{$rowNum}>=4,(F{$rowNum}+(G{$rowNum}*1.5))*300*1.5,(F{$rowNum}+(G{$rowNum}*1.5))*300)))";
+            $row[$밴딩ColIndex] = "=IF(OR(H{$rowNum}=\"\",IF(E{$rowNum}>=4,H{$rowNum}*I{$rowNum}*3*1.5,H{$rowNum}*I{$rowNum}*3)=0),\"\",IF(E{$rowNum}>=4,H{$rowNum}*I{$rowNum}*3*1.5,H{$rowNum}*I{$rowNum}*3))";
             // 용접, 연마는 수동 입력
-            $row[$후처리ColIndex] = "=IF(J{$rowNum}=\"\",\"\",ROUND(IF(J{$rowNum}=\"E\",C{$rowNum}*D{$rowNum}*0.15,IF(J{$rowNum}=\"N\",C{$rowNum}*D{$rowNum}*0.12,IF(J{$rowNum}=\"A\",C{$rowNum}*D{$rowNum}*0.075,IF(J{$rowNum}=\"P\",C{$rowNum}*D{$rowNum}*0.025,C{$rowNum}*D{$rowNum}*0.04)))),0))";
+            $row[$후처리ColIndex] = "=IF(OR(J{$rowNum}=\"\",ROUND(IF(J{$rowNum}=\"E\",C{$rowNum}*D{$rowNum}*0.15,IF(J{$rowNum}=\"N\",C{$rowNum}*D{$rowNum}*0.12,IF(J{$rowNum}=\"A\",C{$rowNum}*D{$rowNum}*0.075,IF(J{$rowNum}=\"P\",C{$rowNum}*D{$rowNum}*0.025,C{$rowNum}*D{$rowNum}*0.04)))),0)=0),\"\",ROUND(IF(J{$rowNum}=\"E\",C{$rowNum}*D{$rowNum}*0.15,IF(J{$rowNum}=\"N\",C{$rowNum}*D{$rowNum}*0.12,IF(J{$rowNum}=\"A\",C{$rowNum}*D{$rowNum}*0.075,IF(J{$rowNum}=\"P\",C{$rowNum}*D{$rowNum}*0.025,C{$rowNum}*D{$rowNum}*0.04)))),0))";
             // 기타는 수동 입력
-            $row[$가공비소계ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUND(SUM(P{$rowNum}:V{$rowNum}),0))";
+            $row[$가공비소계ColIndex] = "=IF(OR(A{$rowNum}=\"\",ROUND(SUM(P{$rowNum}:V{$rowNum}),0)=0),\"\",ROUND(SUM(P{$rowNum}:V{$rowNum}),0))";
 
-            // 기타 섹션 수식
-            $row[$이익ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUND((W{$rowNum}+O{$rowNum})*0.15,0))";
-            $row[$최종수량ColIndex] = "=IF(K{$rowNum}=\"\",\"\",K{$rowNum})";
-            $row[$최종단가ColIndex] = "=IF(A{$rowNum}=\"\",\"\",ROUNDUP(X{$rowNum}+W{$rowNum}+O{$rowNum},-2))";
-            $row[$금액ColIndex] = "=IF(A{$rowNum}=\"\",\"\",Z{$rowNum}*Y{$rowNum})"; // 금액 (최종 단가 * 수량)
+            // 기타 섹션 수식 (0일 때 빈 문자열 반환)
+            $row[$이익ColIndex] = "=IF(OR(A{$rowNum}=\"\",ROUND((W{$rowNum}+O{$rowNum})*0.15,0)=0),\"\",ROUND((W{$rowNum}+O{$rowNum})*0.15,0))";
+            $row[$최종수량ColIndex] = "=IF(OR(K{$rowNum}=\"\",K{$rowNum}=0),\"\",K{$rowNum})";
+            $row[$최종단가ColIndex] = "=IF(OR(A{$rowNum}=\"\",ROUNDUP(X{$rowNum}+W{$rowNum}+O{$rowNum},-2)=0),\"\",ROUNDUP(X{$rowNum}+W{$rowNum}+O{$rowNum},-2))";
+            $row[$금액ColIndex] = "=IF(OR(A{$rowNum}=\"\",Z{$rowNum}*Y{$rowNum}=0),\"\",Z{$rowNum}*Y{$rowNum})";
             $initialData[] = $row;
+        }
+
+        array_push($initialData, [
+            '', // 도번
+            '', // 재질
+            // 재료비 섹션
+            '', // 가로
+            '', // 세로
+            '', // 두께
+            '', // 홀수
+            '', // 탭
+            '', // 절곡
+            '', // 길이
+            '', // 후
+            '', // 수량
+            '', // 비중 (수식으로 자동 설정됨)
+            '', // 무게 (수식으로 자동 설정됨)
+            '', // 단가 (수식으로 자동 설정됨)
+            '자재비', // 소계 (수식으로 자동 설정됨)
+            // 가공비 섹션
+            '절단비', // 외곽 (수식으로 자동 설정됨)
+            '홀/탭', // 홀탭 (수식으로 자동 설정됨)
+            '밴딩', // 밴딩 (수식으로 자동 설정됨)
+            '용접', // 용접
+            '연마', // 연마
+            '후처리', // 후처리 (수식으로 자동 설정됨)
+            '', // 기타 (수식으로 자동 설정됨)
+            '', // 소계 (수식으로 자동 설정됨)
+            // 기타
+            '', // 이익 (수식으로 자동 설정됨)
+            '', // 수량 (수식으로 자동 설정됨)
+            '', // 단가 (수식으로 자동 설정됨)
+            '합계금액', // 금액 (수식으로 자동 설정됨)
+            '', // 비고
+        ]);
+        array_push($initialData, [
+            '', // 도번
+            '', // 재질
+            // 재료비 섹션
+            '', // 가로
+            '', // 세로
+            '', // 두께
+            '', // 홀수
+            '', // 탭
+            '', // 절곡
+            '', // 길이
+            '', // 후
+            '', // 수량
+            '', // 비중 (수식으로 자동 설정됨)
+            '', // 무게 (수식으로 자동 설정됨)
+            '', // 단가 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},O1:O{$rows})", // 소계 (수식으로 자동 설정됨)
+            // 가공비 섹션
+            "=SUMPRODUCT(K1:K{$rows},P1:P{$rows})", // 외곽 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},Q1:Q{$rows})", // 홀탭 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},R1:R{$rows})", // 밴딩 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},S1:S{$rows})", // 용접 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},T1:T{$rows})", // 연마 (수식으로 자동 설정됨)
+            "=SUMPRODUCT(K1:K{$rows},U1:U{$rows})", // 후처리 (수식으로 자동 설정됨)
+            '', // 기타 (수식으로 자동 설정됨)
+            '', // 소계 (수식으로 자동 설정됨)
+            // 기타
+            '', // 이익 (수식으로 자동 설정됨)
+            '', // 수량 (수식으로 자동 설정됨)
+            '', // 단가 (수식으로 자동 설정됨)
+            "=SUM(AA1:AA{$rows})", // 금액 (수식으로 자동 설정됨)
+            '', // 비고
+        ]);
+
+        // 견적서 초기 데이터 템플릿
+        $견적서RowTemplate = [
+            '', // 도면번호/품명 (수식으로 자동 설정됨)
+            '', // 소재 (수식으로 자동 설정됨)
+            '', // 수량 (수식으로 자동 설정됨)
+            '', // 단위 (수식으로 자동 설정됨)
+            '', // 단가 (수식으로 자동 설정됨)
+            '', // 금액 (수식으로 자동 설정됨)
+            '', // 비고
+        ];
+
+        // 견적서 초기 데이터 생성 (3행)
+        $견적서InitialData = [];
+        for ($i = 0; $i < $rows; $i++) {
+            $row = $견적서RowTemplate;
+            // Handsontable은 0부터 시작, Excel은 5행부터 시작
+            $rowNum = $i + 1;
+
+            // 견적서 수식 설정 (내역서 참조)
+            $row[0] = "=IF('내역서'!A{$rowNum}=\"\",\"\",'내역서'!A{$rowNum})"; // 도면번호/품명
+            $row[1] = "=IF('내역서'!B{$rowNum}=\"\",\"\",'내역서'!B{$rowNum})"; // 소재
+            $row[2] = "='내역서'!Y{$rowNum}"; // 수량
+            $row[3] = "=IF(A{$rowNum}=\"\",\"\",\"EA\")"; // 단위
+            $row[4] = "='내역서'!Z{$rowNum}"; // 단가
+            $row[5] = "='내역서'!AA{$rowNum}"; // 금액
+            // 비고는 빈 값
+
+            $견적서InitialData[] = $row;
         }
 
         $sheets = [
@@ -380,66 +469,57 @@ class api extends MY_Controller
                     100, // 금액
                     100, // 비고
                 ],
-                'height' => 'auto',
+                'height' => $rows < 10 ? 'auto' : 500,
+                'totalRowIndex' => count($initialData) - 1, // 마지막 행 인덱스 (배경색 적용, 고정 행)
             ],
             [
                 'name' => '견적서',
-                'data' => [
-                    [], // ^ 데이터
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                ],
+                'data' => $견적서InitialData,
                 'columns' => [
                     [
-                        'title'     => '품목',
-                        'type'      => 'dropdown',
-
-                        // ^ 드롭다운 샘플 데이터
-                        'source'    => $source,
+                        'title'     => '도면번호/품명',
+                        'className' => 'htCenter',
                     ],
                     [
-                        'title' => '규격',
+                        'title' => '소재',
+                        'className' => 'htCenter',
                     ],
                     [
                         'title' => '수량',
                         'type' => 'numeric',
+                        'className' => 'htRight',
                         'numericFormat' => [
                             'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
                         ],
+                    ],
+                    [
+                        'title' => '단위',
+                        'className' => 'htCenter',
                     ],
                     [
                         'title' => '단가',
                         'type' => 'numeric',
-                        'className' => 'ht-yellow-bg',
+                        'className' => 'ht-yellow-bg htRight',
                         'numericFormat' => [
                             'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
                         ],
                     ],
                     [
-                        'title' => '공급가액',
+                        'title' => '금액',
                         'type' => 'numeric',
-                        'className' => 'ht-red-text',
-                        'numericFormat' => [
-                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
-                        ],
-                    ],
-                    [
-                        'title' => '세액',
-                        'type' => 'numeric',
-                        'className' => 'ht-red-text',
+                        'className' => 'ht-yellow-bg htRight',
                         'numericFormat' => [
                             'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
                         ],
                     ],
                     [
                         'title' => '비고',
+                        'className' => 'htCenter',
                     ]
                 ],
-                'colWidths' => [360, 60, 60, 100, 120, 100, 80],
-                'height' => 300,
+                'colWidths' => [220, 60, 60, 100, 140, 140, 80],
+                // 'height' => $rows < 10 ? 'auto' : 300,
+                // 'height' => 100,
             ],
         ];
 
@@ -447,29 +527,31 @@ class api extends MY_Controller
         exit;
     }
 
-    # Excel 템플릿 Load Init (거래명세표)
+    # Handsontable Excel 템플릿 Load Init (거래명세표)
     public function load_excel_template_v2()
     {
+        $sub_type = $this->input->get('sub_type') ?? '';
 
-        $items = $this->service_model->get_item('all', [
-            "is_active = 1"
-        ]);
+        // $items = $this->service_model->get_item('all', [
+        //     "is_active = 1"
+        // ]);
 
-        $source = [];
+        // $source = [];
 
-        if (!empty($items)) {
-            foreach ($items as $item) {
-                $source[] = [
-                    'key'   => $item['id'],
-                    'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
-                    'title' => $item['item_name'],
-                ];
-            }
-        }
+        // if (!empty($items)) {
+        //     foreach ($items as $item) {
+        //         $source[] = [
+        //             'key'   => $item['id'],
+        //             'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
+        //             'title' => $item['item_name'],
+        //         ];
+        //     }
+        // }
 
         $sheets = [
             [
-                'name' => '견적서',
+                'name' => $sub_type === 'MI' ? '매입 거래명세표' : '매출 거래명세표',
+                'key' => $sub_type,
                 'data' => [
                     [], // ^ 데이터
                     [],
@@ -485,7 +567,7 @@ class api extends MY_Controller
                         'dateFormat' => 'YYYY-MM-DD', // 표시 포맷
                         'correctFormat' => true,      // 자동으로 형식 맞춰줌
                         'allowInvalid' => false,      // 잘못된 형식 입력 시 거부
-                        'defaultDate' => '2025-01-01', // 기본값 설정 (선택사항)
+                        'defaultDate' => date('Y-m-d'), // 기본값 설정 (선택사항)
                         'datePickerConfig' => [
                             'firstDay' => 0,
                             'i18n' => [
@@ -499,10 +581,10 @@ class api extends MY_Controller
                     ],
                     [
                         'title'     => '품목',
-                        'type'      => 'dropdown',
+                        // 'type'      => 'dropdown',
 
                         // ^ 드롭다운 샘플 데이터
-                        'source'    => $source,
+                        // 'source'    => $source,
                     ],
                     [
                         'title' => '규격',
@@ -545,36 +627,100 @@ class api extends MY_Controller
                 'colWidths' => [110, 250, 60, 60, 100, 120, 100, 80],
                 'height' => 'auto',
             ],
+        ];
+
+        echo json_encode($sheets);
+        exit;
+    }
+
+    # Handsontable Excel 템플릿 Load Init (발주서,수주서)
+    public function load_excel_template_v3()
+    {
+        $sub_type = $this->input->get('sub_type') ?? '';
+
+        switch ($sub_type) {
+            case 'B':
+                $sheet_name = '발주서';
+                break;
+            case 'S':
+                $sheet_name = '수주서';
+                break;
+        }
+
+        // $items = $this->service_model->get_item('all', [
+        //     "is_active = 1"
+        // ]);
+
+        // $source = [];
+
+        // if (!empty($items)) {
+        //     foreach ($items as $item) {
+        //         $source[] = [
+        //             'key'   => $item['id'],
+        //             'value' => "{$item['item_code']} // {$item['item_name']} // {$item['unit']}",
+        //             'title' => $item['item_name'],
+        //         ];
+        //     }
+        // }
+
+        $sheets = [
             [
-                'name' => '내역서',
+                'name' => $sheet_name,
                 'data' => [
-                    ["='견적서'!D2"],  // ✅ 교차시트 수식
+                    [], // ^ 데이터
+                    [],
+                    [],
+                    [],
                     [],
                     [],
                 ],
                 'columns' => [
-                    ['title' => '품목'],
+                    [
+                        'title'     => '품목',
+                        // 'type'      => 'dropdown',
+                        // ^ 드롭다운 샘플 데이터
+                        // 'source'    => $source,
+                    ],
                     [
                         'title' => '규격',
                     ],
                     [
                         'title' => '수량',
+                        'type' => 'numeric',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
                     ],
                     [
                         'title' => '단가',
+                        'type' => 'numeric',
+                        'className' => 'ht-yellow-bg',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
                     ],
                     [
                         'title' => '공급가액',
+                        'type' => 'numeric',
+                        'className' => 'ht-red-text',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
                     ],
                     [
                         'title' => '세액',
+                        'type' => 'numeric',
+                        'className' => 'ht-red-text',
+                        'numericFormat' => [
+                            'pattern' => '0,0',  // ✅ 콤마(천 단위 구분)
+                        ],
                     ],
                     [
                         'title' => '비고',
                     ]
                 ],
-                'colWidths' => [300, 100, 60, 100, 120, 100, 100],
-                'height' => 'auto',
+                'colWidths' => [360, 60, 60, 100, 120, 100, 80],
+                'height' => 300,
             ],
         ];
 
@@ -630,10 +776,53 @@ class api extends MY_Controller
 
                     break;
 
-                case 'B':
-                case 'S':
                 case 'G':
 
+                    $estimate = $this->service_model->get_estimate('row', [
+                        "id = '{$id}'"
+                    ]);
+
+                    if (empty($estimate)) {
+                        throw new Exception('존재하지 않는 견적서입니다.');
+                    }
+
+                    $estimate_sheet = $this->service_model->get_estimate_sheet('row', [
+                        "estimate_id = '{$id}'"
+                    ]);
+
+                    if (empty($estimate_sheet)) {
+                        throw new Exception('존재하지 않는 견적서 시트입니다.');
+                    }
+
+                    $sheets = !empty($estimate['sheets']) ? json_decode($estimate['sheets'], true) : [];
+
+                    /**
+                     * 0번쨰 견적서
+                     * 1번쨰 내역서
+                     */
+                    $original_sheets = !empty($estimate_sheet['sheets']) ? json_decode($estimate_sheet['sheets'], true) : [];
+
+                    // * 내역서 시트 데이터 (ORIGINAL DATA)
+                    $sheets[0]['data'] = $original_sheets[1];
+
+                    // * 견적서 시트 데이터 (ORIGINAL DATA)
+                    $sheets[1]['data'] = $original_sheets[0];
+
+                    $files = $this->service_model->get_file('all', [
+                        "ref_table = 'estimate'",
+                        "ref_id = '{$id}'"
+                    ]);
+
+                    $estimate['sheets'] = $sheets;
+                    $res_array['data'] = [
+                        'estimate' => $estimate,
+                        'files'    => $files,
+                    ];
+
+                    break;
+
+                case 'B':
+                case 'S':
                     $estimate = $this->service_model->get_estimate('row', [
                         "id = '{$id}'"
                     ]);
@@ -665,11 +854,149 @@ class api extends MY_Controller
         echo json_encode($res_array);
     }
 
+    # 거래내역 불러오기 
+    # 
+    public function get_trade_history()
+    {
+        $company_name = $this->input->get('company_name') ?? '';
+
+        /**
+         * * 
+         * * 견적서
+         * * 수주서
+         * * 매입명세서
+         * * 매출명세서
+         * * 발주서
+         * * 세금계산서 전부 가져오기..
+         */
+        $res_array = [
+            'ok'    => true,
+            'msg'   => '',
+            'data'  => [],
+        ];
+
+        $where = [];
+
+        if (!empty($company_name)) {
+
+            $partner = $this->service_model->get_business_partner('row', [
+                "company_name = '{$company_name}'"
+            ]);
+
+            if (!empty($partner)) {
+
+                $where[] = "partner_id = '{$partner['id']}'";
+            }
+        }
+
+        $data = [];
+        $type_vo = [
+            'G' => '견적서',
+            'S' => '수주서',
+            'B' => '발주서',
+            'MI' => '매입명세서',
+            'MC' => '매출명세서',
+            'TAX_INVOICE' => '세금계산서',
+        ];
+
+        // * 수주서,발주서
+        $estimate_all = $this->service_model->get_estimate('all', array_merge($where, [
+            "sub_type != 'G'"
+        ]));
+
+        // * 매입명세서,매출명세서
+        $transcation_statement_all = $this->service_model->get_transcation_statement('all', array_merge($where, [
+            1
+        ]));
+
+        // // * 세금계산서
+        // $barobill_tax_invoice_all = $this->service_model->get_barobill_tax_invoice('all', array_merge($where, [
+        //     1
+        // ]));
+
+        if (!empty($estimate_all)) {
+
+            foreach ($estimate_all as $estimate) {
+
+                $sub_type = $estimate['sub_type'];
+                $estimate_date = $estimate['estimate_date'];
+                $partner_name = $estimate['partner_name'];
+                $sheets = !empty($estimate['sheets']) ? json_decode($estimate['sheets'], true) : [];
+
+                $data[] = [
+                    'id' => $estimate['id'],
+                    '구분' => $type_vo[$sub_type],
+                    '월일' => $estimate_date,
+                    '거래처명' => $partner_name,
+                    '공급가액' => $estimate['supply_amount'],
+                    '세액' => $estimate['tax_amount'],
+                    'sheets' => $sheets,
+                ];
+            }
+        }
+
+        if (!empty($transcation_statement_all)) {
+
+            foreach ($transcation_statement_all as $row) {
+
+                $sub_type = $row['sub_type'];
+                $estimate_date = $row['estimate_date'];
+                $partner_name = $row['partner_name'];
+                $supply_amount = $row['supply_amount'];
+                $tax_amount = $row['tax_amount'];
+                $sheets = !empty($row['sheets']) ? json_decode($row['sheets'], true) : [];
+
+                $data[] = [
+                    'id' => $row['id'],
+                    '구분' => $type_vo[$sub_type],
+                    '월일' => $estimate_date,
+                    '거래처명' => $partner_name,
+                    '공급가액' => $supply_amount,
+                    '세액' => $tax_amount,
+                    'sheets' => $sheets,
+                ];
+            }
+        }
+
+        // * estimate_date 기준으로 정렬
+
+        // PHP 내장 usort 사용해서 정렬 (월일 또는 estimate_date 기준)
+        usort($data, function ($a, $b) {
+            $dateA = $a['월일'] ?? $a['estimate_date'] ?? '';
+            $dateB = $b['월일'] ?? $b['estimate_date'] ?? '';
+            // 날짜가 동일하면 0, A가 작으면 -1, 크면 1
+
+            // * DESC
+            if ($dateA === $dateB) {
+                return 0;
+            }
+
+            if ($dateA > $dateB) {
+                return -1;
+            }
+
+            return 1;
+        });
+
+        /**
+         * 하나의 포맷으로 변환 해야함..
+         * * 월일 2025-01-01
+         * * 품목 SUS304 2P 8T 4X8
+         * * 규격
+         * * 수량 1 / SH
+         * * 단가 
+         * * 공급가액
+         * * 세액
+         * * 비고
+         */
+        $res_array['data'] = $data;
+        echo json_encode($res_array);
+    }
+
     # 견적서 저장
     public function save_estimate()
     {
         $id = $this->input->post('id') ?? '';
-
         $tab = $this->input->post('tab') ?? ''; // * copay (복사)
         $type = $this->input->post('type') ?? ''; // * sell / buy (판매,구매)
         $sub_type = $this->input->post('sub_type') ?? ''; // * g / s (견적서,수주서)
@@ -690,6 +1017,7 @@ class api extends MY_Controller
         $payment_type = $this->input->post('payment_type') ?? '';
         $etc_memo = $this->input->post('etc_memo') ?? '';
         $file_ids = $this->input->post('file_ids') ?? '';
+        $real_sheets = $this->input->post('real_sheets') ?? '';
 
         $amount = (int)preg_replace('/[^0-9]/u', '', $amount); // 숫자만 남김
 
@@ -728,6 +1056,7 @@ class api extends MY_Controller
                                 'due_at'            => $due_at,
                                 'valid_at'          => $valid_at,
                                 'payment_type'      => $payment_type,
+                                'real_sheets'       => $real_sheets,
                                 'etc_memo'          => $etc_memo,
                                 'tab'               => 'copy',
                             ]);
@@ -768,6 +1097,7 @@ class api extends MY_Controller
                                 'valid_at'          => $valid_at,
                                 'payment_type'      => $payment_type,
                                 'etc_memo'          => $etc_memo,
+                                'real_sheets'       => $real_sheets,
                                 'updated_at'        => date('Y-m-d H:i:s'),
                             ], $id);
 
@@ -807,6 +1137,7 @@ class api extends MY_Controller
                         'valid_at'          => $valid_at,
                         'payment_type'      => $payment_type,
                         'etc_memo'          => $etc_memo,
+                        'real_sheets'       => $real_sheets,
                         'tab'               => 'original',
                     ]);
 
@@ -1010,11 +1341,11 @@ class api extends MY_Controller
     }
 
     # 엑셀 불러오기 
+    // TODO: Excel import 처리
     public function estimate_excel_load()
     {
 
         $excel_file = $_FILES['excel_file'] ?? null;
-
         $sheet_name = $this->input->post('sheet_name') ?? '';
 
         $res_array = [
@@ -1037,36 +1368,19 @@ class api extends MY_Controller
             return;
         }
 
+        if ($sheet_name != '내역서') {
+            $res_array['ok'] = false;
+            $res_array['msg'] = '현재 내역서만 엑셀 불러오기가 가능합니다.';
+            echo json_encode($res_array);
+            return;
+        }
+
         if (!$excel_file || $excel_file['error'] !== UPLOAD_ERR_OK) {
             $res_array['ok'] = false;
             $res_array['msg'] = '엑셀 파일 업로드 중 오류가 발생했습니다.';
             echo json_encode($res_array);
             return;
         }
-
-        $excel_base_thead = [
-            '견적서'    => [
-                '품목코드',
-                '품목명',
-                '규격',
-                '창고',
-                '수량',
-                '단위',
-                '단가',
-                '공급가',
-                '부가세',
-                '비고'
-            ],
-            '내역서'    => [
-                '품목명',
-                '규격',
-                '수량',
-                '단가',
-                '공급가',
-                '부가세',
-                '비고'
-            ],
-        ];
 
         // * Excel Upload 후 데이터 파싱
         try {
@@ -1075,45 +1389,131 @@ class api extends MY_Controller
             $sheet = $spreadsheet->getActiveSheet();
             $rows = $sheet->toArray(null, true, true, true);
 
-            // 첫 번째 행(헤더) 기준으로 파싱
-            $header = array_shift($rows);
+            $first_header = $rows[3] ?? [];
+            $second_header = $rows[4] ?? [];
 
-            foreach ($excel_base_thead[$sheet_name] as $index => $expected_header) {
-                $column_letter = chr(65 + $index); // A, B, C, ...
-                if (!isset($header[$column_letter]) || trim($header[$column_letter]) !== $expected_header) {
-                    throw new Exception("엑셀 파일의 헤더가 올바르지 않습니다. 예상 헤더: '{$expected_header}'");
+            if (empty($first_header) || empty($second_header)) {
+                throw new Exception("엑셀 파일의 헤더가 올바르지 않습니다.\nERROR_CODE: 1001");
+            }
+
+            // 첫 번째 헤더 필수 컬럼 검증
+            $first_required_columns = ['NO', '도번', '재질', '재료비', '가공비', '이익', '수량', '단가', '금액', '비고'];
+            $first_header_values = array_map(function ($val) {
+                return trim(str_replace(' ', '', $val ?? ''));
+            }, array_values($first_header));
+
+            foreach ($first_required_columns as $required_col) {
+                $normalized_required = str_replace(' ', '', $required_col);
+                $found = false;
+                foreach ($first_header_values as $header_val) {
+                    if ($header_val === $normalized_required) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    throw new Exception("엑셀 파일의 첫 번째 헤더에 필수 컬럼 '{$required_col}'이 없습니다.\nERROR_CODE: 1002");
                 }
             }
 
-            if (empty($rows)) {
-                throw new Exception('엑셀 파일에 데이터가 없습니다.');
+            // 두 번째 헤더 필수 컬럼 검증
+            $second_required_columns = ['가로', '세로', '두께', '홀수', '탭', '절곡', '길이', '후', '수량', '비중', '무게', '단가', '소계', '외곽', '홀/탭', '밴딩', '용접', '연마', '후처리', '기타'];
+            $second_header_values = array_map(function ($val) {
+                return trim($val ?? '');
+            }, array_values($second_header));
+
+            // 소계는 두 번 나타나므로 별도 검증
+            $sogye_count = 0;
+            foreach ($second_header_values as $header_val) {
+                if ($header_val === '소계') {
+                    $sogye_count++;
+                }
+            }
+            if ($sogye_count < 2) {
+                throw new Exception("엑셀 파일의 두 번째 헤더에 '소계' 컬럼이 2개 이상 필요합니다.\nERROR_CODE: 1003");
+            }
+
+            foreach ($second_required_columns as $required_col) {
+                if ($required_col === '소계') continue; // 소계는 위에서 별도 검증
+                $found = false;
+                foreach ($second_header_values as $header_val) {
+                    if ($header_val === $required_col) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    throw new Exception("엑셀 파일의 두 번째 헤더에 필수 컬럼 '{$required_col}'이 없습니다.\nERROR_CODE: 1004");
+                }
             }
 
             /**
-             *                     ['철판', 'SS400', 10, 15000, '=D1*E1', "='내역서'!D1", ''],
-                    ['볼트', 'M10', 20, 500, '=D2*E2', '=F2*0.1', ''],
-                    ['너트', 'M10', 20, 400, '=D3*E3', '=F3*0.1', ''],
-                    ['용접봉', '6013', 5, 10000, '=D4*E4', '=F4*0.1', ''],
-                    ['기타', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
-                    ['합계', '', 1, 20000, '=D5*E5', '=F5*0.1', ''],
+             * * 함수가 안걸린 애들만 프론트로 던져주면됌.
+             * * 도번 B, 재질 C, 가로 D, 세로 E, 두께 F, 홀수 G, 탭 H, 절곡 I, 길이 J, 후 K
+             * * 용접 T, 연마 U, 기타 W, 수량 Z, 비고 AC
              */
-            foreach ($rows as $row) {
 
-                $품목코드 = trim($row['A']); // 품목코드
-                $품목명   = trim($row['B']); // 품목명
-                $규격     = trim($row['C']); // 규격
-                $창고     = trim($row['D']); // 창고
-                $수량     = (int)trim($row['E']); // 수량
-                $단위     = trim($row['F']); // 단위
-                $단가     = trim($row['G']); // 단가
-                $부가세   = trim($row['I']); // 부가세
-                $비고     = trim($row['J']); // 비고
+            // 헤더 행 제외하고 데이터 행만 처리 (5번째 행부터)
+            // $rows의 5번째 키부터 시작되게 추출
 
-                $단가 = (int)preg_replace('/[^0-9]/u', '', $단가); // 숫자만 남김
-                $공급가  = !empty($단가) ? (int)$단가 * $수량 : 0; // 공급가 계산
-                $부가세 = !empty($공급가) ? (int)($공급가 * 0.1) : 0; // 부가세 계산
+            // 추출할 컬럼 정의 (컬럼명 => 컬럼 인덱스)
+            $extract_columns = [
+                '도번' => 'B',
+                '재질' => 'C',
+                '가로' => 'D',
+                '세로' => 'E',
+                '두께' => 'F',
+                '홀수' => 'G',
+                '탭' => 'H',
+                '절곡' => 'I',
+                '길이' => 'J',
+                '후' => 'K',
+                '수량1' => 'L',
+                '용접' => 'T',
+                '연마' => 'U',
+                '기타' => 'W',
+                '수량' => 'Z',
+                '비고' => 'AC'
+            ];
 
-                $res_array['data'][] = [$품목명, $규격, $수량, $단가, $공급가, $부가세, $비고];
+            foreach ($rows as $row_num => $row) {
+
+                if ($row_num < 5) {
+                    continue;
+                }
+
+                // NO 컬럼이 비어있으면 데이터 행이 아님
+                if (empty(trim($row['A'] ?? ''))) {
+                    continue;
+                }
+
+                $row_data = [];
+
+                foreach ($extract_columns as $column_name => $column_letter) {
+                    $cell_value = $row[$column_letter] ?? '';
+
+                    // 셀의 원본 값을 확인하여 수식인지 체크
+                    try {
+                        $cell = $sheet->getCell($column_letter . $row_num);
+                        $cell_value_raw = $cell->getValue();
+
+                        // 수식이 아닌 경우만 값 추출 (수식은 '='로 시작)
+                        if (!is_string($cell_value_raw) || substr($cell_value_raw, 0, 1) !== '=') {
+                            $row_data[$column_name] = trim($cell_value);
+                        } else {
+                            // 수식인 경우 빈 값으로 처리
+                            $row_data[$column_name] = '';
+                        }
+                    } catch (Exception $e) {
+                        // 셀 읽기 실패 시 계산된 값 사용
+                        $row_data[$column_name] = trim($cell_value);
+                    }
+                }
+
+                // 모든 값이 비어있지 않은 경우만 추가
+                if (!empty(array_filter($row_data))) {
+                    $res_array['data'][] = $row_data;
+                }
             }
         } catch (Throwable $e) {
             $res_array['ok'] = false;
@@ -1128,7 +1528,7 @@ class api extends MY_Controller
     {
         $this->load->helper('download');
 
-        $file_path = FCPATH . "assets/app_hyup/excel/estimate_batch_excel.xls";
+        $file_path = FCPATH . "assets/app_hyup/excel/estimate_batch_excel.xlsx";
 
         if (!file_exists($file_path)) {
             echo "Not Found" . $file_path;

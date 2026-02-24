@@ -5,8 +5,8 @@ import Loading from "./components/Loading";
 
 // 🔥 lazy load 적용
 const CommonDocument = React.lazy(() => import("./pages/CommonDocument"));
-const TranscationStatement = React.lazy(() =>
-  import("./pages/TranscationStatement")
+const TranscationStatement = React.lazy(
+  () => import("./pages/TranscationStatement"),
 );
 const PdfDocument = React.lazy(() => import("./pages/PdfDocument"));
 const PdfEstimate = React.lazy(() => import("./pages/PdfEstimate"));

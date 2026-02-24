@@ -10,20 +10,20 @@ class Barobill
 
      public function __construct()
      {
-          // $BaroService_URL = 'https://testws.baroservice.com/TI.asmx?WSDL';    //테스트베드용
-          $BaroService_URL = 'https://ws.baroservice.com/TI.asmx?WSDL';          //실서비스용
+          // // $BaroService_URL = 'https://testws.baroservice.com/TI.asmx?WSDL';    //테스트베드용
+          // $BaroService_URL = 'https://ws.baroservice.com/TI.asmx?WSDL';          //실서비스용
 
-          $BaroService_TI = new SoapClient($BaroService_URL, array(
-               'trace' => 'true',
-               'encoding' => 'UTF-8' //소스를 ANSI로 사용할 경우 euc-kr로 수정
-          ));
+          // $BaroService_TI = new SoapClient($BaroService_URL, array(
+          //      'trace' => 'true',
+          //      'encoding' => 'UTF-8' //소스를 ANSI로 사용할 경우 euc-kr로 수정
+          // ));
 
-          $this->BaroService_TI = $BaroService_TI;
+          // $this->BaroService_TI = $BaroService_TI;
 
-          // $this->CERTKEY = '3C2743E7-C822-40C7-A55B-A13857B95678'; //연동인증키(테스트베드용)
-          $this->CERTKEY = '1F196223-E6F2-4F4E-B59F-E60D246A0F11'; //연동인증키(실서비스용)
-          $this->CorpNum = '3128630100'; //사업자번호
-          $this->UserID = 'dureotkd123'; //바로빌 회원아이디
+          // // $this->CERTKEY = '3C2743E7-C822-40C7-A55B-A13857B95678'; //연동인증키(테스트베드용)
+          // $this->CERTKEY = '1F196223-E6F2-4F4E-B59F-E60D246A0F11'; //연동인증키(실서비스용)
+          // $this->CorpNum = '3128630100'; //사업자번호
+          // $this->UserID = 'dureotkd123'; //바로빌 회원아이디
      }
 
      /**

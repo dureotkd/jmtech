@@ -281,8 +281,8 @@
             </main>
         </div>
 
-        <dialog id="my_info_modal" class="modal left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div class="modal-box !text-xs !w-[400px] relative">
+        <dialog id="my_info_modal" class="modal">
+            <div class="modal-box fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xs w-[400px] relative">
                 <div class="absolute inset-0 modal-loading hidden">
                     <div class="flex items-center justify-center w-full h-full bg-white/70">
                         <img class="w-16" src="/assets/app_hyup/images/loading.gif" alt="loading" />

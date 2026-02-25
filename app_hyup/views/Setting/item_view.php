@@ -160,7 +160,7 @@
 
     </form>
 
-    <dialog id="excel_upload_modal" class="modal">
+    <dialog id="excel_upload_modal" class="modal left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <form id="exce_form" onsubmit="handle_excel_form(event);" class="modal-box !text-xs !w-[400px] relative">
 
             <div class="absolute inset-0 modal-loading hidden">

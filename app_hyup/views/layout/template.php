@@ -243,7 +243,7 @@
                         <button type="button" onclick="toggleCustomDropdown(event, 'user-dropdown')" class="focus:outline-none">
                             <img class="w-[32px] rounded-sm cursor-pointer" src="/assets/app_hyup/images/default_profile.png" alt="기본이미지">
                         </button>
-                        <div data-dropdown-menu="user-dropdown" class="custom-dropdown-menu hidden absolute right-0 mt-2 !min-w-[280px] !bg-white rounded-box shadow-sm z-10 py-4 px-4 font-sans">
+                        <div data-dropdown-menu="user-dropdown" class="!p-4 custom-dropdown-menu hidden absolute right-0 mt-2 min-w-[280px] bg-white rounded-lg border border-gray-200 shadow-lg z-50 py-4 px-4 flex flex-col items-center">
                             <!-- 프로필 이미지 -->
                             <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-3 mx-auto">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
@@ -281,7 +281,7 @@
             </main>
         </div>
 
-        <dialog id="my_info_modal" class="modal">
+        <dialog id="my_info_modal" class="modal left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <div class="modal-box !text-xs !w-[400px] relative">
                 <div class="absolute inset-0 modal-loading hidden">
                     <div class="flex items-center justify-center w-full h-full bg-white/70">

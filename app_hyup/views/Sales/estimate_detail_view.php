@@ -194,43 +194,49 @@ $datetime = date('YmdHis');
         <div class="flex items-center justify-between w-full print-hide">
             <!-- 왼쪽 버튼 그룹 -->
             <div class="flex space-x-2">
-                <button type="button" class="flex items-center border border-gray-400 px-3 py-1 gap-1 text-xs">
+                <?
+                if (!empty($estimate['su_estimate_id']) && $estimate['sub_type'] == 'G' && $estimate['sub_type'] == 'S') {
+                ?>
+                    <button type="button" class="flex items-center border border-gray-400 px-3 py-1 gap-1 text-xs">
 
-                    <?
-                    if (!empty($estimate['su_estimate_id']) && $estimate['sub_type'] == 'G') {
-                    ?>
-                        <a href="/sales/estimate_detail?id=<?= $estimate['id'] ?>" class="!text-blue-600 hover:underline">
-                            <?= $estimate['gu_status'] ?>
-                        </a>
-                        <span class="!mx-0.5 !text-blue-600">
-                            >
-                        </span>
-                        <a href="/sales/estimate_detail?id=<?= $estimate['su_estimate_id'] ?>" class="!text-blue-600 hover:underline">
-                            <?= $estimate['su_status'] ?>
-                        </a>
-                    <?
-                    } else if (!empty($estimate['g_estimate_id']) && $estimate['sub_type'] == 'S') {
-                    ?>
-                        <a href="/sales/estimate_detail?id=<?= $estimate['g_estimate_id'] ?>" class="!text-blue-600 hover:underline">
-                            <?= $estimate['gu_status'] ?>
-                        </a>
-                        <span class="!mx-0.5 !text-blue-600">
-                            >
-                        </span>
-                        <a href="/sales/estimate_detail?id=<?= $estimate['id'] ?>" class="!text-blue-600 hover:underline">
-                            <?= $estimate['su_status'] ?>
-                        </a>
-                    <?
-                    } else {
-                    ?>
-                        <span>
-                            <?= $estimate['gu_status'] ?? $estimate['su_status'] ?>
-                        </span>
-                    <?
-                    }
-                    ?>
+                        <?
+                        if (!empty($estimate['su_estimate_id']) && $estimate['sub_type'] == 'G') {
+                        ?>
+                            <a href="/sales/estimate_detail?id=<?= $estimate['id'] ?>" class="!text-blue-600 hover:underline">
+                                <?= $estimate['gu_status'] ?>
+                            </a>
+                            <span class="!mx-0.5 !text-blue-600">
+                                >
+                            </span>
+                            <a href="/sales/estimate_detail?id=<?= $estimate['su_estimate_id'] ?>" class="!text-blue-600 hover:underline">
+                                <?= $estimate['su_status'] ?>
+                            </a>
+                        <?
+                        } else if (!empty($estimate['g_estimate_id']) && $estimate['sub_type'] == 'S') {
+                        ?>
+                            <a href="/sales/estimate_detail?id=<?= $estimate['g_estimate_id'] ?>" class="!text-blue-600 hover:underline">
+                                <?= $estimate['gu_status'] ?>
+                            </a>
+                            <span class="!mx-0.5 !text-blue-600">
+                                >
+                            </span>
+                            <a href="/sales/estimate_detail?id=<?= $estimate['id'] ?>" class="!text-blue-600 hover:underline">
+                                <?= $estimate['su_status'] ?>
+                            </a>
+                        <?
+                        } else {
+                        ?>
+                            <span>
+                                <?= $estimate['gu_status'] ?? $estimate['su_status'] ?>
+                            </span>
+                        <?
+                        }
+                        ?>
 
-                </button>
+                    </button>
+                <?
+                }
+                ?>
 
                 <button onclick="window.location.href = '<?= REACT_PATH ?>?id=<?= $estimate['id'] ?>&sub_type=<?= $estimate['sub_type'] ?>'" class="flex items-center border border-gray-400 px-3 py-1 gap-1  text-xs hover:bg-gray-100">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-pen-line-icon lucide-file-pen-line">
@@ -317,7 +323,7 @@ $datetime = date('YmdHis');
         <div class="w-full relative flex justify-center items-center !mt-4 relative">
             <img
                 class="!mb-2 mx-auto"
-                src="/assets/app_hyup/images/<?= $estimate['sub_type'] == 'G' ? '견적서' : '수주서' ?>.png" alt="견적서">
+                src="/assets/app_hyup/images/<?= $title_vo[$estimate['sub_type']] ?>.png" alt="견적서">
 
             <!-- <div class="absolute right-2 top-2 px-2 py-1 text-xs cursor-pointer hover:underline">
                 거래내역 불러오기

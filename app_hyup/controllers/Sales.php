@@ -233,7 +233,12 @@ class sales extends MY_Controller
             return;
         }
 
-        $title = $estimate['sub_type'] == 'G' ? '견적서' : ($estimate['sub_type'] == 'S' ? '수주서' : '발주서');
+        $title_vo = [
+            'G' => '견적서',
+            'S' => '수주서',
+            'B' => '발주서',
+        ];
+        $title = $title_vo[$estimate['sub_type']] ?? '';
 
         $files = $this->service_model->get_file('all', [
             "ref_table = 'estimate'",
@@ -264,6 +269,7 @@ class sales extends MY_Controller
             'files'         => $files,
             'title'         => $title,
             'event_logs'    => $event_logs,
+            'title_vo'      => $title_vo,
             'layout_data'   => $this->layout_blank_config('estimate', $title),
         ];
 
@@ -307,7 +313,6 @@ class sales extends MY_Controller
             'start_date'    => $start_date,
             'end_date'      => $end_date,
             'excel_yn'      => $excel_yn,
-
             'estimate_all'  => $estimate_all,
             'layout_data'   => $excel_yn == 'Y' ? $this->layout_none_config() : $this->layout_config('order', '수주서'),
         ];

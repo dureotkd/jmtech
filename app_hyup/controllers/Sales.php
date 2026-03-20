@@ -616,7 +616,7 @@ class sales extends MY_Controller
         foreach ($items as $index => $item) {
             // ✅ 새로 밀린 만큼 offset
             $row_num = $insertAt + $index;
-            $tmp_index = $count - $index;
+            $tmp_index = $index + 1;
 
             if ($sub_type === 'G') {
 

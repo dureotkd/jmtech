@@ -148,6 +148,12 @@ $datetime = date('YmdHis');
         background-color: #fafafa;
     }
 
+    @media print {
+        table.estimate tbody tr:nth-child(even) {
+            background-color: transparent !important;
+        }
+    }
+
     .tg {
         border-collapse: collapse;
         border-spacing: 0;
@@ -195,33 +201,33 @@ $datetime = date('YmdHis');
             <!-- 왼쪽 버튼 그룹 -->
             <div class="flex space-x-2">
                 <?
-                if (!empty($estimate['su_estimate_id']) && $estimate['sub_type'] == 'G' && $estimate['sub_type'] == 'S') {
+                if ((!empty($estimate['su_estimate_id']) && $estimate['sub_type'] == 'G') || (!empty($estimate['g_estimate_id']) && $estimate['sub_type'] == 'S')) {
                 ?>
                     <button type="button" class="flex items-center border border-gray-400 px-3 py-1 gap-1 text-xs">
 
                         <?
                         if (!empty($estimate['su_estimate_id']) && $estimate['sub_type'] == 'G') {
                         ?>
-                            <a href="/sales/estimate_detail?id=<?= $estimate['id'] ?>" class="!text-blue-600 hover:underline">
-                                <?= $estimate['gu_status'] ?>
+                            <a href="/sales/estimate_detail?id=<?= $estimate['su_estimate_id'] ?>" class="!text-blue-600 hover:underline">
+                                <?= $estimate['su_status'] ?>
                             </a>
                             <span class="!mx-0.5 !text-blue-600">
                                 >
                             </span>
-                            <a href="/sales/estimate_detail?id=<?= $estimate['su_estimate_id'] ?>" class="!text-blue-600 hover:underline">
-                                <?= $estimate['su_status'] ?>
+                            <a href="/sales/estimate_detail?id=<?= $estimate['id'] ?>" class="!text-blue-600 hover:underline">
+                                <?= $estimate['gu_status'] ?>
                             </a>
                         <?
                         } else if (!empty($estimate['g_estimate_id']) && $estimate['sub_type'] == 'S') {
                         ?>
-                            <a href="/sales/estimate_detail?id=<?= $estimate['g_estimate_id'] ?>" class="!text-blue-600 hover:underline">
-                                <?= $estimate['gu_status'] ?>
+                            <a href="/sales/estimate_detail?id=<?= $estimate['id'] ?>" class="!text-blue-600 hover:underline">
+                                <?= $estimate['su_status'] ?>
                             </a>
                             <span class="!mx-0.5 !text-blue-600">
                                 >
                             </span>
-                            <a href="/sales/estimate_detail?id=<?= $estimate['id'] ?>" class="!text-blue-600 hover:underline">
-                                <?= $estimate['su_status'] ?>
+                            <a href="/sales/estimate_detail?id=<?= $estimate['g_estimate_id'] ?>" class="!text-blue-600 hover:underline">
+                                <?= $estimate['gu_status'] ?>
                             </a>
                         <?
                         } else {
@@ -288,7 +294,7 @@ $datetime = date('YmdHis');
                     PDF
                 </button>
                 <button onclick="handle_excel(event);" class="flex items-center border border-gray-400 px-3 py-1 gap-1 text-xs hover:bg-gray-100">
-                    <img width="16" alt="Logo of Microsoft Excel since 2019" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Microsoft_Office_Excel_%282019%E2%80%932025%29.svg/32px-Microsoft_Office_Excel_%282019%E2%80%932025%29.svg.png?20190925171014">
+                    <img width="16" alt="Logo of Microsoft Excel since 2019" src="https://png.pngtree.com/element_our/sm/20180627/sm_5b33460f04516.jpg">
                     <span>
                         엑셀
                     </span>
@@ -484,9 +490,12 @@ $datetime = date('YmdHis');
                     $no = count($sheets);
 
                     foreach ($sheets as $index => $item) {
+                        if (empty(array_filter($item ?? []))) {
+                            continue;
+                        }
                 ?>
                         <tr>
-                            <td><?= $no - $index ?></td>
+                            <td><?= $index + 1 ?></td>
                             <td class="text-left">
                                 <?= $item[0] ?>
                             </td>

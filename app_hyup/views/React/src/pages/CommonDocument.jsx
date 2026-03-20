@@ -30,7 +30,7 @@ export default function CommonDocument() {
   // * title 설정
 
   const { hotRefs, getActiveHotRef, setActiveSheet } = useExcelStore(
-    (state) => state
+    (state) => state,
   );
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
@@ -210,7 +210,7 @@ export default function CommonDocument() {
       const merged = [...prev];
       newFiles.forEach((file) => {
         const isDuplicate = merged.some(
-          (f) => f.name === file.name && f.size === file.size
+          (f) => f.name === file.name && f.size === file.size,
         );
         if (!isDuplicate) merged.push(file);
       });
@@ -549,7 +549,7 @@ export default function CommonDocument() {
               <img
                 width="16"
                 alt="Logo of Microsoft Excel since 2019"
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Microsoft_Office_Excel_%282019%E2%80%932025%29.svg/32px-Microsoft_Office_Excel_%282019%E2%80%932025%29.svg.png?20190925171014"
+                src="https://png.pngtree.com/element_our/sm/20180627/sm_5b33460f04516.jpg"
               />
               <span>일괄등록</span>
             </button>
@@ -559,7 +559,7 @@ export default function CommonDocument() {
               onClick={() => {
                 hotRefs[subTypeKorean].alter(
                   "insert_row_above",
-                  hotRefs[subTypeKorean].countRows()
+                  hotRefs[subTypeKorean].countRows(),
                 );
               }}
               className="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition"
@@ -574,7 +574,7 @@ export default function CommonDocument() {
               onClick={() => {
                 hotRefs[subTypeKorean].alter(
                   "remove_row",
-                  hotRefs[subTypeKorean].countRows() - 1
+                  hotRefs[subTypeKorean].countRows() - 1,
                 );
               }}
               className="flex items-center justify-center w-7 h-7 border border-gray-300 rounded bg-white hover:bg-gray-50 transition"

@@ -264,7 +264,7 @@ $datetime = date('YmdHis');
                     onclick="my_modal_1.showModal()"
                     type="button"
                     class="flex items-center gap-1 border border-gray-300 rounded h-7 !px-1 bg-white hover:bg-gray-50 transition text-xs">
-                    <img width="16" alt="Logo of Microsoft Excel since 2019" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Microsoft_Office_Excel_%282019%E2%80%932025%29.svg/32px-Microsoft_Office_Excel_%282019%E2%80%932025%29.svg.png?20190925171014">
+                    <img width="16" alt="Logo of Microsoft Excel since 2019" src="https://png.pngtree.com/element_our/sm/20180627/sm_5b33460f04516.jpg">
                     <span>일괄등록</span>
                 </button>
 

@@ -269,7 +269,7 @@ export default function EstimateDocument() {
       const merged = [...prev];
       newFiles.forEach((file) => {
         const isDuplicate = merged.some(
-          (f) => f.name === file.name && f.size === file.size
+          (f) => f.name === file.name && f.size === file.size,
         );
         if (!isDuplicate) merged.push(file);
       });
@@ -630,7 +630,7 @@ export default function EstimateDocument() {
               <img
                 width="16"
                 alt="Logo of Microsoft Excel since 2019"
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Microsoft_Office_Excel_%282019%E2%80%932025%29.svg/32px-Microsoft_Office_Excel_%282019%E2%80%932025%29.svg.png?20190925171014"
+                src="https://png.pngtree.com/element_our/sm/20180627/sm_5b33460f04516.jpg"
               />
               <span>일괄등록</span>
             </button>
@@ -661,7 +661,7 @@ export default function EstimateDocument() {
                     instance,
                     rowIndex,
                     rowNum,
-                    is내역서
+                    is내역서,
                   ) => {
                     if (is내역서) {
                       // 컬럼 인덱스 정의
@@ -683,71 +683,71 @@ export default function EstimateDocument() {
                       instance.setDataAtCell(
                         rowIndex,
                         비중ColIndex,
-                        `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",7.93,IF(B${rowNum}="AL",2.8,7.85)))`
+                        `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",7.93,IF(B${rowNum}="AL",2.8,7.85)))`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         무게ColIndex,
-                        `=IF(A${rowNum}="","",(C${rowNum}*D${rowNum}*E${rowNum}*L${rowNum})/1000000)`
+                        `=IF(A${rowNum}="","",(C${rowNum}*D${rowNum}*E${rowNum}*L${rowNum})/1000000)`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         재료비단가ColIndex,
-                        `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",6500,IF(B${rowNum}="AL",7500,1600)))`
+                        `=IF(A${rowNum}="","",IF(B${rowNum}="SUS",6500,IF(B${rowNum}="AL",7500,1600)))`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         재료비소계ColIndex,
-                        `=IF(A${rowNum}="","",ROUND(M${rowNum}*N${rowNum},0))`
+                        `=IF(A${rowNum}="","",ROUND(M${rowNum}*N${rowNum},0))`,
                       );
 
                       // 가공비 섹션 수식
                       instance.setDataAtCell(
                         rowIndex,
                         외곽ColIndex,
-                        `=IF(A${rowNum}="","",IF(E${rowNum}>=3,(C${rowNum}+D${rowNum})*2*E${rowNum},(C${rowNum}+D${rowNum})*5))`
+                        `=IF(A${rowNum}="","",IF(E${rowNum}>=3,(C${rowNum}+D${rowNum})*2*E${rowNum},(C${rowNum}+D${rowNum})*5))`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         홀탭ColIndex,
-                        `=IF(A${rowNum}="","",IF(AND(F${rowNum}="",G${rowNum}=""),"",IF(E${rowNum}>=4,(F${rowNum}+(G${rowNum}*1.5))*300*1.5,(F${rowNum}+(G${rowNum}*1.5))*300)))`
+                        `=IF(A${rowNum}="","",IF(AND(F${rowNum}="",G${rowNum}=""),"",IF(E${rowNum}>=4,(F${rowNum}+(G${rowNum}*1.5))*300*1.5,(F${rowNum}+(G${rowNum}*1.5))*300)))`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         밴딩ColIndex,
-                        `=IF(H${rowNum}="","",IF(E${rowNum}>=4,H${rowNum}*I${rowNum}*3*1.5,H${rowNum}*I${rowNum}*3))`
+                        `=IF(H${rowNum}="","",IF(E${rowNum}>=4,H${rowNum}*I${rowNum}*3*1.5,H${rowNum}*I${rowNum}*3))`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         후처리ColIndex,
-                        `=IF(J${rowNum}="","",ROUND(IF(J${rowNum}="E",C${rowNum}*D${rowNum}*0.15,IF(J${rowNum}="N",C${rowNum}*D${rowNum}*0.12,IF(J${rowNum}="A",C${rowNum}*D${rowNum}*0.075,IF(J${rowNum}="P",C${rowNum}*D${rowNum}*0.025,C${rowNum}*D${rowNum}*0.04)))),0))`
+                        `=IF(J${rowNum}="","",ROUND(IF(J${rowNum}="E",C${rowNum}*D${rowNum}*0.15,IF(J${rowNum}="N",C${rowNum}*D${rowNum}*0.12,IF(J${rowNum}="A",C${rowNum}*D${rowNum}*0.075,IF(J${rowNum}="P",C${rowNum}*D${rowNum}*0.025,C${rowNum}*D${rowNum}*0.04)))),0))`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         가공비소계ColIndex,
-                        `=IF(A${rowNum}="","",ROUND(SUM(P${rowNum}:V${rowNum}),0))`
+                        `=IF(A${rowNum}="","",ROUND(SUM(P${rowNum}:V${rowNum}),0))`,
                       );
 
                       // 기타 섹션 수식
                       instance.setDataAtCell(
                         rowIndex,
                         이익ColIndex,
-                        `=IF(A${rowNum}="","",ROUND((W${rowNum}+O${rowNum})*0.15,0))`
+                        `=IF(A${rowNum}="","",ROUND((W${rowNum}+O${rowNum})*0.15,0))`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         최종수량ColIndex,
-                        `=IF(K${rowNum}="","",K${rowNum})`
+                        `=IF(K${rowNum}="","",K${rowNum})`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         최종단가ColIndex,
-                        `=IF(A${rowNum}="","",ROUNDUP(X${rowNum}+W${rowNum}+O${rowNum},-2))`
+                        `=IF(A${rowNum}="","",ROUNDUP(X${rowNum}+W${rowNum}+O${rowNum},-2))`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         금액ColIndex,
-                        `=IF(A${rowNum}="","",Z${rowNum}*Y${rowNum})`
+                        `=IF(A${rowNum}="","",Z${rowNum}*Y${rowNum})`,
                       );
 
                       /**
@@ -761,33 +761,33 @@ export default function EstimateDocument() {
                       instance.setDataAtCell(
                         rowIndex + 2,
                         재료비소계ColIndex,
-                        `=SUMPRODUCT(K1:K${rowIndex + 1},O1:O${rowIndex + 1})`
+                        `=SUMPRODUCT(K1:K${rowIndex + 1},O1:O${rowIndex + 1})`,
                       );
                       instance.setDataAtCell(
                         rowIndex + 2,
                         외곽ColIndex,
-                        `=SUMPRODUCT(K1:K${rowIndex + 1},P1:P${rowIndex + 1})`
+                        `=SUMPRODUCT(K1:K${rowIndex + 1},P1:P${rowIndex + 1})`,
                       );
                       instance.setDataAtCell(
                         rowIndex + 2,
                         홀탭ColIndex,
-                        `=SUMPRODUCT(K1:K${rowIndex + 1},Q1:Q${rowIndex + 1})`
+                        `=SUMPRODUCT(K1:K${rowIndex + 1},Q1:Q${rowIndex + 1})`,
                       );
                       instance.setDataAtCell(
                         rowIndex + 2,
                         밴딩ColIndex,
-                        `=SUMPRODUCT(K1:K${rowIndex + 1},R1:R${rowIndex + 1})`
+                        `=SUMPRODUCT(K1:K${rowIndex + 1},R1:R${rowIndex + 1})`,
                       );
                       instance.setDataAtCell(
                         rowIndex + 2,
                         후처리ColIndex,
-                        `=SUMPRODUCT(K1:K${rowIndex + 1},U1:U${rowIndex + 1})`
+                        `=SUMPRODUCT(K1:K${rowIndex + 1},U1:U${rowIndex + 1})`,
                       );
 
                       instance.setDataAtCell(
                         rowIndex + 2,
                         금액ColIndex,
-                        `=SUM(AA1:AA${rowIndex + 1})`
+                        `=SUM(AA1:AA${rowIndex + 1})`,
                       );
                     } else {
                       // 견적서 수식 설정 (내역서 참조)
@@ -801,32 +801,32 @@ export default function EstimateDocument() {
                       instance.setDataAtCell(
                         rowIndex,
                         도면번호품명ColIndex,
-                        `=IF('내역서'!A${rowNum}="","",'내역서'!A${rowNum})`
+                        `=IF('내역서'!A${rowNum}="","",'내역서'!A${rowNum})`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         소재ColIndex,
-                        `=IF('내역서'!B${rowNum}="","",'내역서'!B${rowNum})`
+                        `=IF('내역서'!B${rowNum}="","",'내역서'!B${rowNum})`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         수량ColIndex,
-                        `='내역서'!Y${rowNum}`
+                        `='내역서'!Y${rowNum}`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         단위ColIndex,
-                        `=IF(A${rowNum}="","","EA")`
+                        `=IF(A${rowNum}="","","EA")`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         단가ColIndex,
-                        `='내역서'!Z${rowNum}`
+                        `='내역서'!Z${rowNum}`,
                       );
                       instance.setDataAtCell(
                         rowIndex,
                         금액ColIndex,
-                        `='내역서'!AA${rowNum}`
+                        `='내역서'!AA${rowNum}`,
                       );
                     }
                   };

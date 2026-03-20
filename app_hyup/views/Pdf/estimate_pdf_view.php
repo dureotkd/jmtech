@@ -177,7 +177,7 @@ $VAT_TYPE = unserialize(VAT_TYPE);
         ?>
                 <tr>
                     <td style="font-size:14px !important; width: 50px;">
-                        <?= $count - $index ?>
+                        <?= $index + 1 ?>
                     </td>
                     <td style="font-size:12pt !important; width:500px; text-align:left;"><?= $item[0] ?></td>
                     <td data-label="규격" style="font-size:12pt !important; width: 100px;"><?= $item[1] ?></td>

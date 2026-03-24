@@ -38,9 +38,12 @@ const estimateApi = {
     return res;
   },
 
-  견적서일괄등록품목양식다운로드: async () => {
+  견적서일괄등록품목양식다운로드: async (subType) => {
     const res = await request.getBlob("download_bulk_estimate_item_template", {
       responseType: "blob",
+      params: {
+        sub_type: subType,
+      },
     });
 
     console.log(res);
@@ -54,7 +57,7 @@ const estimateApi = {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "견적서_일괄등록_양식.xls";
+    a.download = "일괄등록_양식.xls";
     a.click();
 
     return res;

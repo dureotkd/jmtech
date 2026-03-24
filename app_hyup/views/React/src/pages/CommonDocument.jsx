@@ -277,8 +277,8 @@ export default function CommonDocument() {
           const 수량 = row[2];
           const 단가 = row[3];
 
-          const 공급가액 = 단가 > 0 ? 수량 * 단가 : 0;
-          const 세액 = 0;
+          const 공급가액 = 단가 > 0 ? 수량 * 단가 : "";
+          const 세액 = "";
 
           row[4] = 공급가액;
           row[5] = 세액;
@@ -333,6 +333,7 @@ export default function CommonDocument() {
       {loading && <Loading />}
       <ExcelImportModal
         sheets={sheets}
+        subType={subType}
         setSheets={setSheets}
         setAmount={setAmount}
       />

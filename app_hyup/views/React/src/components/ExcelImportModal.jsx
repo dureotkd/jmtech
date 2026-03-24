@@ -8,6 +8,7 @@ import { deepClone } from "../utils/util";
 
 export default function ExcelImportModal({
   sheets = [],
+  subType,
   setSheets,
   setAmount,
 }) {
@@ -81,6 +82,7 @@ export default function ExcelImportModal({
     setLoading(true);
     const formData = new FormData();
     formData.append("excel_file", file);
+    formData.append("sub_type", subType);
     formData.append("sheet_name", sheetName);
 
     try {
@@ -93,15 +95,40 @@ export default function ExcelImportModal({
       }
 
       const convertedExcelData = res.data;
+      const hotRefs = getHotRef();
+      const activeHotRef = hotRefs[sheetName];
+
+      if (subType === "B") {
+        const resExcelTemplate = deepClone(sheets);
+        resExcelTemplate[0].data = convertedExcelData.map((row) => [
+          row["품목"] ?? "",
+          row["규격"] ?? "",
+          row["수량"] ?? "",
+          row["단가"] ?? "",
+          row["공급가액"] ?? "",
+          row["세액"] ?? "",
+          row["비고"] ?? "",
+        ]);
+        const newAmount = convertedExcelData.reduce(
+          (sum, r) =>
+            sum +
+            (parseFloat(r["공급가액"]) || 0) +
+            (parseFloat(r["세액"]) || 0),
+          0
+        );
+        activeHotRef.loadData([]);
+        setSheets(resExcelTemplate);
+        setAmount(newAmount);
+        onClose();
+        return;
+      }
+
       const resExcelTemplate =
         convertedExcelData.length > 3
           ? await estimateApi.견적서초기엑셀템플릿({
               rows: convertedExcelData.length,
             })
           : deepClone(sheets);
-
-      const hotRefs = getHotRef();
-      const activeHotRef = hotRefs[sheetName];
 
       resExcelTemplate[0].data = resExcelTemplate[0].data.map((item, index) => {
         const 매칭ITEM = convertedExcelData[index];
@@ -215,12 +242,12 @@ export default function ExcelImportModal({
               className="flex justify-end text-sm text-gray-700 items-center"
               onClick={async () => {
                 setLoading(true);
-                await estimateApi.견적서일괄등록품목양식다운로드();
+                await estimateApi.견적서일괄등록품목양식다운로드(subType);
                 setLoading(false);
               }}
             >
               <a href="#" className="flex items-center text-xs hover:underline">
-                견적서 품목양식
+                일괄등록 양식
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="14"

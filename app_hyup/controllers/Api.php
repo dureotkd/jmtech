@@ -1340,6 +1340,138 @@ class api extends MY_Controller
         exit;
     }
 
+    /**
+     * 발주서 일괄등록 엑셀(bal_batch_excel 등) 파싱 → Handsontable 발주서 컬럼에 맞는 연관배열 목록
+     * 열: A No., B 품번, C 모델, D·E 품명, F 수량(EA), G 단가, H 금액
+     */
+    public function 발주서일괄등록셋업($excel_file)
+    {
+        $res_array = [
+            'ok'   => true,
+            'msg'  => '',
+            'data' => [],
+        ];
+
+        if (!$excel_file || ($excel_file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = '엑셀 파일 업로드 중 오류가 발생했습니다.';
+            return $res_array;
+        }
+
+        try {
+            $spreadsheet = $this->phpspreadsheet->loadExcelFile($excel_file['tmp_name']);
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray(null, true, true, true);
+
+            $header_row_num = $this->_발주서일괄_헤더행찾기($rows);
+            if ($header_row_num === null) {
+                throw new Exception("엑셀 양식이 올바르지 않습니다. (품번·No. 헤더 행을 찾을 수 없습니다.)");
+            }
+
+            $max_row = (int)$sheet->getHighestRow();
+            for ($row_num = $header_row_num + 1; $row_num <= $max_row; $row_num++) {
+                $row = $rows[$row_num] ?? [];
+                $flat = '';
+                foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as $col) {
+                    $flat .= trim((string)($row[$col] ?? ''));
+                }
+                if ($flat === '') {
+                    continue;
+                }
+
+                if ($this->_발주서일괄_헤더행같음($row)) {
+                    continue;
+                }
+
+                $part_no = trim((string)($row['B'] ?? ''));
+                $model = trim((string)($row['C'] ?? ''));
+                $name_d = trim((string)($row['D'] ?? ''));
+                $name_e = trim((string)($row['E'] ?? ''));
+                $name = $name_d !== '' ? $name_d : $name_e;
+                if ($name_d !== '' && $name_e !== '' && $name_d !== $name_e) {
+                    $name = $name_d . ' ' . $name_e;
+                }
+
+                $qty = $this->_발주서일괄_숫자셀($sheet, 'F', $row_num);
+                $unit_price = $this->_발주서일괄_숫자셀($sheet, 'G', $row_num);
+                $amount_cell = $this->_발주서일괄_숫자셀($sheet, 'H', $row_num);
+
+                if ($part_no === '' && $name === '' && $qty == 0 && $unit_price == 0 && $amount_cell == 0) {
+                    continue;
+                }
+
+                $품목 = $part_no;
+                if ($name !== '') {
+                    $품목 = $part_no !== '' ? ($part_no . ' ' . $name) : $name;
+                }
+
+                $공급가액 = $amount_cell > 0 ? (int)round($amount_cell) : (int)round($qty * $unit_price);
+                $세액 = (int)round($공급가액 * 0.1);
+
+                $res_array['data'][] = [
+                    '품목'    => $품목,
+                    '규격'    => $model,
+                    '수량'    => $qty == (int)$qty ? (int)$qty : $qty,
+                    '단가'    => (int)round($unit_price),
+                    '공급가액' => $공급가액,
+                    '세액'    => $세액,
+                    '비고'    => '',
+                ];
+            }
+
+            if (empty($res_array['data'])) {
+                $res_array['ok'] = false;
+                $res_array['msg'] = '불러올 품목 데이터가 없습니다.';
+            }
+        } catch (Throwable $e) {
+            $res_array['ok'] = false;
+            $res_array['msg'] = $e->getMessage();
+            $res_array['data'] = [];
+        }
+
+        return $res_array;
+    }
+
+    private function _발주서일괄_헤더행찾기($rows)
+    {
+        foreach ($rows as $row_num => $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $b = trim((string)($row['B'] ?? ''));
+            if ($b === '') {
+                continue;
+            }
+            if ((bool)preg_match('/품\s*번|품번/u', $b)) {
+                return (int)$row_num;
+            }
+        }
+
+        return null;
+    }
+
+    private function _발주서일괄_헤더행같음($row)
+    {
+        $b = trim((string)($row['B'] ?? ''));
+        return (bool)preg_match('/품\s*번|품번/u', $b);
+    }
+
+    private function _발주서일괄_숫자셀($sheet, $col, $row_num)
+    {
+        try {
+            $cell = $sheet->getCell($col . $row_num);
+            $v = $cell->getCalculatedValue();
+            if (is_numeric($v)) {
+                return (float)$v;
+            }
+            $s = preg_replace('/[^0-9.\-]/', '', (string)$v);
+
+            return $s === '' ? 0.0 : (float)$s;
+        } catch (Throwable $e) {
+            return 0.0;
+        }
+    }
+
     # 엑셀 불러오기 
     // TODO: Excel import 처리
     public function estimate_excel_load()
@@ -1347,6 +1479,7 @@ class api extends MY_Controller
 
         $excel_file = $_FILES['excel_file'] ?? null;
         $sheet_name = $this->input->post('sheet_name') ?? '';
+        $sub_type = $this->input->post('sub_type') ?? '';
 
         $res_array = [
             'ok'    => true,
@@ -1364,6 +1497,12 @@ class api extends MY_Controller
         if (empty($sheet_name)) {
             $res_array['ok'] = false;
             $res_array['msg'] = '시트를 선택해주세요.';
+            echo json_encode($res_array);
+            return;
+        }
+
+        if ($sub_type == 'B') {
+            $res_array = $this->발주서일괄등록셋업($excel_file);
             echo json_encode($res_array);
             return;
         }
@@ -1526,9 +1665,16 @@ class api extends MY_Controller
     # 견적서 품목양식 다운로드
     public function download_bulk_estimate_item_template()
     {
+        $sub_type = $this->input->get('sub_type') ?? '';
+
         $this->load->helper('download');
 
-        $file_path = FCPATH . "assets/app_hyup/excel/estimate_batch_excel.xlsx";
+        $file_vo_array = [
+            'B' => 'bal_batch_excel.xlsx',
+        ];
+
+        $file_name = $file_vo_array[$sub_type] ?? 'estimate_batch_excel.xlsx';
+        $file_path = FCPATH . "assets/app_hyup/excel/{$file_name}";
 
         if (!file_exists($file_path)) {
             echo "Not Found" . $file_path;

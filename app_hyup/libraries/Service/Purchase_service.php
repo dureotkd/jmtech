@@ -254,19 +254,20 @@ class Purchase_service
             if (!empty($file_upload_res)) {
                 foreach ($file_upload_res as $file_res) {
 
-                    if ($file_res['status'] === 'success') {
-
-                        $this->obj->service_model->insert_file(DEBUG, [
-                            'ref_table'     => $ref_table,
-                            'ref_id'        => $statement_id,
-                            'file_name'     => $file_res['originalFileName'],
-                            'file_path'     => $file_res['filePath'],
-                            'file_size'     => $file_res['fileSize'],
-                            'file_url'      => $file_res['fileSrc'],
-                            'created_at'    => date('Y-m-d H:i:s'),
-                            'updated_at'    => date('Y-m-d H:i:s'),
-                        ]);
+                    if ($file_res['status'] !== 'success') {
+                        throw new Exception($file_res['message'] ?? '파일 업로드에 실패했습니다.');
                     }
+
+                    $this->obj->service_model->insert_file(DEBUG, [
+                        'ref_table'     => $ref_table,
+                        'ref_id'        => $statement_id,
+                        'file_name'     => $file_res['originalFileName'],
+                        'file_path'     => $file_res['filePath'],
+                        'file_size'     => $file_res['fileSize'],
+                        'file_url'      => $file_res['fileSrc'],
+                        'created_at'    => date('Y-m-d H:i:s'),
+                        'updated_at'    => date('Y-m-d H:i:s'),
+                    ]);
                 }
             }
         } catch (Exception $e) {
@@ -275,7 +276,7 @@ class Purchase_service
         }
     }
 
-    public function deleteFile($statement_id = 0, $file_ids)
+    public function deleteFile($statement_id = 0, $file_ids = '')
     {
         if (empty($statement_id)) {
             throw new Exception("명세표 아이디가 올바르지 않습니다.");

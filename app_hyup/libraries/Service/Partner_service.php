@@ -110,19 +110,20 @@ class Partner_service
 
             $ref_table = 'partner';
 
-            if ($file_res['status'] === 'success') {
-
-                $this->obj->service_model->insert_file(DEBUG, [
-                    'ref_table'     => $ref_table,
-                    'ref_id'        => $partner_id,
-                    'file_name'     => $file_res['originalFileName'],
-                    'file_path'     => $file_res['filePath'],
-                    'file_size'     => $file_res['fileSize'],
-                    'file_url'      => $file_res['fileSrc'],
-                    'created_at'    => date('Y-m-d H:i:s'),
-                    'updated_at'    => date('Y-m-d H:i:s'),
-                ]);
+            if ($file_res['status'] !== 'success') {
+                throw new Exception($file_res['message'] ?? '파일 업로드에 실패했습니다.');
             }
+
+            $this->obj->service_model->insert_file(DEBUG, [
+                'ref_table'     => $ref_table,
+                'ref_id'        => $partner_id,
+                'file_name'     => $file_res['originalFileName'],
+                'file_path'     => $file_res['filePath'],
+                'file_size'     => $file_res['fileSize'],
+                'file_url'      => $file_res['fileSrc'],
+                'created_at'    => date('Y-m-d H:i:s'),
+                'updated_at'    => date('Y-m-d H:i:s'),
+            ]);
         } catch (Exception $e) {
 
             throw new Exception("파일 업로드 중 오류가 발생했습니다: " . $e->getMessage());

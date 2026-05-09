@@ -174,15 +174,17 @@ class file
         $uploadPath = rtrim($uploadDirectory, '/') . "/" . $fileName;
         $fullUploadPath = rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/' . ltrim($uploadDirectory, '/');
 
-        if (!is_dir($fullUploadPath)) {
-            mkdir($fullUploadPath, 0777, true);
+        $directoryResult = $this->prepareUploadDirectory($fullUploadPath);
+        if ($directoryResult !== true) {
+            $result['message'] = $directoryResult;
+            return $result;
         }
 
         $this->ensureUploadDirectoryProtection($fullUploadPath);
 
         $serverFilePath = rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . $uploadPath;
 
-        if (move_uploaded_file($file['tmp_name'], $serverFilePath)) {
+        if (@move_uploaded_file($file['tmp_name'], $serverFilePath)) {
             $result['status'] = 'success';
             $result['message'] = "파일 업로드 성공";
             $result['fileName'] = $fileName;
@@ -191,7 +193,7 @@ class file
             $result['filePath'] = $uploadPath;
             $result['fileSrc'] = 도메인 .  $uploadPath;
         } else {
-            $result['message'] = "파일 업로드 중 오류가 발생했습니다." . "서버 경로: " . $serverFilePath;
+            $result['message'] = "파일 저장에 실패했습니다. 업로드 폴더 권한을 확인해 주세요. 서버 경로: " . $serverFilePath;
         }
 
         return $result;
@@ -265,6 +267,23 @@ class file
 
         if (in_array($fileExtension, $this->archiveExtensions, true)) {
             return $this->validateArchiveContents($file['tmp_name']);
+        }
+
+        return true;
+    }
+
+    protected function prepareUploadDirectory($directory)
+    {
+        if (!is_dir($directory) && !@mkdir($directory, 0775, true)) {
+            return "업로드 폴더를 생성할 수 없습니다. 서버 권한을 확인해 주세요. 경로: " . $directory;
+        }
+
+        if (!is_writable($directory)) {
+            @chmod($directory, 0775);
+        }
+
+        if (!is_writable($directory)) {
+            return "업로드 폴더에 쓰기 권한이 없습니다. 서버 권한을 확인해 주세요. 경로: " . $directory;
         }
 
         return true;

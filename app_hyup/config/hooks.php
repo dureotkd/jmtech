@@ -30,6 +30,12 @@ $hook['post_controller_constructor'][] = [
     'filepath' => 'hooks'
 ];
 
+$hook['post_controller_constructor'][] = [
+    'function' => 'block_search_engine_indexing',
+    'filename' => 'Robots_hook.php',
+    'filepath' => 'hooks'
+];
+
 // $hook['post_controller_constructor'][] = [
 //     'function' => 'proc',
 //     'filename' => 'Ip_check_hook.php',

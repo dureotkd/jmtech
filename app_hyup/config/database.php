@@ -73,14 +73,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
-
-/**
- * 	"host"=>"49.247.44.238",
-	"user"=>"root",
-	"pass"=>"rptakxhr09*&",
-	"base"=>"corpgm02",
-	"connect"=>"connect" // connect | pconnect
- */
 $db = array(
 	'main'	=> array(
 		'hostname' => "52.79.213.173",

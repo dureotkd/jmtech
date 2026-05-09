@@ -1,5 +1,9 @@
 <?php
 
+if (PHP_SAPI !== 'cli' && !headers_sent()) {
+	header('X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex', true);
+}
+
 /**
  * CodeIgniter
  *

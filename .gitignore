@@ -28,3 +28,5 @@ yarn-error.log*
 .svn/format
 .htaccess*
 .htaccess
+!.htaccess
+!assets/app_hyup/uploads/.htaccess

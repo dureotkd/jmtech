@@ -32,6 +32,11 @@ const estimateApi = {
     return res;
   },
 
+  품목자동완성: async (params) => {
+    const res = await request.get("get_estimate_item_suggestions", { params });
+    return res;
+  },
+
   견적저장: async (formData) => {
     const res = await request.post("save_estimate", formData);
 

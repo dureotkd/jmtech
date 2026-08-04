@@ -1341,6 +1341,92 @@ class api extends MY_Controller
     }
 
     /**
+     * 발주서/수주서의 저장 이력에서 품목(도면번호)과 최근 단가를 찾습니다.
+     */
+    public function get_estimate_item_suggestions()
+    {
+        $query = trim((string)($this->input->get('query') ?? ''));
+        $sub_type = strtoupper((string)($this->input->get('sub_type') ?? ''));
+        $type = strtoupper((string)($this->input->get('type') ?? 'SELL'));
+        $partner_id = (int)($this->input->get('partner_id') ?? 0);
+
+        $res_array = [
+            'ok' => true,
+            'msg' => '',
+            'data' => [],
+        ];
+
+        if ($query === '' || !in_array($sub_type, ['B', 'S'], true)) {
+            echo json_encode($res_array);
+            return;
+        }
+
+        if (!in_array($type, ['SELL', 'BUY'], true)) {
+            $type = 'SELL';
+        }
+
+        $search_condition = $this->service_model->build_document_search_condition($query);
+
+        if ($search_condition === '') {
+            echo json_encode($res_array);
+            return;
+        }
+
+        $documents = $this->service_model->get_estimate_item_history([
+            "a.type = '{$type}'",
+            "a.sub_type = '{$sub_type}'",
+            $search_condition,
+        ], $partner_id);
+
+        $seen = [];
+
+        foreach ($documents as $document) {
+            $sheets = json_decode($document['sheets'] ?? '', true);
+            $rows = $sheets[0]['data'] ?? [];
+
+            if (!is_array($rows)) {
+                continue;
+            }
+
+            foreach ($rows as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+
+                $raw_item = $row[0] ?? '';
+                $item = is_array($raw_item)
+                    ? trim((string)($raw_item['title'] ?? $raw_item['value'] ?? ''))
+                    : trim((string)$raw_item);
+
+                if ($item === '' || mb_stripos($item, $query, 0, 'UTF-8') === false) {
+                    continue;
+                }
+
+                $item_key = mb_strtolower($item, 'UTF-8');
+
+                if (isset($seen[$item_key])) {
+                    continue;
+                }
+
+                $seen[$item_key] = true;
+                $res_array['data'][] = [
+                    'item' => $item,
+                    'spec' => (string)($row[1] ?? ''),
+                    'unit_price' => is_numeric($row[3] ?? null) ? (float)$row[3] : '',
+                    'partner_id' => (int)($document['partner_id'] ?? 0),
+                    'estimate_date' => (string)($document['estimate_date'] ?? ''),
+                ];
+
+                if (count($res_array['data']) >= 20) {
+                    break 2;
+                }
+            }
+        }
+
+        echo json_encode($res_array);
+    }
+
+    /**
      * 발주서 일괄등록 엑셀(bal_batch_excel 등) 파싱 → Handsontable 발주서 컬럼에 맞는 연관배열 목록
      * 열: A No., B 품번, C 모델, D·E 품명, F 수량(EA), G 단가, H 금액
      */

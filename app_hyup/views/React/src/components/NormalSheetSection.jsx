@@ -3,9 +3,8 @@ import { HotTable } from "@handsontable/react-wrapper";
 import { registerAllModules } from "handsontable/registry";
 import "handsontable/styles/handsontable.css";
 import "handsontable/styles/ht-theme-main.css";
-import HyperFormula from "hyperformula";
 import { useExcelStore } from "../store/useExcelStore";
-import { registerCellType, TextCellType } from "handsontable/cellTypes";
+import estimateApi from "../apis/estimateApi";
 
 registerAllModules();
 
@@ -15,25 +14,128 @@ const NormalSheetSection = ({
   setAmount,
   theme = "light",
   subType = "G",
+  type = "SELL",
+  partnerId = "",
 }) => {
   const hotRef = React.useRef(null);
-  const {
-    activeSheet = sheets[0]?.name,
-    setActiveSheet,
-    registerHotRef,
-  } = useExcelStore((state) => state);
+  const amountUpdateTimeoutRef = React.useRef(null);
+  const suggestionCacheRef = React.useRef(new Map());
+  const suggestionLookupRef = React.useRef(new Map());
+  const storedActiveSheet = useExcelStore((state) => state.activeSheet);
+  const setActiveSheet = useExcelStore((state) => state.setActiveSheet);
+  const registerHotRef = useExcelStore((state) => state.registerHotRef);
+  const activeSheet = storedActiveSheet ?? sheets[0]?.name;
 
-  // 초기 마운트 시 activeSheet가 없으면 첫 번째 시트로 설정
+  // 템플릿이 비동기로 바뀌면 현재 문서의 첫 시트를 활성화합니다.
   React.useEffect(() => {
-    if (!activeSheet && sheets.length > 0) {
+    const hasActiveSheet = sheets.some((sheet) => sheet.name === activeSheet);
+    if (!hasActiveSheet && sheets.length > 0) {
       setActiveSheet(sheets[0].name);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 초기 마운트 시에만 실행
+  }, [activeSheet, setActiveSheet, sheets]);
 
   const activeSheetOptions = React.useMemo(() => {
     return sheets.find((sheet) => sheet.name === activeSheet) || {};
   }, [activeSheet, sheets]);
+
+  const suggestionContext = `${type}|${subType}|${partnerId || ""}`;
+
+  const itemAutocompleteSource = React.useCallback(
+    async (query, process) => {
+      const keyword = String(query || "").trim();
+
+      if (!keyword) {
+        process([]);
+        return;
+      }
+
+      const cacheKey = `${suggestionContext}|${keyword.toLocaleLowerCase()}`;
+      const cached = suggestionCacheRef.current.get(cacheKey);
+
+      if (cached) {
+        process(cached.map((suggestion) => suggestion.item));
+        return;
+      }
+
+      try {
+        const res = await estimateApi.품목자동완성({
+          query: keyword,
+          type,
+          sub_type: subType,
+          partner_id: partnerId || "",
+        });
+        const suggestions = res?.ok && Array.isArray(res?.data) ? res.data : [];
+
+        suggestionCacheRef.current.set(cacheKey, suggestions);
+        suggestions.forEach((suggestion) => {
+          const itemKey = String(suggestion.item || "")
+            .trim()
+            .toLocaleLowerCase();
+          if (itemKey) {
+            suggestionLookupRef.current.set(
+              `${suggestionContext}|${itemKey}`,
+              suggestion,
+            );
+          }
+        });
+
+        process(suggestions.map((suggestion) => suggestion.item));
+      } catch (error) {
+        console.error("품목 자동완성 조회 중 오류:", error);
+        process([]);
+      }
+    },
+    [partnerId, subType, suggestionContext, type],
+  );
+
+  const columns = React.useMemo(() => {
+    const originalColumns = activeSheetOptions.columns || [];
+
+    if (subType !== "S" && subType !== "B") {
+      return originalColumns;
+    }
+
+    return originalColumns.map((column, index) =>
+      index === 0
+        ? {
+            ...column,
+            type: "autocomplete",
+            source: itemAutocompleteSource,
+            strict: false,
+            allowInvalid: true,
+          }
+        : column,
+    );
+  }, [activeSheetOptions.columns, itemAutocompleteSource, subType]);
+
+  const updateOrderAmount = React.useCallback(() => {
+    if (amountUpdateTimeoutRef.current) {
+      clearTimeout(amountUpdateTimeoutRef.current);
+    }
+
+    amountUpdateTimeoutRef.current = setTimeout(() => {
+      const instance = hotRef.current?.hotInstance;
+      if (!instance || instance.isDestroyed) {
+        return;
+      }
+
+      const sumAmount = instance.getData().reduce((acc, row) => {
+        const supplyValue = parseFloat(row[4]) || 0;
+        const taxValue = parseFloat(row[5]) || 0;
+        return acc + supplyValue + taxValue;
+      }, 0);
+
+      setAmount(sumAmount);
+    }, 50);
+  }, [setAmount]);
+
+  React.useEffect(() => {
+    return () => {
+      if (amountUpdateTimeoutRef.current) {
+        clearTimeout(amountUpdateTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const showSheet = (sheetName) => {
     setActiveSheet(sheetName);
@@ -80,7 +182,7 @@ const NormalSheetSection = ({
         ref={hotRef}
         themeName="ht-theme-main"
         className={`hot-table-theme-${theme}`}
-        columns={activeSheetOptions.columns || []}
+        columns={columns}
         data={activeSheetOptions.data || []}
         colWidths={activeSheetOptions.colWidths || 100}
         height={activeSheetOptions.height || "auto"}
@@ -96,26 +198,76 @@ const NormalSheetSection = ({
             registerHotRef(activeSheet, instance);
           }
         }}
-        beforeChange={function (changes, source) {}}
         afterChange={function (changes, source) {
           switch (subType) {
             case "S": // 수주서
             case "B": // 발주서
-              if (source === "edit" && changes) {
-                // * 0번쨰 품목 수정시
-                if (changes[0][3]?.key) {
-                  changes.forEach(([row, prop, oldValue, newValue]) => {
-                    if (prop === 0 && oldValue.value !== newValue.value) {
+              if (
+                changes &&
+                source !== "loadData" &&
+                source !== "autoCalc" &&
+                source !== "itemAutocomplete"
+              ) {
+                changes.forEach(([row, prop, oldValue, newValue]) => {
+                  if (prop === 0) {
+                    const itemValue =
+                      typeof newValue === "object" && newValue
+                        ? newValue.title || newValue.value || ""
+                        : String(newValue || "").trim();
+                    const suggestionKey = `${suggestionContext}|${itemValue.toLocaleLowerCase()}`;
+                    const suggestion =
+                      suggestionLookupRef.current.get(suggestionKey);
+
+                    if (suggestion) {
+                      const quantity =
+                        parseFloat(this.getDataAtCell(row, 2)) || 0;
+                      const unitPrice =
+                        parseFloat(suggestion.unit_price) || 0;
+                      const total = quantity * unitPrice;
+                      let supply = total;
+                      let tax = 0;
+
+                      if (vatType === "Y") {
+                        tax = Math.round(total - total / 1.1);
+                        supply = total - tax;
+                      } else if (vatType === "N") {
+                        tax = Math.round(supply * 0.1);
+                      }
+
                       this.setDataAtCell(
                         row,
                         0,
-                        newValue.title ? newValue.title : newValue.value
-                      ); // * 품목
+                        suggestion.item,
+                        "itemAutocomplete",
+                      );
+                      this.setDataAtCell(
+                        row,
+                        1,
+                        suggestion.spec || "",
+                        "itemAutocomplete",
+                      );
+                      this.setDataAtCell(
+                        row,
+                        3,
+                        suggestion.unit_price,
+                        "itemAutocomplete",
+                      );
+                      this.setDataAtCell(
+                        row,
+                        4,
+                        supply || "",
+                        "autoCalc",
+                      );
+                      this.setDataAtCell(
+                        row,
+                        5,
+                        tax || "",
+                        "autoCalc",
+                      );
+                      updateOrderAmount();
                     }
-                  });
-                }
+                  }
 
-                changes.forEach(([row, prop, oldValue, newValue]) => {
                   if (prop === 2 || prop === 3) {
                     let targetValue = "";
 
@@ -153,21 +305,7 @@ const NormalSheetSection = ({
 
                     this.setDataAtCell(row, 4, supply, "autoCalc"); // 공급가액(E)
                     this.setDataAtCell(row, 5, tax, "autoCalc"); // 세액(F)
-
-                    let amount = 0;
-
-                    setTimeout(() => {
-                      const hotData = hotRef.current.hotInstance.getData();
-                      const sumAmount = hotData.reduce((acc, cur) => {
-                        const supplyValue = parseFloat(cur[4]) || 0;
-                        const taxValue = parseFloat(cur[5]) || 0;
-                        return acc + supplyValue + taxValue;
-                      }, 0);
-
-                      setAmount((prev) => {
-                        return sumAmount;
-                      });
-                    }, 500);
+                    updateOrderAmount();
                   }
                 });
               }
@@ -223,8 +361,6 @@ const NormalSheetSection = ({
 
                     this.setDataAtCell(row, 5, supply, "autoCalc"); // 공급가액(E)
                     this.setDataAtCell(row, 6, tax, "autoCalc"); // 세액(F)
-
-                    let amount = 0;
 
                     setTimeout(() => {
                       const hotData = hotRef.current.hotInstance.getData();

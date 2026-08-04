@@ -142,6 +142,56 @@ class service_model extends MY_Model
         $sql = sprintf("SELECT {$select} FROM jmtech.estimate a WHERE %s ORDER BY a.created_at DESC", join(" AND ", $where));
         return $this->excute($sql, $type, 'main');
     }
+
+    /**
+     * 문서 목록의 공통 검색 조건을 생성합니다.
+     * 거래처명뿐 아니라 문서번호, 제목, 품목/도면번호가 저장된 시트도 검색합니다.
+     */
+    public function build_document_search_condition($search_text)
+    {
+        $keyword = trim((string)$search_text);
+        $keyword = preg_replace('/[^\p{L}\p{N}\s._\/-]/u', '', $keyword);
+
+        if ($keyword === '') {
+            return '';
+        }
+
+        return "(a.no LIKE '%{$keyword}%'
+            OR a.title LIKE '%{$keyword}%'
+            OR a.sheets LIKE '%{$keyword}%'
+            OR EXISTS (
+                SELECT 1
+                FROM jmtech.business_partner bp
+                WHERE bp.id = a.partner_id
+                  AND bp.company_name LIKE '%{$keyword}%'
+            ))";
+    }
+
+    /**
+     * 발주서/수주서 품목 자동완성용 최근 문서를 조회합니다.
+     * 같은 거래처의 최근 문서를 먼저 반환해 거래처별 단가를 우선합니다.
+     */
+    public function get_estimate_item_history($where = [1], $partner_id = 0, $limit = 200)
+    {
+        $partner_id = (int)$partner_id;
+        $limit = max(1, min((int)$limit, 500));
+        $partner_order = $partner_id > 0
+            ? "CASE WHEN a.partner_id = {$partner_id} THEN 0 ELSE 1 END,"
+            : '';
+
+        $sql = sprintf(
+            "SELECT a.id, a.partner_id, a.sheets, a.estimate_date
+             FROM jmtech.estimate a
+             WHERE %s
+             ORDER BY %s a.created_at DESC
+             LIMIT %d",
+            join(" AND ", $where),
+            $partner_order,
+            $limit
+        );
+
+        return $this->excute($sql, 'all', 'main');
+    }
     public function insert_estimate($debug = false, $data = [])
     {
         $sql = $this->getInsertQuery('jmtech.estimate', $data);

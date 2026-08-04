@@ -4,7 +4,7 @@ import Loading from "../components/Loading";
 import ExcelImportModal from "../components/ExcelImportModal";
 import SimpleAutocomplete from "../components/SimpleAutoComplete";
 
-import { deepClone, empty, numberToKorean, wait } from "../utils/util";
+import { deepClone, empty, numberToKorean } from "../utils/util";
 import { ESTIMATE_SUB_TYPE } from "../../constants";
 
 import request, { STATIC_URL } from "../utils/request";
@@ -29,9 +29,7 @@ export default function CommonDocument() {
   const subTypeKorean = subType === "S" ? "수주서" : "발주서";
   // * title 설정
 
-  const { hotRefs, getActiveHotRef, setActiveSheet } = useExcelStore(
-    (state) => state,
-  );
+  const hotRefs = useExcelStore((state) => state.hotRefs);
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
     parent_id: "",
@@ -72,7 +70,7 @@ export default function CommonDocument() {
   ]);
 
   // * 기존 견적서 불러오기
-  const loadSaveExcelTemplate = async (id) => {
+  const loadSaveExcelTemplate = React.useCallback(async (id) => {
     const res = await estimateApi.저장된엑셀템플릿({ id, sub_type: subType });
 
     if (!res?.ok && empty(res?.data)) {
@@ -84,37 +82,38 @@ export default function CommonDocument() {
     const estimate = res.data.estimate || {};
     const files = res.data.files || [];
     const fileIds = files.map((f) => f.id) || [];
-    const cloneForm = { ...form };
-    cloneForm.partner_id = estimate.partner_id || "";
-    cloneForm.estimate_date = estimate.estimate_date || "";
-    cloneForm.phone_number = estimate.phone_number || "";
-    cloneForm.fax_number = estimate.fax_number || "";
-    cloneForm.title = estimate.title || "";
-    cloneForm.due_at = estimate.due_at || "";
-    cloneForm.location = estimate.location || "";
-    cloneForm.valid_at = estimate.valid_at || "";
-    cloneForm.payment_type = estimate.payment_type || "";
-    cloneForm.etc_memo = estimate.etc_memo || "";
-    cloneForm.partner_name = estimate.partner_name || "";
-
-    setForm(cloneForm);
+    setForm((prev) => ({
+      ...prev,
+      partner_id: estimate.partner_id || "",
+      estimate_date: estimate.estimate_date || "",
+      phone_number: estimate.phone_number || "",
+      fax_number: estimate.fax_number || "",
+      title: estimate.title || "",
+      vat_type: estimate.vat_type || "N",
+      due_at: estimate.due_at || "",
+      location: estimate.location || "",
+      valid_at: estimate.valid_at || "",
+      payment_type: estimate.payment_type || "",
+      etc_memo: estimate.etc_memo || "",
+      partner_name: estimate.partner_name || "",
+    }));
     setFiles(files);
     setFileIds(fileIds);
     setAmount(estimate.amount || 0);
     setSheets(estimate.sheets || []);
-  };
+  }, [subType]);
 
   // * 초기 엑셀 템플릿 로드
-  const loadExcelTemplate = async () => {
+  const loadExcelTemplate = React.useCallback(async () => {
     const res = await estimateApi.초기엑셀템플릿(subType);
     setSheets(res);
-  };
+  }, [subType]);
 
   // * 거래처 목록 로드
-  const loadPartnerList = async () => {
+  const loadPartnerList = React.useCallback(async () => {
     const res = await estimateApi.거래처목록();
     setPartners(res);
-  };
+  }, []);
 
   // * 견적서 저장 핸들러
   const handleFormSubmit = async (e) => {
@@ -124,8 +123,6 @@ export default function CommonDocument() {
 
     const target = e.target;
     const formData = new FormData(target);
-
-    console.log(hotRefs);
 
     const hot = hotRefs[subTypeKorean].getData();
 
@@ -310,23 +307,19 @@ export default function CommonDocument() {
         document.title = `${ESTIMATE_SUB_TYPE[subType]} 등록`;
         setLoading(true);
 
-        if (id) {
-          // * 기존 ${subTypeKorean} 불러오기
-          await loadSaveExcelTemplate(id);
-        } else {
-          // * 초기 엑셀 템플릿 로드
-          await loadExcelTemplate();
-        }
-
-        // * 거래처 목록 로드
-        await loadPartnerList();
+        await Promise.all([
+          id
+            ? loadSaveExcelTemplate(id) // * 기존 문서 불러오기
+            : loadExcelTemplate(), // * 초기 엑셀 템플릿 로드
+          loadPartnerList(), // * 거래처 목록 로드
+        ]);
       } catch (error) {
         alert("엑셀 템플릿 로드 중 오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [id, loadExcelTemplate, loadPartnerList, loadSaveExcelTemplate, subType]);
 
   return (
     <>
@@ -531,7 +524,7 @@ export default function CommonDocument() {
             id="select-vat"
             name="vat_type"
             className="text-[12px]"
-            defaultValue={form.vat_type}
+            value={form.vat_type}
             onChange={handleVat}
           >
             <option value="N">부가세 별도</option>
@@ -594,6 +587,8 @@ export default function CommonDocument() {
             vatType={form.vat_type}
             setAmount={setAmount}
             subType={subType}
+            type={type}
+            partnerId={form.partner_id}
           />
           {/* 하단 입력 테이블 */}
           <table className="w-full border-t-2 border-black text-black text-xs">

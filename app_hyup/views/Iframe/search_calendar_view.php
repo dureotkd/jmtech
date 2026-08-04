@@ -20,9 +20,9 @@
                 <div class="flex items-center gap-2 !mb-2">
                     <span>기준연도</span>
                     <select id="yearSelect" class="border border-gray-300 rounded px-1 py-0.5">
-                        <option value="2025" selected>2025</option>
-                        <option value="2024">2024</option>
-                        <option value="2023">2023</option>
+                        <?php for ($year = (int)date('Y'); $year >= (int)date('Y') - 5; $year--): ?>
+                            <option value="<?= $year ?>" <?= $year === (int)date('Y') ? 'selected' : '' ?>><?= $year ?></option>
+                        <?php endfor; ?>
                     </select>
                 </div>
 

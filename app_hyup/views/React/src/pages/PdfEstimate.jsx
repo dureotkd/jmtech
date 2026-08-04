@@ -206,7 +206,7 @@ export default function PdfDocument({ id, subType }) {
     </Document>
   );
 
-  const fileName = `${subType === "MC" ? "매출" : "매입"}_거래명세표_${
+  const fileName = `${title[subType] || "문서"}_${
     new Date().toISOString().split("T")[0]
   }.pdf`;
 
@@ -661,8 +661,8 @@ const PdfPage = ({ subType, data }) => {
         <Text>
           합계금액 : 일금&nbsp;
           <Text style={{ fontWeight: "semibold" }}>
-            {numberToKorean(data?.supply_amount)} ￦
-            {Number(data?.supply_amount).toLocaleString()}원 (
+            {numberToKorean(data?.amount)} ￦
+            {Number(data?.amount).toLocaleString()}원 (
             {VAT_TYPE[data?.vat_type]})
           </Text>
         </Text>
@@ -698,7 +698,7 @@ const PdfPage = ({ subType, data }) => {
                   { width: COL_WIDTHS.item },
                 ]}
               >
-                도면번호/품명
+                {subType === "G" ? "도면번호/품명" : "품목"}
               </Text>
               <Text
                 style={[
@@ -707,7 +707,7 @@ const PdfPage = ({ subType, data }) => {
                   { width: COL_WIDTHS.material },
                 ]}
               >
-                소재
+                {subType === "G" ? "소재" : "규격"}
               </Text>
               <Text
                 style={[
@@ -725,7 +725,7 @@ const PdfPage = ({ subType, data }) => {
                   { width: COL_WIDTHS.unitMeasure },
                 ]}
               >
-                단위
+                {subType === "G" ? "단위" : "단가"}
               </Text>
               <Text
                 style={[
@@ -734,7 +734,7 @@ const PdfPage = ({ subType, data }) => {
                   { width: COL_WIDTHS.unit },
                 ]}
               >
-                단가
+                {subType === "G" ? "단가" : "공급가액"}
               </Text>
               <Text
                 style={[
@@ -743,7 +743,7 @@ const PdfPage = ({ subType, data }) => {
                   { width: COL_WIDTHS.supply },
                 ]}
               >
-                금액
+                {subType === "G" ? "금액" : "세액"}
               </Text>
               <Text
                 style={[
@@ -843,7 +843,9 @@ const PdfPage = ({ subType, data }) => {
                     styles.itemCell,
                     { width: COL_WIDTHS.memo, borderRightWidth: 0 },
                   ]}
-                ></Text>
+                >
+                  {row[7] || ""}
+                </Text>
               </View>
             ))}
           </View>
@@ -879,7 +881,10 @@ const PdfPage = ({ subType, data }) => {
                 styles.bottomCell,
                 styles.bottomHeader,
                 {
-                  width: COL_WIDTHS.unitMeasure + COL_WIDTHS.unit,
+                  width:
+                    subType === "G"
+                      ? COL_WIDTHS.unitMeasure + COL_WIDTHS.unit
+                      : COL_WIDTHS.unitMeasure,
                   borderRightWidth: 1,
                   borderColor: "#000",
                 },
@@ -887,6 +892,24 @@ const PdfPage = ({ subType, data }) => {
             >
               합계
             </Text>
+
+            {subType === "G" ? null : (
+              <Text
+                style={[
+                  styles.bottomCell,
+                  styles.rightAlign,
+                  {
+                    width: COL_WIDTHS.unit,
+                    borderRightWidth: 1,
+                    borderColor: "#000",
+                  },
+                ]}
+              >
+                {data?.supply_amount
+                  ? Number(data.supply_amount).toLocaleString()
+                  : ""}
+              </Text>
+            )}
 
             <Text
               style={[
@@ -899,8 +922,12 @@ const PdfPage = ({ subType, data }) => {
                 },
               ]}
             >
-              {data?.supply_amount
-                ? Number(data.supply_amount).toLocaleString()
+              {subType === "G"
+                ? data?.supply_amount
+                  ? Number(data.supply_amount).toLocaleString()
+                  : ""
+                : data?.tax_amount
+                  ? Number(data.tax_amount).toLocaleString()
                 : ""}
             </Text>
 

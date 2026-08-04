@@ -513,7 +513,7 @@ $datetime = date('YmdHis');
                                 <?
                                 } else {
                                 ?>
-                                    <?= !empty($item[4]) ? number_format($item[4]) : '' ?>
+                                    <?= !empty($item[3]) ? number_format($item[3]) : '' ?>
                                 <?
                                 }
                                 ?>
@@ -524,7 +524,7 @@ $datetime = date('YmdHis');
                             <td class="!text-right">
                                 <?= !empty($item[5]) ? number_format($item[5]) : '' ?>
                             </td>
-                            <td></td>
+                            <td><?= $item[6] ?? '' ?></td>
                         </tr>
                     <?
                     }

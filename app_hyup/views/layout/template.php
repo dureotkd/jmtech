@@ -84,6 +84,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker@2.0.11/dist/css/litepicker.css">
 
     <script src="https://cdn.jsdelivr.net/npm/litepicker@2.0.11/dist/litepicker.js"></script>
+    <script src="/assets/app_hyup/common/search_calendar.js?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/app_hyup/common/search_calendar.js') ?>"></script>
 </head>
 
 <body>

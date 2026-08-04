@@ -45,8 +45,10 @@ class sales extends MY_Controller
         ];
 
         if (!empty($search_text)) {
-
-            $where[] = "(SELECT COUNT(*) FROM jmtech.business_partner bp WHERE bp.id = a.partner_id AND bp.company_name LIKE '%{$search_text}%') > 0";
+            $search_condition = $this->service_model->build_document_search_condition($search_text);
+            if ($search_condition !== '') {
+                $where[] = $search_condition;
+            }
         }
 
         if (!empty($start_date)) {
@@ -169,8 +171,10 @@ class sales extends MY_Controller
         ];
 
         if (!empty($search_text)) {
-
-            $where[] = "(SELECT COUNT(*) FROM jmtech.business_partner bp WHERE bp.id = a.partner_id AND bp.company_name LIKE '%{$search_text}%') > 0";
+            $search_condition = $this->service_model->build_document_search_condition($search_text);
+            if ($search_condition !== '') {
+                $where[] = $search_condition;
+            }
         }
 
         if (!empty($start_date)) {
@@ -291,8 +295,10 @@ class sales extends MY_Controller
         ];
 
         if (!empty($search_text)) {
-
-            $where[] = "(SELECT COUNT(*) FROM jmtech.business_partner bp WHERE bp.id = a.partner_id AND bp.company_name LIKE '%{$search_text}%') > 0";
+            $search_condition = $this->service_model->build_document_search_condition($search_text);
+            if ($search_condition !== '') {
+                $where[] = $search_condition;
+            }
         }
 
         if (!empty($start_date)) {
